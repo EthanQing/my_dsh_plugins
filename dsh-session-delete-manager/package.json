@@ -1,0 +1,46 @@
+{
+  "name": "dsh-session-delete-manager",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Permanently delete DSH session records from the project and session menus, with project-scoped batch selection and running-session protection.",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "lib/",
+    "locale/",
+    "cordis.patch.yml",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-session",
+        "@deepseek-ai/dsh-client-ui-workspace"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}

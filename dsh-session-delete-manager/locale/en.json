@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Session Deletion & Batch Manager",
+    "description": "Permanently delete session records from project and session menus, with project-scoped multi-select, select-all, and running-session protection."
+  }
+}

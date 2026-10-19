@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Message Edit & Retry",
+    "description": "Edit a sent user message in place and resend it, continue an interrupted turn, or replay a turn from its prompt by forking the conversation."
+  }
+}
