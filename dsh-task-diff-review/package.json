@@ -1,0 +1,55 @@
+{
+  "name": "dsh-task-diff-review",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Task, working-tree, staged, unstaged, branch and commit review using native DSH Diff.",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "lib/",
+    "locale/",
+    "icon.svg",
+    "cordis.patch.yml",
+    "README.md",
+    "docs/",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs --check"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-sidebar-right",
+        "@deepseek-ai/dsh-client-ui-deliverables"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=24",
+    "dsh": "0.2.1-rc.2"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  }
+}

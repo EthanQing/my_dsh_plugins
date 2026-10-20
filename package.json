@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugins",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "description": "DSH plugins and the Aegis engineering workflow. Enable the components you need.",
@@ -76,7 +76,15 @@
     "dsh-aegis-workflow/presets/",
     "dsh-aegis-workflow/README.md",
     "dsh-aegis-workflow/README.zh-CN.md",
-    "dsh-aegis-workflow/docs/"
+    "dsh-aegis-workflow/docs/",
+    "dsh-task-diff-review/package.json",
+    "dsh-task-diff-review/lib/",
+    "dsh-task-diff-review/locale/",
+    "dsh-task-diff-review/icon.svg",
+    "dsh-task-diff-review/cordis.patch.yml",
+    "dsh-task-diff-review/README.md",
+    "dsh-task-diff-review/docs/",
+    "dsh-task-diff-review/LICENSE"
   ],
   "scripts": {
     "check": "node scripts/check-package.mjs",
@@ -98,6 +106,7 @@
     "dsh-smart-session-title": "file:./dsh-smart-session-title",
     "dsh-codex-collapse": "file:./dsh-codex-collapse",
     "dsh-subagent-sidebar-default": "file:./dsh-subagent-sidebar-default",
-    "dsh-aegis-workflow": "file:./dsh-aegis-workflow"
+    "dsh-aegis-workflow": "file:./dsh-aegis-workflow",
+    "dsh-task-diff-review": "file:./dsh-task-diff-review"
   }
 }

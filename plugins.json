@@ -33,5 +33,10 @@
     "name": "dsh-aegis-workflow",
     "directory": "dsh-aegis-workflow",
     "title": "Aegis 工程工作流"
+  },
+  {
+    "name": "dsh-task-diff-review",
+    "directory": "dsh-task-diff-review",
+    "title": "代码改动概览与 Diff 审查"
   }
 ]

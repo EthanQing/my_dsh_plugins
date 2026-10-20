@@ -1,5 +1,4 @@
-# Distribution only. The user chooses which existing plugins to activate.
-# Bare package names allow DSH to resolve both localized metadata and Client manifests.
+# Distribution only. All components remain disabled until selected by the user.
 - insert:
     - id: dsh-markdown-editor
       name: dsh-markdown-editor
@@ -21,4 +20,7 @@
       disabled: true
     - id: dsh-aegis-workflow
       name: dsh-aegis-workflow
+      disabled: true
+    - id: dsh-task-diff-review
+      name: dsh-task-diff-review
       disabled: true

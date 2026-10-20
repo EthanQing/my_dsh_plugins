@@ -1,0 +1,4 @@
+# Keep official conversation, sidebar-right, ui-deliverables and agent services enabled.
+- update:
+    id: dsh-task-diff-review
+    disabled: false
