@@ -63,7 +63,7 @@ npm run pack:plugins
 
 ```powershell
 # 示例文件名；使用你实际下载的包路径。
-& 'D:/Programs/DSH/resources/runtime/cli/bin/dsh.cmd' plugin --profile desktop add './dsh-markdown-editor-0.3.0.tgz'
+& 'D:/Programs/DSH/resources/runtime/cli/bin/dsh.cmd' plugin --profile desktop add './dsh-markdown-editor-0.3.1.tgz'
 ```
 
 Release 尚未发布前，不存在可用的附件下载地址。更新时选择新的 commit/tag 或 `.tgz`，按当前 DSH 插件管理器的更新流程自行操作。

@@ -36,7 +36,7 @@ function fixture(text, caret = text.length, soft = false) {
   const adapter = createComposerAdapter(root)
   assert.ok(adapter, `Lexical version ${editor.constructor.version} must be supported`)
   const readText = () => editor.getEditorState().read(() => $getRoot().getChildren().map(n => n.getTextContent()).join('\n'))
-  const edit = (key, shift = false) => {
+  const edit = (key, shift = key === 'Enter') => {
     const facts = adapter.read()
     const plan = facts && planListEdit(facts.text, facts.caret, key, shift)
     if (!plan) return false
@@ -46,7 +46,8 @@ function fixture(text, caret = text.length, soft = false) {
   return { editor, adapter, edit, readText, history }
 }
 
-test('real Lexical: ordered/bullet continuation, split and empty item cleanup', () => {
+test('real Lexical: Shift+Enter continues lists; plain Enter does not edit', () => {
+  assert.equal(fixture('- abc').edit('Enter', false), false)
   for (const [text, expected] of [['- abc', '- abc\n- '], ['  9) abc', '  9) abc\n  10) '], ['+ abc', '+ abc\n+ '], ['-   ', ''], ['  2. \t ', '']]) {
     const f = fixture(text)
     assert.equal(f.edit('Enter'), true)
@@ -84,7 +85,7 @@ test('real Lexical: one gesture undoes and redoes as one change', async () => {
 test('fences shield all inline syntax and list gestures until matching closer', () => {
   for (const opening of ['````js', '~~~python', '  ```c++', '- ```js', '> ```js']) {
     const text = `${opening}\n- **literal**\n\`\`\n1. x`
-    assert.equal(planListEdit(text, text.length, 'Enter'), null)
+    assert.equal(planListEdit(text, text.length, 'Enter', true), null)
     const colors = classifyMarkdown(text)
     const start = text.indexOf('**literal**')
     assert.ok(colors.slice(start, start + 11).every(c => c === 'code'))
@@ -108,7 +109,9 @@ test('unknown Lexical version/namespace and reference nodes disable writes', () 
 
 test('native IME, modified keys, menu and disabled gestures pass', () => {
   const root = { hasAttribute: () => false, getAttribute: () => null, ownerDocument: { querySelector: () => null } }
-  for (const event of [{ isComposing: true }, { keyCode: 229 }, { ctrlKey: true }, { altKey: true }, { metaKey: true }, { key: 'Enter', shiftKey: true }, { defaultPrevented: true }, { getModifierState: () => true }]) assert.ok(mustPass(event, root))
+  for (const event of [{ isComposing: true }, { keyCode: 229 }, { key: 'Tab', ctrlKey: true }, { altKey: true }, { metaKey: true }, { key: 'Enter' }, { key: 'Enter', ctrlKey: true, shiftKey: true }, { defaultPrevented: true }, { getModifierState: () => true }]) assert.ok(mustPass(event, root))
+  assert.equal(Boolean(mustPass({ key: 'Enter', shiftKey: true }, root)), false)
+  assert.equal(Boolean(mustPass({ key: 'Enter', ctrlKey: true }, root)), false)
   root.ownerDocument.querySelector = () => ({})
   assert.ok(mustPass({ key: 'Tab' }, root))
 })
@@ -124,7 +127,7 @@ test('delegated keyboard resolves replacement editor; repeated Enter and write e
   document.activeElement = { closest: () => root }
   const off = installKeyboard(document)
   const key = (repeat = false) => {
-    const event = { key: 'Enter', repeat, preventDefault() { this.defaultPrevented = true }, stopPropagation() { this.stopped = true } }
+    const event = { key: 'Enter', shiftKey: true, repeat, preventDefault() { this.defaultPrevented = true }, stopPropagation() { this.stopped = true } }
     handlers.get('keydown')(event)
     return event
   }
@@ -147,4 +150,41 @@ test('delegated keyboard resolves replacement editor; repeated Enter and write e
   } finally { console.warn = originalWarn }
   off()
   assert.equal(handlers.size, 0)
+})
+
+test('keyboard shortcuts: Enter passes, Shift+Enter continues, Ctrl+Enter only breaks', () => {
+  const handlers = new Map()
+  const document = { addEventListener: (type, fn) => handlers.set(type, fn), removeEventListener: type => handlers.delete(type), querySelector: () => null }
+  const f = fixture('1. first')
+  const root = { __lexicalEditor: f.editor, ownerDocument: document, contains: () => true, hasAttribute: () => false, getAttribute: () => null }
+  f.editor.getRootElement = () => root
+  document.activeElement = { closest: () => root }
+  const off = installKeyboard(document)
+  const press = modifiers => {
+    const event = { key: 'Enter', ...modifiers, preventDefault() { this.defaultPrevented = true }, stopPropagation() { this.stopped = true } }
+    handlers.get('keydown')(event)
+    return event
+  }
+  assert.equal(press({}).defaultPrevented, undefined)
+  assert.equal(f.readText(), '1. first')
+  assert.ok(press({ shiftKey: true }).defaultPrevented)
+  assert.equal(f.readText(), '1. first\n2. ')
+  assert.ok(press({ ctrlKey: true }).defaultPrevented)
+  assert.equal(f.readText(), '1. first\n2. \n')
+  f.editor.update(() => { $getRoot().clear().append($createParagraphNode()).selectEnd() }, { discrete: true })
+  assert.ok(press({ ctrlKey: true }).defaultPrevented)
+  assert.equal(f.readText(), '\n')
+  f.editor.update(() => {
+    $getRoot().clear()
+    const node = $createTextNode('- abcd')
+    $getRoot().append($createParagraphNode().append(node))
+    node.select(2, 4)
+  }, { discrete: true })
+  press({ ctrlKey: true })
+  assert.equal(f.readText(), '- \ncd')
+  root.__lexicalEditor = null
+  assert.ok(press({ ctrlKey: true }).defaultPrevented, 'unsupported adapter must not accidentally send')
+  document.querySelector = () => ({})
+  assert.equal(press({ ctrlKey: true }).defaultPrevented, undefined, 'menu retains ownership')
+  off()
 })

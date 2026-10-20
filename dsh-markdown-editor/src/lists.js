@@ -32,7 +32,7 @@ export function planListEdit(text, caret, key, shift = false) {
   const item = classifyLines(text.slice(0, end)).at(-1)
   if (item?.kind !== 'list') return null
   if (key === 'Enter') {
-    if (shift || caret < start + item.bodyStart) return null
+    if (!shift || caret < start + item.bodyStart) return null
     if (item.body.trim() === '') return { from: start, to: end, text: '', caret: start }
     const ordered = /^(\d+)([.)])$/.exec(item.marker)
     if (ordered && Number(ordered[1]) >= 999999999) return null

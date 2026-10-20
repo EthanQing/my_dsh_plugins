@@ -286,7 +286,7 @@
     const item = classifyLines(text.slice(0, end)).at(-1);
     if (item?.kind !== "list") return null;
     if (key === "Enter") {
-      if (shift || caret < start + item.bodyStart) return null;
+      if (!shift || caret < start + item.bodyStart) return null;
       if (item.body.trim() === "") return { from: start, to: end, text: "", caret: start };
       const ordered = /^(\d+)([.)])$/.exec(item.marker);
       if (ordered && Number(ordered[1]) >= 999999999) return null;
@@ -496,7 +496,14 @@ ${item.indent}${marker}${item.spacer}`;
       }, { tag: "history-push", discrete: true });
       return changed;
     }
-    return { read, apply, canApply: (facts, plan) => Boolean(pointAt(facts, plan.from) && pointAt(facts, plan.to)) };
+    function insertLineBreak() {
+      editor.update(() => {
+        const selection = editor._pendingEditorState?._selection;
+        if (typeof selection?.isCollapsed !== "function" || typeof selection.insertLineBreak !== "function") return;
+        selection.insertLineBreak();
+      }, { tag: "history-push", discrete: true });
+    }
+    return { read, apply, insertLineBreak, canApply: (facts, plan) => Boolean(pointAt(facts, plan.from) && pointAt(facts, plan.to)) };
   }
 
   // src/highlighter.js
@@ -708,7 +715,7 @@ ${item.indent}${marker}${item.spacer}`;
 
   // src/keyboard.js
   function mustPass(event, root, composingUntil = 0) {
-    return event.defaultPrevented || event.isComposing || event.keyCode === 229 || Date.now() < composingUntil || event.ctrlKey || event.metaKey || event.altKey || event.getModifierState?.("AltGraph") || event.key === "Enter" && event.shiftKey || root.hasAttribute("data-composer-composing") || root.getAttribute("aria-disabled") === "true" || root.ownerDocument.querySelector("[data-trigger-menu]") !== null || root.getAttribute("aria-expanded") === "true";
+    return event.defaultPrevented || event.isComposing || event.keyCode === 229 || Date.now() < composingUntil || event.metaKey || event.altKey || event.getModifierState?.("AltGraph") || (event.key === "Enter" ? !event.shiftKey && !event.ctrlKey || event.shiftKey && event.ctrlKey : event.ctrlKey) || root.hasAttribute("data-composer-composing") || root.getAttribute("aria-disabled") === "true" || root.ownerDocument.querySelector("[data-trigger-menu]") !== null || root.getAttribute("aria-expanded") === "true";
   }
   function installKeyboard(document2) {
     let composingUntil = 0;
@@ -720,11 +727,21 @@ ${item.indent}${marker}${item.spacer}`;
       composingUntil = Date.now() + 10;
     };
     const onKey = (event) => {
-      if (disabled || !["Enter", "Tab"].includes(event.key)) return;
+      if (!["Enter", "Tab"].includes(event.key)) return;
       const root = focusedComposerRoot(document2);
       if (!root || !root.contains(event.target) || mustPass(event, root, composingUntil)) return;
+      const plainLineBreak = event.key === "Enter" && event.ctrlKey;
+      if (plainLineBreak) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      if (disabled || plainLineBreak && event.repeat) return;
       try {
         const adapter = createComposerAdapter(root);
+        if (plainLineBreak) {
+          adapter?.insertLineBreak();
+          return;
+        }
         const facts = adapter?.read();
         if (!facts) return;
         const plan = planListEdit(facts.text, facts.caret, event.key, event.shiftKey);

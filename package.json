@@ -1,6 +1,6 @@
 {
   "name": "my-dsh-plugins",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Prebuilt optional DSH plugins by EthanQing. All collection entries are disabled until selected by the user.",

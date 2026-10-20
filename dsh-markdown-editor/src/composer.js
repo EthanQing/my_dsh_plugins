@@ -84,5 +84,14 @@ export function createComposerAdapter(root) {
     }, { tag: 'history-push', discrete: true })
     return changed
   }
-  return { read, apply, canApply: (facts, plan) => Boolean(pointAt(facts, plan.from) && pointAt(facts, plan.to)) }
+  function insertLineBreak() {
+    // Native Lexical range semantics also handle empty paragraphs, selected
+    // text and documents with chips, without a whole-document rewrite.
+    editor.update(() => {
+      const selection = editor._pendingEditorState?._selection
+      if (typeof selection?.isCollapsed !== 'function' || typeof selection.insertLineBreak !== 'function') return
+      selection.insertLineBreak()
+    }, { tag: 'history-push', discrete: true })
+  }
+  return { read, apply, insertLineBreak, canApply: (facts, plan) => Boolean(pointAt(facts, plan.from) && pointAt(facts, plan.to)) }
 }
