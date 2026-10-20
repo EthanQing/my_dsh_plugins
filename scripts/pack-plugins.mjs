@@ -22,9 +22,13 @@ for (const pkg of packages) {
   const [{ filename, files }] = JSON.parse(result.stdout)
   if (pkg.directory === '.') {
     const packed = new Set(files.map(file => file.path))
+    for (const resource of ['locale/en.json', 'locale/zh.json', 'icon.svg']) {
+      assert.ok(packed.has(resource), `${filename}: missing ${resource}`)
+    }
     for (const plugin of plugins) {
       const manifest = await readJson(`${plugin.directory}/package.json`)
-      for (const resource of ['package.json', manifest.exports['.'].default, manifest.exports['./client'].default, 'locale/en.json', 'locale/zh.json', 'icon.svg', manifest.dsh.bundle.patch]) {
+      for (const resource of ['package.json', manifest.exports['.'].default, manifest.exports['./client']?.default, 'locale/en.json', 'locale/zh.json', 'icon.svg', manifest.dsh.bundle.patch,
+        ...plugin.name === 'dsh-aegis-workflow' ? ['lib/presets.yml', ...['lead', 'planner', 'coder', 'knowledge-curator', 'reviewer', 'project-mentor', 'git-operator'].map(role => `presets/${role}.patch.yml`)] : []].filter(Boolean)) {
         const target = path.posix.join(plugin.directory, resource)
         assert.ok(packed.has(target), `${filename}: missing ${target}`)
       }

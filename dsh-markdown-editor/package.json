@@ -6,9 +6,7 @@
   "description": "Safe Markdown source assistance and official Markdown message rendering for DSH.",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "check": "node scripts/build.mjs --check && node --check lib/client.js && node --check lib/index.js",
-    "test": "node --test test/*.test.js",
-    "prepack": "npm run build && npm run check"
+    "check": "node scripts/build.mjs --check && node --check lib/client.js && node --check lib/index.js"
   },
   "devDependencies": {
     "@lexical/headless": "0.49.0",

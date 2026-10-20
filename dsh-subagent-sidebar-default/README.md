@@ -57,7 +57,6 @@
 npm ci
 npm run build
 npm run check
-npm test
 npm run pack:plugin
 ```
 

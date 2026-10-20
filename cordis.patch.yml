@@ -1,21 +1,24 @@
 # Distribution only. The user chooses which existing plugins to activate.
-# Relative paths are resolved against this bundle patch, not the Desktop Profile.
+# Bare package names allow DSH to resolve both localized metadata and Client manifests.
 - insert:
     - id: dsh-markdown-editor
-      name: ./dsh-markdown-editor/lib/index.js
+      name: dsh-markdown-editor
       disabled: true
     - id: dsh-message-edit-retry
-      name: ./dsh-message-edit-retry/lib/index.js
+      name: dsh-message-edit-retry
       disabled: true
     - id: dsh-session-delete-manager
-      name: ./dsh-session-delete-manager/lib/index.js
+      name: dsh-session-delete-manager
       disabled: true
     - id: dsh-smart-session-title
-      name: ./dsh-smart-session-title/lib/index.js
+      name: dsh-smart-session-title
       disabled: true
     - id: dsh-codex-collapse
-      name: ./dsh-codex-collapse/lib/index.js
+      name: dsh-codex-collapse
       disabled: true
     - id: dsh-subagent-sidebar-default
-      name: ./dsh-subagent-sidebar-default/lib/index.js
+      name: dsh-subagent-sidebar-default
+      disabled: true
+    - id: dsh-aegis-workflow
+      name: dsh-aegis-workflow
       disabled: true

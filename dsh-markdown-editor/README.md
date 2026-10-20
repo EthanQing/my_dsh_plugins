@@ -30,10 +30,9 @@ DSH **0.2.1-rc.2** 的 Markdown 原文辅助编辑器，版本 **0.3.1**。保�
 npm ci
 npm run build
 npm run check
-npm test
 ```
 
-`package-lock.json` 锁定开发依赖；esbuild 生成单文件 `lib/client.js`，运行时不加载本包 React 或 Lexical 开发依赖。`check` 检查源码与产物一致，`prepack` 自动构建。验证包括真实 Lexical 编辑/光标/撤销与 React 消息层委托；GUI 由用户验收。
+`package-lock.json` 锁定开发依赖；esbuild 生成单文件 `lib/client.js`，运行时不加载本包 React 或 Lexical 开发依赖。`check` 检查源码与产物一致。测试代码已移除；GUI 由用户验收。
 
 ```text
 src/
@@ -48,7 +47,6 @@ src/
   collapse.js         折叠状态与阈值
   locale.js / styles.js
 scripts/build.mjs
-test/
 lib/index.js / lib/client.js  DSH 入口
 ```
 

@@ -1,9 +1,9 @@
 {
-  "name": "my-dsh-plugins",
-  "version": "0.1.3",
+  "name": "dsh-plugins",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Prebuilt optional DSH plugins by EthanQing. All collection entries are disabled until selected by the user.",
+  "description": "DSH plugins and the Aegis engineering workflow. Enable the components you need.",
   "repository": {
     "type": "git",
     "url": "https://github.com/EthanQing/my_dsh_plugins.git"
@@ -12,7 +12,9 @@
   "bugs": "https://github.com/EthanQing/my_dsh_plugins/issues",
   "license": "MIT",
   "exports": {
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
   },
   "files": [
     "cordis.patch.yml",
@@ -63,7 +65,18 @@
     "dsh-subagent-sidebar-default/docs/",
     "dsh-subagent-sidebar-default/README.md",
     "dsh-subagent-sidebar-default/LICENSE",
-    "dsh-subagent-sidebar-default/THIRD_PARTY_NOTICES.md"
+    "dsh-subagent-sidebar-default/THIRD_PARTY_NOTICES.md",
+    "locale/",
+    "icon.svg",
+    "dsh-aegis-workflow/package.json",
+    "dsh-aegis-workflow/lib/",
+    "dsh-aegis-workflow/locale/",
+    "dsh-aegis-workflow/icon.svg",
+    "dsh-aegis-workflow/cordis.patch.yml",
+    "dsh-aegis-workflow/presets/",
+    "dsh-aegis-workflow/README.md",
+    "dsh-aegis-workflow/README.zh-CN.md",
+    "dsh-aegis-workflow/docs/"
   ],
   "scripts": {
     "check": "node scripts/check-package.mjs",
@@ -77,5 +90,14 @@
   "engines": {
     "node": ">=24",
     "dsh": "0.2.1-rc.2"
+  },
+  "dependencies": {
+    "dsh-markdown-editor": "file:./dsh-markdown-editor",
+    "dsh-message-edit-retry": "file:./dsh-message-edit-retry",
+    "dsh-session-delete-manager": "file:./dsh-session-delete-manager",
+    "dsh-smart-session-title": "file:./dsh-smart-session-title",
+    "dsh-codex-collapse": "file:./dsh-codex-collapse",
+    "dsh-subagent-sidebar-default": "file:./dsh-subagent-sidebar-default",
+    "dsh-aegis-workflow": "file:./dsh-aegis-workflow"
   }
 }

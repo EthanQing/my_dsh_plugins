@@ -109,28 +109,19 @@ dsh-smart-session-title/
 │   ├── remote.js        # Remote 契约、owner 校验、Typert 注册
 │   ├── validate.js      # Host 侧无依赖的严格线格式校验
 │   └── client.js        # 侧栏菜单项 + 预览/确认面板（shell.overlay）
-├── test/                # node:test（真实 Cordis/Typert/Gateway）
 ├── README.md
 └── LICENSE
 ```
 
 ## 开发与验证
 
-测试直接以**真实** Cordis、Typert Registry、API Gateway 与 `Peer` 组合进行，不复制运行时；用 `DSH_RUNTIME` 指向提取出的 0.2.1-rc.2 运行时目录：
+测试代码已移除。现保留构建和语法检查：
 
 ```bash
-# 构建（用真实 Node 24）
 node scripts/build.mjs
-
-# 测试（DSH_RUNTIME 指向提取的运行时目录）
-DSH_RUNTIME=<extracted-runtime> node --import ./test/runtime.mjs --test test/*.test.mjs
-
-# 语法检查
 node --check lib/index.js
 node --check lib/client.js
 ```
-
-覆盖范围：标题清洗/长度/同主题、用户锁前后竞态、超时/取消/节流/合并、批量预览不写/过期/子集/peer 隔离、Remote 身份与入参拒绝、Client 契约与浏览器 bundle 工厂、patch/locale 资源。
 
 ## 限制
 

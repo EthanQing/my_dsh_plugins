@@ -1,0 +1,52 @@
+{
+  "name": "dsh-aegis-workflow",
+  "version": "0.2.0",
+  "description": "Aegis engineering workflow: Lead and six continuable roles, context reuse and approval-based implementation.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EthanQing/my_dsh_plugins.git",
+    "directory": "dsh-aegis-workflow"
+  },
+  "engines": {
+    "dsh": "0.2.1-rc.2",
+    "node": ">=24"
+  },
+  "files": [
+    "lib/",
+    "locale/",
+    "icon.svg",
+    "cordis.patch.yml",
+    "presets/",
+    "README.md",
+    "README.zh-CN.md",
+    "docs/"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "private": true,
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs --check"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis-plugin-include": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis-plugin-include": {
+      "optional": true
+    }
+  }
+}

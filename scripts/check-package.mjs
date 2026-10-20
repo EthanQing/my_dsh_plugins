@@ -33,31 +33,55 @@ export async function checkPackage() {
   for (const script of ['prepare', 'preinstall', 'install', 'postinstall', 'prepack']) {
     assert.equal(manifest.scripts?.[script], undefined, `${script} must not run during GitHub installation`)
   }
-  assert.equal(Object.keys(manifest.dependencies ?? {}).length, 0, 'collection must ship self-contained runtime artifacts')
+  assert.deepEqual(manifest.dependencies, Object.fromEntries(plugins.map(p => [p.name, `file:./${p.directory}`])),
+    'collection dependencies must only reference its own shipped plugin directories')
+  for (const locale of ['en', 'zh']) {
+    const data = await readJson(`locale/${locale}.json`)
+    assert.ok(data.meta?.title && data.meta?.description, `collection: missing ${locale} display metadata`)
+  }
+  assert.equal(manifest.exports['./locale/*.json'], './locale/*.json')
+  assert.equal(manifest.exports['./icon'], './icon.svg')
   const expectedRows = []
   for (const plugin of plugins) {
     assert.match(plugin.name, /^dsh-[a-z0-9-]+$/)
     assert.equal(plugin.directory, plugin.name)
     const pkg = await readJson(`${plugin.directory}/package.json`)
     assert.equal(pkg.name, plugin.name)
+    for (const script of ['prepare', 'preinstall', 'install', 'postinstall', 'prepack']) {
+      assert.equal(pkg.scripts?.[script], undefined, `${plugin.name}: ${script} must not run while installing the collection`)
+    }
+    for (const peer of Object.keys(pkg.peerDependencies ?? {})) {
+      assert.equal(pkg.peerDependenciesMeta?.[peer]?.optional, true, `${plugin.name}: DSH-owned peer ${peer} must not cause a registry installation`)
+    }
     const main = pkg.exports['.'].default
-    const client = pkg.exports['./client'].default
-    for (const resource of [main, client, 'locale/en.json', 'locale/zh.json', 'icon.svg', pkg.dsh.bundle.patch]) {
+    const client = pkg.exports['./client']?.default
+    assert.equal(Boolean(client), Boolean(pkg.dsh.client), `${plugin.name}: Client declaration and export must agree`)
+    for (const resource of [main, client, 'locale/en.json', 'locale/zh.json', 'icon.svg', pkg.dsh.bundle.patch].filter(Boolean)) {
       assert.ok((await stat(path.join(root, plugin.directory, resource))).isFile(), `${plugin.name}: missing ${resource}`)
     }
-    let registration
-    vm.runInNewContext(await readFile(path.join(root, plugin.directory, client), 'utf8'), {
-      window: { __ModuleLoader__: { load: entry => { assert.equal(registration, undefined); registration = entry } } },
-    }, { timeout: 1000 })
-    assert.equal(registration.id, plugin.name, 'nested manifest must own the existing browser module ID')
-    assert.equal(typeof registration.factory, 'function')
+    if (client) {
+      let registration
+      vm.runInNewContext(await readFile(path.join(root, plugin.directory, client), 'utf8'), {
+        window: { __ModuleLoader__: { load: entry => { assert.equal(registration, undefined); registration = entry } } },
+      }, { timeout: 1000 })
+      assert.equal(registration.id, plugin.name, 'nested manifest must own the existing browser module ID')
+      assert.equal(typeof registration.factory, 'function')
+    } else {
+      const checked = spawnSync(process.execPath, [path.join(root, plugin.directory, 'scripts/build.mjs'), '--check'], { encoding: 'utf8' })
+      assert.equal(checked.status, 0, checked.stderr || checked.stdout)
+    }
     const runtimeFiles = `${plugin.directory}/lib/`
     assert.ok(manifest.files.includes(runtimeFiles))
     assert.ok(manifest.files.includes(`${plugin.directory}/package.json`))
     assert.ok(manifest.files.includes(`${plugin.directory}/locale/`))
-    expectedRows.push(`    - id: ${plugin.name}\n      name: ./${plugin.directory}/${main.replace(/^\.\//, '')}\n      disabled: true`)
+    expectedRows.push(`    - id: ${plugin.name}\n      name: ${plugin.name}\n      disabled: true`)
     await checkSyntax(path.join(root, plugin.directory, 'lib'))
-    for (const locale of ['en', 'zh']) await readJson(`${plugin.directory}/locale/${locale}.json`)
+    assert.equal(pkg.exports['./locale/*.json'], './locale/*.json')
+    assert.equal(pkg.exports['./icon'], './icon.svg')
+    for (const locale of ['en', 'zh']) {
+      const data = await readJson(`${plugin.directory}/locale/${locale}.json`)
+      assert.ok(data.meta?.title && data.meta?.description, `${plugin.name}: missing ${locale} display metadata`)
+    }
   }
   const patch = (await readFile(path.join(root, manifest.dsh.bundle.patch), 'utf8')).replace(/\r\n/g, '\n')
     .split('\n').filter(line => !line.startsWith('#')).join('\n').trim()

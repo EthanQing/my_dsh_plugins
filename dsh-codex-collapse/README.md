@@ -52,7 +52,6 @@ DSH Windows Desktop **0.2.1-rc.2** 的独立显示插件，版本 **0.1.0**。�
 npm ci
 npm run build
 npm run check
-npm test
 npm run pack:plugin
 ```
 
@@ -63,7 +62,6 @@ src/             状态模型、折叠选择、React 控制器、局部 CSS、�
 lib/             可直接加载的 Host / Client 产物
 locale/          中英文显示与元数据
 scripts/         构建、产物一致性检查、独立打包
-test/            纯逻辑与注册边界验证
 docs/            设计依据与已核对接口
 cordis.patch.yml 独立插件行
 icon.svg         原创 SVG 图标

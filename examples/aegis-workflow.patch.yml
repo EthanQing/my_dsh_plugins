@@ -1,0 +1,4 @@
+# Disable/remove any older Aegis bundle before enabling this component.
+# Existing preset IDs (including reliable-dev) are preserved and must be unique.
+- id: dsh-aegis-workflow
+  disabled: false

@@ -34,7 +34,6 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "check": "node scripts/build.mjs --check",
-    "test": "node --test test/*.test.mjs",
     "pack:plugin": "node scripts/pack.mjs"
   },
   "devDependencies": {

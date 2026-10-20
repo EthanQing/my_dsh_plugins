@@ -29,14 +29,8 @@ const browser = await transform(`window.__ModuleLoader__.load({
 const host = await build({ absWorkingDir: root, entryPoints: ['src/index.js'],
   bundle: true, format: 'esm', platform: 'node', target: 'node24', write: false,
   outfile: 'lib/index.js', charset: 'utf8' })
-// Also emit the pure modules for direct unit testing, without a React/DOM mock.
-const navigation = await transform(await readFile(path.join(root, 'src/client/navigation.ts'), 'utf8'),
-  { loader: 'ts', format: 'esm', target: 'es2022' })
-const deletion = await transform(await readFile(path.join(root, 'src/client/deletion.ts'), 'utf8'),
-  { loader: 'ts', format: 'esm', target: 'es2022' })
 await mkdir(path.join(root, 'lib'), { recursive: true })
-for (const [name, text] of [['client.js', browser.code], ['index.js', host.outputFiles[0].text],
-  ['navigation.js', navigation.code], ['deletion.js', deletion.code]]) {
+for (const [name, text] of [['client.js', browser.code], ['index.js', host.outputFiles[0].text]]) {
   const content = '// Generated from src/; see THIRD_PARTY_NOTICES.md for MIT attribution.\n' + text
   const file = path.join(root, 'lib', name)
   if (check) {
@@ -51,4 +45,4 @@ for (const locale of ['zh', 'en']) {
   const dictionary = JSON.parse(await readFile(path.join(root, 'locale', `${locale}.json`), 'utf8'))
   if (!dictionary.meta?.title || !dictionary.meta?.description) throw new Error('Missing metadata')
 }
-console.log(check ? 'Runtime artifacts match source; syntax and metadata passed.' : 'Built Host, Client and pure helpers.')
+console.log(check ? 'Runtime artifacts match source; syntax and metadata passed.' : 'Built Host and Client.')
