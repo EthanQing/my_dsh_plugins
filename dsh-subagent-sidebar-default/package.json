@@ -1,0 +1,63 @@
+{
+  "name": "dsh-subagent-sidebar-default",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Subagent manager with native right-sidebar tabs by default; an independent MIT fork of dsh-subagent-workspace-ui.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EthanQing/my_dsh_plugins.git",
+    "directory": "dsh-subagent-sidebar-default"
+  },
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "lib/",
+    "locale/",
+    "icon.svg",
+    "cordis.patch.yml",
+    "README.md",
+    "docs/",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs --check",
+    "test": "node --test test/*.test.mjs",
+    "pack:plugin": "node scripts/pack.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-sidebar-right",
+        "@deepseek-ai/dsh-client-ui-subagent",
+        "@deepseek-ai/dsh-client-ui-workspace"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=24",
+    "dsh": "0.2.1-rc.2"
+  }
+}

@@ -3,5 +3,6 @@
   { "name": "dsh-message-edit-retry", "directory": "dsh-message-edit-retry", "title": "消息编辑、继续与重试" },
   { "name": "dsh-session-delete-manager", "directory": "dsh-session-delete-manager", "title": "会话删除管理" },
   { "name": "dsh-smart-session-title", "directory": "dsh-smart-session-title", "title": "智能会话标题" },
-  { "name": "dsh-codex-collapse", "directory": "dsh-codex-collapse", "title": "Codex 风格执行过程折叠" }
+  { "name": "dsh-codex-collapse", "directory": "dsh-codex-collapse", "title": "Codex 风格执行过程折叠" },
+  { "name": "dsh-subagent-sidebar-default", "directory": "dsh-subagent-sidebar-default", "title": "子代理侧边栏管理器" }
 ]

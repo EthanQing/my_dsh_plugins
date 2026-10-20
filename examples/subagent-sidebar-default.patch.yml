@@ -1,0 +1,7 @@
+# The original package uses this Host row ID. Disable any custom original ID too.
+- id: subagent-workspace-manager
+  disabled: true
+- id: dsh-subagent-sidebar-default
+  disabled: false
+# Keep the official ui-subagent and right-sidebar plugins enabled: this plugin
+# uses their native subagentchat resource, not a replacement conversation view.

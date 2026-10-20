@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Subagent Sidebar Manager",
+    "description": "Search and manage subagents, opening native right-sidebar tabs while keeping the parent conversation visible."
+  }
+}

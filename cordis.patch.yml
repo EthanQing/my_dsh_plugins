@@ -16,3 +16,6 @@
     - id: dsh-codex-collapse
       name: ./dsh-codex-collapse/lib/index.js
       disabled: true
+    - id: dsh-subagent-sidebar-default
+      name: ./dsh-subagent-sidebar-default/lib/index.js
+      disabled: true
