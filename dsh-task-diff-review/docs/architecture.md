@@ -49,3 +49,21 @@
 修正了 no-index numstat 在 `-z` 双路径格式中删除文件的 `/dev/null` 取路径问题，这是历史提交删除文件统计所需的小范围兼容修复。
 
 语义依据：[git diff](https://git-scm.com/docs/git-diff)、[git status](https://git-scm.com/docs/git-status)、[git log](https://git-scm.com/docs/git-log)、[git show](https://git-scm.com/docs/git-show)。
+
+## 0.3.0：Git Actions
+
+`git-actions.js` 与只读 `git.js`/Review 分离，复用 Snapshots.repository 做仓库定位，额外拒绝缺失/相对 cwd，避免回落 Host 当前目录。单一 porcelain-v1-z 状态来源提供文件选择、暂存/未暂存标志和 UI 统计；不会用两份 Diff 累加未提交文件数。状态每 5 秒在可见页面刷新，Git 操作后经同一 Client invalidation 通知刷新原有 summary/history。没有改动 Recorder 的任务/父子代理生命周期。
+
+新 GET `/api/task-diff.git-status` 和 POST `/api/task-diff.git-action` 位于 Connection 认证边界。POST 还要求专用请求头及同源来源，限制消息体 64 KiB；客户端不能指定 cwd、任意 Git 命令或任意 URL。服务端重读会话工作目录和已有 Remote，不接受 Shell 文本。命令用 execFile + argv 执行，无 Shell 插值。
+
+暂存与取消暂存只接受当前状态中符合条件的文件，通过 NUL 分隔 pathspec stdin 和 `--literal-pathspecs` 防止特殊文件名扩大范围。处理 Index rename 与 Working Tree rename 的原路径差异。暂存用 add -A 的明确路径集合；取消暂存用 restore --staged，未出生分支用 rm --cached，不删除 Working Tree 文件。
+
+提交 preview 返回有界、5 分钟有效、绑定 Session/仓库的随机确认票据。原始 Index 哈希 + HEAD + 分支绑定预览，提交/生成前后再次验证。提交必须有 confirmed=true，使用标准 commit --file=-，不加 -a、不自动 add、不跳过 hooks 或签名。Git 操作按工作树在本插件内互斥；其他进程仍由 Git 自身锁管理，不尝试控制外部代理或删除锁文件。票据在实际写入前消费，不在异常后自动重试。
+
+`commit-message.js` 使用官方 @deepseek-ai/dsh-llm 的 createUserMessage、BlockAssembler、prepareCall/stream，参考已安装官方 session-title-llm 的模型调用契约；不借用标题生成器，不写会话日志。只在用户点击时读取 <=128 KiB 真实 cached Diff，经会话最近模型路由发起一次有界文本调用；无工具、无写入权限，模型输出仍需人工确认提交。读取失败、超限、暂存区改变或非正常 finish 均不返回猜测文本。
+
+推送默认目标遵循 branch.pushRemote → remote.pushDefault → branch.remote → origin。目标分支优先所选 upstream Remote 的 branch.merge，否则当前分支同名。预览通过 ls-remote 查询每个 Push URL 的真实目标，不 fetch；远端 tip 不在本地或不是 HEAD 祖先时拒绝推送。确认再验证 HEAD、分支、Remote 配置和远端 tip，执行明确 OID:refs/heads/目标，禁用 force/mirror/follow-tags/submodule recursion。用户选择 Remote 不写配置。多地址的计数分别展示，不重复相加；认证走已有 Git 配置/GCM，不存储凭据，返回信息隐藏 URL 内的常见敏感字段。
+
+Composer 面板使用 conversation.composer.dock，依照 [官方 Slots](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/client/ui-conversation/src/client/contract/slots.ts) 在布局内右对齐。确认窗口使用原生 dialog 模态、焦点及 Escape 行为。切会话按 Session key 重新挂载面板，丢弃旧窗口响应，不将旧仓库状态显示在新会话。
+
+Git 依据：[add](https://git-scm.com/docs/git-add)、[restore](https://git-scm.com/docs/git-restore)、[commit](https://git-scm.com/docs/git-commit)、[push](https://git-scm.com/docs/git-push)、[remote](https://git-scm.com/docs/git-remote)。

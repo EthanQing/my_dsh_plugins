@@ -3,6 +3,8 @@ import os from 'node:os'
 import { Snapshots } from './snapshots.js'
 import { Recorder } from './recorder.js'
 import { commitHistory } from './git-review.js'
+import { GitActions, redact } from './git-actions.js'
+import { generateCommitMessage } from './commit-message.js'
 
 export const name = 'dsh-task-diff-review'
 export const inject = ['connection', 'agents', 'sessionQuery']
@@ -11,6 +13,7 @@ export function apply(ctx) {
   const lifetime = new AbortController()
   const root = path.join(process.env.DSH_HOME || path.join(os.homedir(), '.dsh'), 'plugin-data', name)
   const recorder = new Recorder(ctx, new Snapshots(root, lifetime.signal), lifetime.signal)
+  const actions = new GitActions(recorder.snapshots, lifetime.signal)
   const ready = recorder.init()
   void ready.catch(error => ctx.logger.warn(`${name}: storage unavailable: ${error.code || error.message}`))
   const headers = new Map()
@@ -76,6 +79,50 @@ export function apply(ctx) {
         }
         return Response.json(result, { headers: { 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } })
       } catch (error) { return Response.json({ error: error.message }, { status: 422, headers: { 'cache-control': 'no-store' } }) }
+    },
+  })
+  ctx.connection.fetch.register({
+    path: '/api/task-diff.git-status', methods: ['GET'], requestBody: 'buffered',
+    async fetch(request) {
+      try {
+        const sessionId = new URL(request.url).searchParams.get('sessionId')
+        if (!sessionId || sessionId.length > 256) return new Response('Invalid session', { status: 400 })
+        return Response.json(await actions.status((await headerFor(sessionId)).cwd), { headers: { 'cache-control': 'no-store' } })
+      } catch (error) { return Response.json({ error: redact(error.message) }, { status: 422 }) }
+    },
+  })
+  ctx.connection.fetch.register({
+    path: '/api/task-diff.git-action', methods: ['POST'], requestBody: 'buffered',
+    async fetch(request) {
+      try {
+        if (request.headers.get('x-dsh-git-action') !== '1' || ['cross-site', 'same-site'].includes(request.headers.get('sec-fetch-site'))) return new Response('Forbidden', { status: 403 })
+        const origin = request.headers.get('origin')
+        if (origin && origin !== new URL(request.url).origin) return new Response('Forbidden', { status: 403 })
+        if (Number(request.headers.get('content-length')) > 65536) return new Response('Body too large', { status: 413 })
+        const text = await request.text()
+        if (Buffer.byteLength(text) > 65536) return new Response('Body too large', { status: 413 })
+        const body = JSON.parse(text), sessionId = body.sessionId
+        if (typeof sessionId !== 'string' || !sessionId || sessionId.length > 256) return new Response('Invalid session', { status: 400 })
+        const cwd = (await headerFor(sessionId)).cwd
+        let result
+        switch (body.action) {
+          case 'stage': case 'unstage':
+            if (typeof body.all !== 'boolean') throw new Error('文件选择无效')
+            result = await actions.select(cwd, body.action, body); break
+          case 'prepareCommit': result = await actions.prepareCommit(cwd, sessionId); break
+          case 'commit': result = await actions.commit(cwd, sessionId, body); break
+          case 'preparePush': result = await actions.preparePush(cwd, sessionId, body.remote); break
+          case 'push':
+            if (body.confirmed !== true) throw new Error('推送需要用户明确确认')
+            result = await actions.push(cwd, sessionId, body.ticket); break
+          case 'generate': {
+            const modelContext = { agents: ctx.agents, sessionQuery: ctx.sessionQuery, llm: ctx.get('llm') }
+            result = await generateCommitMessage(modelContext, actions, cwd, sessionId, body.ticket, lifetime.signal); break
+          }
+          default: return new Response('Invalid action', { status: 400 })
+        }
+        return Response.json(result, { headers: { 'cache-control': 'no-store' } })
+      } catch (error) { return Response.json({ error: redact(error.message) }, { status: 422, headers: { 'cache-control': 'no-store' } }) }
     },
   })
 }

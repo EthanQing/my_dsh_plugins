@@ -1,4 +1,5 @@
 import { createHistoryBrowser } from './history-view.js'
+import { subscribeGitRefresh } from './refresh.js'
 
 const api = (kind, params) => `api/task-diff.${kind}?${new URLSearchParams(params)}`
 const noop = () => {}
@@ -25,13 +26,17 @@ export function createViews(React, ctx, open) {
     const [state, setState] = useState(), [error, setError] = useState(''), [revision, setRevision] = useState(0)
     const key = JSON.stringify([sessionId, mode, base, taskId, commit, parent])
     const value = state?.key === key ? state.value : cached.get(key)
+    useEffect(() => subscribeGitRefresh(() => { cached.clear(); pending.clear(); setRevision(value => value + 1) }), [])
     useEffect(() => {
       let disposed = false, timer
       setState({ key, value: cached.get(key) }); setError('')
       if (mode === 'commits' && !commit) return
       const load = async () => {
         try {
-          if (!pending.has(key)) pending.set(key, read('summary', { sessionId, mode, base, taskId, commit, parent: String(parent) }).finally(() => pending.delete(key)))
+          if (!pending.has(key)) {
+            const task = read('summary', { sessionId, mode, base, taskId, commit, parent: String(parent) })
+            pending.set(key, task); void task.finally(() => { if (pending.get(key) === task) pending.delete(key) }).catch(() => {})
+          }
           const result = await pending.get(key)
           cached.set(key, result); while (cached.size > 30) cached.delete(cached.keys().next().value)
           if (!disposed) { setState({ key, value: result }); setError('') }
@@ -83,6 +88,7 @@ export function createViews(React, ctx, open) {
     const [mode, setMode] = useState(remembered?.mode ?? 'task'), [base, setBase] = useState(remembered?.base ?? ''), [taskId, setTaskId] = useState(remembered?.taskId ?? '')
     const [historyBranch, setHistoryBranch] = useState(remembered?.historyBranch ?? 'HEAD'), [commit, setCommit] = useState(remembered?.commit ?? ''), [parent, setParent] = useState(remembered?.parent ?? 0)
     const [historyRevision, setHistoryRevision] = useState(0)
+    useEffect(() => subscribeGitRefresh(() => setHistoryRevision(value => value + 1)), [])
     const { value, error, refresh } = useSummary(sessionId, mode, base, taskId, mode === 'commits' ? commit : '', mode === 'commits' ? parent : 0)
     const [choices, setChoices] = useState(remembered?.choices ?? { index: 0, split: false, wrap: false, navigated: -1 })
     const [diffState, setDiffState] = useState(), [diffRevision, setDiffRevision] = useState(0)

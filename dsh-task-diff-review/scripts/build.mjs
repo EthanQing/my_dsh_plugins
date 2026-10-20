@@ -8,6 +8,7 @@ await mkdir(path.join(root, 'lib'), { recursive: true })
 for (const [entry, output, platform, format] of [['src/client.js', 'client.js', 'browser', 'iife'], ['src/index.js', 'index.js', 'node', 'esm']]) {
   const result = await build({ absWorkingDir: root, entryPoints: [entry], outfile: `lib/${output}`, bundle: true, write: false,
     platform, format, target: platform === 'node' ? 'node24' : 'chrome120', charset: 'utf8', legalComments: 'none',
+    external: platform === 'node' ? ['@deepseek-ai/dsh-llm'] : [],
     loader: { '.css': 'text' }, banner: { js: '// Generated; edit src/ and run scripts/build.mjs.' } })
   const content = result.outputFiles[0].text, destination = path.join(root, 'lib', output)
   if (check) { if ((await readFile(destination, 'utf8')).replace(/\r\n/g, '\n') !== content.replace(/\r\n/g, '\n')) throw new Error(`Stale ${output}`) }

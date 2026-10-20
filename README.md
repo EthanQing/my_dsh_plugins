@@ -13,7 +13,7 @@
 | [Codex 风格执行折叠](dsh-codex-collapse/README.md) | 把 AI 的工具调用等执行细节收成一行，运行时显示进度，展开后可看原始记录，正文和最终回答保持可见。 |
 | [子代理侧边栏管理器](dsh-subagent-sidebar-default/README.md) | 搜索、查看和管理子代理；点击后在右侧栏标签页中打开，主窗口继续保留父代理会话。 |
 | [Aegis 工程工作流](dsh-aegis-workflow/README.zh-CN.md) | 主代理协调规划、编码、审查等六个可续聊角色。优先复用你准备好的详细任务，审批后按需实施。 |
-| [代码改动概览与审查](dsh-task-diff-review/README.md) | 输入框上方显示本轮改动，包含关联子代理；右侧查看本轮、未提交、暂存、未暂存、分支和历史提交 Diff。支持提交搜索与 Merge 父提交选择。 |
+| [代码改动概览与 Git 操作](dsh-task-diff-review/README.md) | 查看本轮及子代理改动和六种 Diff；输入框下方可暂存、取消暂存、AI 辅助写提交信息、确认提交和选择 Remote 推送。 |
 
 ## 怎么安装
 

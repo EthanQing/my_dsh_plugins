@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "代码改动概览与审查",
-    "description": "本轮及子代理改动概览，支持未提交、暂存、未暂存、分支和历史提交的原生 Diff 审查。"
+    "title": "代码审查与 Git 操作",
+    "description": "本轮及子代理改动概览、六种 Diff Review，支持暂存、取消暂存、AI 辅助提交信息、确认提交与选择 Remote 推送。"
   }
 }

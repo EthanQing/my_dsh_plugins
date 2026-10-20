@@ -1,9 +1,9 @@
 {
   "name": "dsh-task-diff-review",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "Task, working-tree, staged, unstaged, branch and commit review using native DSH Diff.",
+  "description": "Native task and Git Diff review with explicit staging, AI-assisted commit messages, commit and ordinary push actions.",
   "main": "lib/index.js",
   "exports": {
     ".": {
@@ -51,5 +51,13 @@
   "license": "MIT",
   "devDependencies": {
     "esbuild": "0.25.12"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-llm": "0.2.1-rc.2"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-llm": {
+      "optional": true
+    }
   }
 }

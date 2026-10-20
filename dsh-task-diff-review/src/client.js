@@ -1,4 +1,5 @@
 import { createViews } from './views.js'
+import { createActionsPanel } from './actions-view.js'
 import styles from './style.css'
 import zh from '../locale/zh.json'
 import en from '../locale/en.json'
@@ -24,6 +25,7 @@ window.__ModuleLoader__.load({
           canOpen: value => /^dsh-resource:\/\/task-diff-review\/session\/[^/?#]+$/.test(value), title: () => '代码改动审查',
         }))
         ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({ name: 'conversation.input.dock', id: 'dsh-task-diff-review' }, views.Dock))
+        ctx.slots.inject('conversation.composer.dock', () => ctx.slots.register({ name: 'conversation.composer.dock', id: 'dsh-task-diff-review-actions' }, createActionsPanel(React)))
         ctx.slots.inject('sidebar.right.pane.tab', () => ctx.slots.register({ name: 'sidebar.right.pane.tab', key: 'dsh-task-diff-review' }, views.Review))
       },
     }

@@ -37,6 +37,6 @@
   {
     "name": "dsh-task-diff-review",
     "directory": "dsh-task-diff-review",
-    "title": "代码改动概览与 Diff 审查"
+    "title": "代码审查与 Git 操作"
   }
 ]

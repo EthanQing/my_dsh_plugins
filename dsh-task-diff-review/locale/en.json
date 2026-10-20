@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Task Changes & Git Review",
-    "description": "Native Diff review for tasks, working changes, staged, unstaged, branches and commit history."
+    "title": "Git Review & Actions",
+    "description": "Task and Git Diff review, staging, unstaging, AI-assisted commit messages, confirmed commits and ordinary pushes."
   }
 }
