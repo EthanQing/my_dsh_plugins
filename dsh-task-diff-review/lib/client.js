@@ -94,6 +94,8 @@
   var noop = () => {
   };
   var states = { tracking: "正在记录", settled: "本轮已结束", interrupted: "恢复的历史快照", incomplete: "记录不完整", missing: "等待新任务", ready: "已更新" };
+  var scopes = [["task", "本轮对话"], ["uncommitted", "未提交"], ["unstaged", "未暂存"], ["staged", "已暂存"], ["commits", "历史提交"], ["branch", "分支对比"]];
+  var emptyStates = { task: "本轮尚无代码改动", uncommitted: "没有未提交的改动", unstaged: "没有未暂存的改动", staged: "暂存区没有改动", commits: "此提交没有文件差异", branch: "当前分支相对基准没有改动" };
   function createViews(React, ctx, open) {
     const { createElement: h, useState, useEffect, useCallback, useMemo } = React;
     class NativeBoundary extends React.Component {
@@ -214,7 +216,11 @@
     function Dock({ sessionId }) {
       const { value, error, refresh } = useSummary(sessionId);
       const [expanded, setExpanded] = useState(false);
-      return h(
+      useEffect(() => {
+        setExpanded(false);
+      }, [sessionId, value?.taskId]);
+      if (!value || value.total <= 0) return null;
+      return h("div", { className: "dtd-dock-seat" }, h(
         "section",
         { className: "dtd-root dtd-dock", "aria-label": "本轮代码改动" },
         h(
@@ -237,7 +243,7 @@
           h(Warnings, { value }),
           h("button", { type: "button", onClick: refresh }, "刷新")
         )
-      );
+      ));
     }
     function Review(props) {
       const { tab } = props.useTabInfo();
@@ -313,8 +319,13 @@
           { className: "dtd-toolbar" },
           h(
             "div",
-            { role: "group", "aria-label": "改动范围", className: "dtd-scopes" },
-            [["task", "本轮对话"], ["uncommitted", "未提交"], ["staged", "暂存 Staged"], ["unstaged", "未暂存 Unstaged"], ["branch", "分支对比"], ["commits", "历史提交 Commits"]].map(([key, label]) => h("button", { key, type: "button", "aria-pressed": mode === key, onClick: () => changeMode(key) }, label))
+            { className: "dtd-scope-summary" },
+            h(
+              "select",
+              { className: "dtd-scope-select", "aria-label": "代码审查范围", value: mode, onChange: (event) => changeMode(event.target.value) },
+              scopes.map(([key, label]) => h("option", { key, value: key }, label))
+            ),
+            value && !error && counts(value)
           ),
           h("button", { type: "button", onClick: () => {
             void refresh();
@@ -362,11 +373,12 @@
           setTaskId(event.target.value);
           setChoices((value2) => ({ ...value2, index: 0 }));
         } }, value.histories.map((task) => h("option", { key: task.id, value: task.id }, `${new Date(task.started).toLocaleString()} · ${states[task.status] || task.status}`)))),
-        h("div", { className: "dtd-totals", role: "status" }, error || (mode === "commits" && !commit ? "选择一个提交查看详情与文件 Diff" : value ? `${value.total} 个文件 · ${states[value.status] || value.status}` : "正在读取…"), !error && (mode !== "commits" || commit) && counts(value)),
+        h("div", { className: "dtd-totals", role: "status" }, error || (mode === "commits" && !commit ? "选择一个提交查看详情与文件 Diff" : value ? `${value.total} 个文件 · ${states[value.status] || value.status}` : "正在读取…")),
         h(Warnings, { value }),
         value && value.files.length > 0 && h(FileList, { value, selected: index, select: (index2) => setChoices((value2) => ({ ...value2, index: index2 })) }),
         value?.files[index] && h("div", { className: "dtd-fullpath", title: value.files[index].path }, value.files[index].path),
-        mode === "commits" && !commit ? null : original?.component && !error ? h("div", { className: "dtd-native" }, h(NativeBoundary, null, h(original.component, {
+        value && value.files.length === 0 && !error && (mode !== "commits" || commit) && h("p", { className: "dtd-empty", role: "status" }, emptyStates[mode]),
+        !value?.files.length || error ? null : original?.component ? h("div", { className: "dtd-native" }, h(NativeBoundary, null, h(original.component, {
           ...props,
           sessionId,
           useTabInfo: () => ({ tab: nativeTab }),
@@ -599,7 +611,7 @@
   }
 
   // src/style.css
-  var style_default = ".dtd-root{font:inherit;color:inherit;min-width:0;font-size:12px;--dtd-green:light-dark(#18733c,#78d69b);--dtd-red:light-dark(#b32b36,#ff939c);--dtd-border:color-mix(in srgb,currentColor 13%,transparent)}\n.dtd-root button,.dtd-root select{font:inherit;color:inherit;border:1px solid transparent;border-radius:5px;background:transparent;cursor:pointer;padding:4px 7px}\n.dtd-root button:hover,.dtd-root button:focus-visible{background:color-mix(in srgb,currentColor 7%,transparent)}\n.dtd-root button:focus-visible,.dtd-root select:focus-visible{outline:2px solid Highlight;outline-offset:1px}\n.dtd-dock{border:1px solid var(--dtd-border);border-radius:9px;margin:0 0 6px;padding:5px 7px;background:color-mix(in srgb,currentColor 2%,transparent)}\n.dtd-heading,.dtd-disclosure,.dtd-toolbar,.dtd-counts,.dtd-totals{display:flex;align-items:center;gap:9px;min-width:0}\n.dtd-heading{flex-wrap:wrap}.dtd-heading>.dtd-muted{flex:1;font-size:11px}.dtd-counts{gap:6px;font-variant-numeric:tabular-nums;white-space:nowrap}\n.dtd-added,.dtd-status-A{color:var(--dtd-green)}.dtd-deleted,.dtd-status-D{color:var(--dtd-red)}.dtd-status-M{color:light-dark(#996200,#e9c36b)}.dtd-status-R{color:light-dark(#2764a3,#88bafa)}\n.dtd-muted{opacity:.65}.dtd-files{list-style:none;margin:4px 0;padding:0;overflow:auto;max-height:200px}.dtd-file{width:100%;display:flex;gap:9px;align-items:center;text-align:left}.dtd-path{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dtd-status{flex-shrink:0;width:30px;font-size:10px}.dtd-selected{background:color-mix(in srgb,currentColor 8%,transparent)!important}\n.dtd-review{height:100%;display:flex;flex-direction:column;overflow:hidden}.dtd-toolbar{justify-content:space-between;flex-wrap:wrap;padding:9px;border-bottom:1px solid var(--dtd-border)}.dtd-scopes{display:flex;gap:2px}.dtd-scopes [aria-pressed=true]{border-color:var(--dtd-border);background:color-mix(in srgb,currentColor 8%,transparent)}\n.dtd-options,.dtd-totals{padding:6px 12px}.dtd-options select{max-width:80%;background:Canvas;color:CanvasText;border-color:var(--dtd-border)}.dtd-totals{justify-content:space-between}.dtd-review>.dtd-files{max-height:170px;margin:0 7px;flex-shrink:0}\n.dtd-coverage{padding:4px 10px;font-size:11px;opacity:.75;flex-shrink:0;max-height:130px;overflow:auto}.dtd-coverage summary{cursor:pointer}.dtd-coverage ul{padding-left:17px;margin:5px 0}.dtd-coverage li{margin:4px 0;overflow-wrap:anywhere}\n.dtd-fullpath{padding:7px 12px;font-size:11px;overflow-wrap:anywhere;max-height:65px;overflow:auto;opacity:.7;border-bottom:1px solid var(--dtd-border)}.dtd-native{flex:1;min-height:0;overflow:auto}.dtd-native>div{height:100%;min-height:150px}.dtd-message{padding:12px}\n.dtd-scopes{flex-wrap:wrap}.dtd-untracked{font-size:10px;opacity:.65;white-space:nowrap}.dtd-history{padding:7px 12px;border-bottom:1px solid var(--dtd-border);flex-shrink:0;min-height:0}.dtd-history-controls{display:flex;gap:7px;flex-wrap:wrap}.dtd-history-controls form{display:flex;gap:4px;flex:1;min-width:170px}.dtd-history-controls input{font:inherit;background:Canvas;color:CanvasText;border:1px solid var(--dtd-border);border-radius:5px;padding:5px;min-width:0;width:100%}.dtd-history select,.dtd-commit-detail select{font:inherit;max-width:100%;background:Canvas;color:CanvasText;border:1px solid var(--dtd-border)}\n.dtd-commit-list{max-height:200px;overflow:auto;margin-top:5px}.dtd-commit-list ul{list-style:none;margin:0;padding:0}.dtd-commit-list p{margin:5px 0}.dtd-commit-row{display:flex;flex-direction:column;width:100%;text-align:left;gap:3px}.dtd-commit-subject{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}.dtd-commit-meta{font-size:11px;opacity:.65;overflow-wrap:anywhere}.dtd-commit-detail{padding:8px 12px;max-height:170px;overflow:auto;flex-shrink:0;border-bottom:1px solid var(--dtd-border)}.dtd-commit-hash{display:block;font-size:11px;overflow-wrap:anywhere;margin-top:5px}.dtd-commit-detail pre{font:inherit;white-space:pre-wrap;overflow-wrap:anywhere}.dtd-commit-detail summary{cursor:pointer}\n.dtd-review-commits{overflow:auto}.dtd-review-commits>.dtd-native{flex:1 0 200px}.dtd-history-controls input:focus-visible{outline:2px solid Highlight;outline-offset:1px}.dtd-root button:disabled{opacity:.5;cursor:default}\n.dtd-actions{margin-left:auto;max-width:min(100%,650px);text-align:right;padding:4px 0}.dtd-actions-summary{font-size:11px!important;max-width:100%;overflow-wrap:anywhere;opacity:.8}.dtd-actions-body{text-align:left;border:1px solid var(--dtd-border);border-radius:8px;padding:8px;margin-top:4px;background:color-mix(in srgb,currentColor 2%,transparent)}.dtd-action-buttons,.dtd-dialog-buttons{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.dtd-action-buttons button,.dtd-dialog-buttons button{border-color:var(--dtd-border)}.dtd-action-files{max-height:170px;overflow:auto;margin-top:5px}.dtd-action-file{display:flex;align-items:center;gap:7px;text-align:left;padding:4px 0;font-size:11px;min-width:0}.dtd-action-file input{accent-color:Highlight}.dtd-action-file code{white-space:pre}.dtd-action-file>.dtd-muted{flex-shrink:0}.dtd-action-error{text-align:left;color:var(--dtd-red);white-space:pre-wrap;overflow-wrap:anywhere;max-height:140px;overflow:auto}.dtd-action-notice{font-size:11px;color:var(--dtd-green);margin:4px 0}\n.dtd-actions-dialog{font:inherit;background:Canvas;color:CanvasText;border:1px solid var(--dtd-border);border-radius:10px;width:min(490px,calc(100vw - 40px));max-height:80vh;padding:16px;text-align:left;overflow:auto;box-shadow:0 10px 36px #0003}.dtd-actions-dialog::backdrop{background:#0005}.dtd-dialog-title{display:flex;align-items:center;justify-content:space-between;gap:16px}.dtd-message-label{display:block}.dtd-message-label textarea{display:block;width:100%;box-sizing:border-box;margin:6px 0 12px;resize:vertical;min-height:110px;font:inherit;border:1px solid var(--dtd-border);border-radius:5px;padding:8px;background:Canvas;color:CanvasText}.dtd-message-label textarea:focus-visible{outline:2px solid Highlight}.dtd-push-urls{font-size:11px;opacity:.7;overflow-wrap:anywhere;margin:8px 0}.dtd-actions-dialog select{font:inherit;max-width:100%;background:Canvas;color:CanvasText}\n";
+  var style_default = ".dtd-root{font:inherit;color:inherit;min-width:0;font-size:12px;--dtd-green:light-dark(#18733c,#78d69b);--dtd-red:light-dark(#b32b36,#ff939c);--dtd-border:color-mix(in srgb,currentColor 13%,transparent)}\n.dtd-root button,.dtd-root select{font:inherit;color:inherit;border:1px solid transparent;border-radius:5px;background:transparent;cursor:pointer;padding:4px 7px}\n.dtd-root button:hover,.dtd-root button:focus-visible{background:color-mix(in srgb,currentColor 7%,transparent)}\n.dtd-root button:focus-visible,.dtd-root select:focus-visible{outline:2px solid Highlight;outline-offset:1px}\n.dtd-dock-seat{box-sizing:border-box;width:100%;min-width:0;flex:none;display:flex;justify-content:center;padding-inline:var(--dsh-composer-side-clearance,16px)}\n.dtd-dock{box-sizing:border-box;width:100%;max-width:var(--dsh-composer-card-max-width,952px);min-width:0;flex:none;border:1px solid var(--dtd-border);border-radius:10px;margin:0;padding:6px 9px;background:var(--dsw-alias-bg-layer-1,Canvas);color:var(--dsw-alias-label-primary,CanvasText)}\n.dtd-heading,.dtd-disclosure,.dtd-toolbar,.dtd-counts,.dtd-totals{display:flex;align-items:center;gap:9px;min-width:0}\n.dtd-heading{flex-wrap:wrap}.dtd-heading>.dtd-muted{flex:1;font-size:11px}.dtd-counts{gap:6px;font-variant-numeric:tabular-nums;white-space:nowrap}\n.dtd-added,.dtd-status-A{color:var(--dtd-green)}.dtd-deleted,.dtd-status-D{color:var(--dtd-red)}.dtd-status-M{color:light-dark(#996200,#e9c36b)}.dtd-status-R{color:light-dark(#2764a3,#88bafa)}\n.dtd-muted{opacity:.65}.dtd-files{list-style:none;margin:4px 0;padding:0;overflow:auto;max-height:200px}.dtd-file{width:100%;display:flex;gap:9px;align-items:center;text-align:left}.dtd-path{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dtd-status{flex-shrink:0;width:30px;font-size:10px}.dtd-selected{background:color-mix(in srgb,currentColor 8%,transparent)!important}\n.dtd-review{height:100%;display:flex;flex-direction:column;overflow:hidden}.dtd-toolbar{justify-content:space-between;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid var(--dtd-border);flex:none}.dtd-scope-summary{display:flex;align-items:center;gap:8px;min-width:0}.dtd-root .dtd-scope-select{max-width:160px;border:1px solid var(--dtd-border);border-radius:999px;background:var(--dsw-alias-bg-layer-1,Canvas);color:var(--dsw-alias-label-primary,CanvasText);padding:5px 8px;cursor:pointer}.dtd-scope-select option{background:Canvas;color:CanvasText}.dtd-empty{margin:0;padding:28px 16px;text-align:center;color:var(--dsw-alias-label-tertiary,GrayText);font-size:12px}\n.dtd-options,.dtd-totals{padding:6px 12px}.dtd-options select{max-width:80%;background:Canvas;color:CanvasText;border-color:var(--dtd-border)}.dtd-totals{justify-content:space-between}.dtd-review>.dtd-files{max-height:170px;margin:0 7px;flex-shrink:0}\n.dtd-coverage{padding:4px 10px;font-size:11px;opacity:.75;flex-shrink:0;max-height:130px;overflow:auto}.dtd-coverage summary{cursor:pointer}.dtd-coverage ul{padding-left:17px;margin:5px 0}.dtd-coverage li{margin:4px 0;overflow-wrap:anywhere}\n.dtd-fullpath{padding:7px 12px;font-size:11px;overflow-wrap:anywhere;max-height:65px;overflow:auto;opacity:.7;border-bottom:1px solid var(--dtd-border)}.dtd-native{flex:1;min-height:0;overflow:auto}.dtd-native>div{height:100%;min-height:150px}.dtd-message{padding:12px}\n.dtd-untracked{font-size:10px;opacity:.65;white-space:nowrap}.dtd-history{padding:7px 12px;border-bottom:1px solid var(--dtd-border);flex-shrink:0;min-height:0}.dtd-history-controls{display:flex;gap:7px;flex-wrap:wrap}.dtd-history-controls form{display:flex;gap:4px;flex:1;min-width:170px}.dtd-history-controls input{font:inherit;background:Canvas;color:CanvasText;border:1px solid var(--dtd-border);border-radius:5px;padding:5px;min-width:0;width:100%}.dtd-history select,.dtd-commit-detail select{font:inherit;max-width:100%;background:Canvas;color:CanvasText;border:1px solid var(--dtd-border)}\n.dtd-commit-list{max-height:200px;overflow:auto;margin-top:5px}.dtd-commit-list ul{list-style:none;margin:0;padding:0}.dtd-commit-list p{margin:5px 0}.dtd-commit-row{display:flex;flex-direction:column;width:100%;text-align:left;gap:3px}.dtd-commit-subject{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}.dtd-commit-meta{font-size:11px;opacity:.65;overflow-wrap:anywhere}.dtd-commit-detail{padding:8px 12px;max-height:170px;overflow:auto;flex-shrink:0;border-bottom:1px solid var(--dtd-border)}.dtd-commit-hash{display:block;font-size:11px;overflow-wrap:anywhere;margin-top:5px}.dtd-commit-detail pre{font:inherit;white-space:pre-wrap;overflow-wrap:anywhere}.dtd-commit-detail summary{cursor:pointer}\n.dtd-review-commits{overflow:auto}.dtd-review-commits>.dtd-native{flex:1 0 200px}.dtd-history-controls input:focus-visible{outline:2px solid Highlight;outline-offset:1px}.dtd-root button:disabled{opacity:.5;cursor:default}\n.dtd-actions{margin-left:auto;max-width:min(100%,650px);text-align:right;padding:4px 0}.dtd-actions-summary{font-size:11px!important;max-width:100%;overflow-wrap:anywhere;opacity:.8}.dtd-actions-body{text-align:left;border:1px solid var(--dtd-border);border-radius:8px;padding:8px;margin-top:4px;background:color-mix(in srgb,currentColor 2%,transparent)}.dtd-action-buttons,.dtd-dialog-buttons{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.dtd-action-buttons button,.dtd-dialog-buttons button{border-color:var(--dtd-border)}.dtd-action-files{max-height:170px;overflow:auto;margin-top:5px}.dtd-action-file{display:flex;align-items:center;gap:7px;text-align:left;padding:4px 0;font-size:11px;min-width:0}.dtd-action-file input{accent-color:Highlight}.dtd-action-file code{white-space:pre}.dtd-action-file>.dtd-muted{flex-shrink:0}.dtd-action-error{text-align:left;color:var(--dtd-red);white-space:pre-wrap;overflow-wrap:anywhere;max-height:140px;overflow:auto}.dtd-action-notice{font-size:11px;color:var(--dtd-green);margin:4px 0}\n.dtd-actions-dialog{font:inherit;background:Canvas;color:CanvasText;border:1px solid var(--dtd-border);border-radius:10px;width:min(490px,calc(100vw - 40px));max-height:80vh;padding:16px;text-align:left;overflow:auto;box-shadow:0 10px 36px #0003}.dtd-actions-dialog::backdrop{background:#0005}.dtd-dialog-title{display:flex;align-items:center;justify-content:space-between;gap:16px}.dtd-message-label{display:block}.dtd-message-label textarea{display:block;width:100%;box-sizing:border-box;margin:6px 0 12px;resize:vertical;min-height:110px;font:inherit;border:1px solid var(--dtd-border);border-radius:5px;padding:8px;background:Canvas;color:CanvasText}.dtd-message-label textarea:focus-visible{outline:2px solid Highlight}.dtd-push-urls{font-size:11px;opacity:.7;overflow-wrap:anywhere;margin:8px 0}.dtd-actions-dialog select{font:inherit;max-width:100%;background:Canvas;color:CanvasText}\n\n.dtd-guide-entry{box-sizing:border-box;width:380px;max-width:100%;min-height:56px;display:flex;align-items:center;gap:14px;padding:14px 20px;text-align:left;font:inherit;background:var(--dsw-alias-bg-layer-1,Canvas);color:var(--dsw-alias-label-primary,CanvasText);border:.5px solid var(--dsw-alias-border-l3,#8884);border-radius:var(--dsl-guide-entry-radius,16px);cursor:pointer}.dtd-guide-entry:hover{background:var(--dsw-alias-interactive-bg-hover,#8881)}.dtd-guide-entry:focus-visible{outline:2px solid var(--dsw-focus-ring-color,Highlight);outline-offset:2px}.dtd-guide-icon{width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex:none;color:var(--dsw-alias-state-business-primary,#4386ec)}.dtd-guide-copy{display:flex;flex-direction:column;min-width:0;gap:3px}.dtd-guide-title{font-size:14px;line-height:1.4}.dtd-guide-description{font-size:11px;line-height:1.4;color:var(--dsw-alias-label-tertiary,GrayText)}\n";
 
   // locale/zh.json
   var zh_default = {
@@ -639,14 +651,45 @@
             params: { index, mode: "task", taskId: "" }
           });
           const views = createViews(React, ctx, open);
+          const ReviewIcon = ({ size = 24 }) => React.createElement(
+            "svg",
+            { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.6, "aria-hidden": true },
+            React.createElement("path", { d: "M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zm0 0v6h6M8 13h4m-2-2v4m4 2h3", strokeLinecap: "round", strokeLinejoin: "round" })
+          );
+          function ReviewGuide({ sessionId, useTabInfo, title, description }) {
+            const { tab } = useTabInfo();
+            return React.createElement(
+              "button",
+              {
+                type: "button",
+                className: "dtd-guide-entry",
+                "data-sidebar-right-guide-entry": "task-diff-review",
+                onClick: () => tab.actions.openResource(`dsh-resource://task-diff-review/session/${encodeURIComponent(sessionId)}`, {
+                  replaceTab: true,
+                  preferNewPane: false,
+                  revealIfOpened: true,
+                  params: { index: 0, mode: "task", taskId: "" }
+                })
+              },
+              React.createElement("span", { className: "dtd-guide-icon" }, React.createElement(ReviewIcon, {})),
+              React.createElement(
+                "span",
+                { className: "dtd-guide-copy" },
+                React.createElement("span", { className: "dtd-guide-title" }, title),
+                description && React.createElement("span", { className: "dtd-guide-description" }, description)
+              )
+            );
+          }
           ctx.effect(() => ctx.sidebarRightTabs.register({
             id: "dsh-task-diff-review",
             kind: "task-diff-review",
             patterns: ["dsh-resource://task-diff-review/session/**"],
             canOpen: (value) => /^dsh-resource:\/\/task-diff-review\/session\/[^/?#]+$/.test(value),
-            title: () => "代码改动审查"
+            title: () => "代码改动审查",
+            guide: [{ id: "review", title: () => "代码改动审查", description: () => "查看本轮、工作区和历史提交的代码差异", icon: ReviewIcon, order: 40 }]
           }));
-          ctx.slots.inject("conversation.input.dock", () => ctx.slots.register({ name: "conversation.input.dock", id: "dsh-task-diff-review" }, views.Dock));
+          ctx.slots.inject("sidebar.right.tab.guide.entry", () => ctx.slots.register({ name: "sidebar.right.tab.guide.entry", key: "dsh-task-diff-review" }, ReviewGuide));
+          ctx.slots.inject("conversation.input.dock", () => ctx.slots.register({ name: "conversation.input.dock", id: "dsh-task-diff-review", order: 10 }, views.Dock));
           ctx.slots.inject("conversation.composer.dock", () => ctx.slots.register({ name: "conversation.composer.dock", id: "dsh-task-diff-review-actions" }, createActionsPanel(React)));
           ctx.slots.inject("sidebar.right.pane.tab", () => ctx.slots.register({ name: "sidebar.right.pane.tab", key: "dsh-task-diff-review" }, views.Review));
         }

@@ -4,6 +4,8 @@ import { subscribeGitRefresh } from './refresh.js'
 const api = (kind, params) => `api/task-diff.${kind}?${new URLSearchParams(params)}`
 const noop = () => {}
 const states = { tracking: '正在记录', settled: '本轮已结束', interrupted: '恢复的历史快照', incomplete: '记录不完整', missing: '等待新任务', ready: '已更新' }
+const scopes = [['task', '本轮对话'], ['uncommitted', '未提交'], ['unstaged', '未暂存'], ['staged', '已暂存'], ['commits', '历史提交'], ['branch', '分支对比']]
+const emptyStates = { task: '本轮尚无代码改动', uncommitted: '没有未提交的改动', unstaged: '没有未暂存的改动', staged: '暂存区没有改动', commits: '此提交没有文件差异', branch: '当前分支相对基准没有改动' }
 
 export function createViews(React, ctx, open) {
   const { createElement: h, useState, useEffect, useCallback, useMemo } = React
@@ -72,13 +74,15 @@ export function createViews(React, ctx, open) {
   function Dock({ sessionId }) {
     const { value, error, refresh } = useSummary(sessionId)
     const [expanded, setExpanded] = useState(false)
-    return h('section', { className: 'dtd-root dtd-dock', 'aria-label': '本轮代码改动' },
+    useEffect(() => { setExpanded(false) }, [sessionId, value?.taskId])
+    if (!value || value.total <= 0) return null
+    return h('div', { className: 'dtd-dock-seat' }, h('section', { className: 'dtd-root dtd-dock', 'aria-label': '本轮代码改动' },
       h('div', { className: 'dtd-heading' }, h('button', { type: 'button', className: 'dtd-disclosure', 'aria-expanded': expanded, onClick: () => setExpanded(!expanded) },
         h('span', { 'aria-hidden': true }, expanded ? '⌄' : '›'), ` ${value?.warnings?.length > 1 ? '已覆盖 ' : ''}${value?.total ?? 0} 个文件`, counts(value)),
       h('span', { className: 'dtd-muted', role: 'status' }, error || (value?.warnings?.length > 1 ? '覆盖有限 · ' : '') + (states[value?.status] || '正在读取…')),
       h('button', { type: 'button', onClick: () => open(sessionId) }, '查看全部改动')),
       expanded && h(React.Fragment, null, value && h(FileList, { value, select: index => open(sessionId, index) }), h(Warnings, { value }),
-        h('button', { type: 'button', onClick: refresh }, '刷新')))
+        h('button', { type: 'button', onClick: refresh }, '刷新'))))
   }
   function Review(props) {
     const { tab } = props.useTabInfo()
@@ -124,8 +128,10 @@ export function createViews(React, ctx, open) {
     const summaryKey = `api/changes.summary?${new URLSearchParams({ sessionId, seq: '0' })}`
     const diffKey = `api/changes.diff?${new URLSearchParams({ sessionId, seq: '0', index: String(index) })}`
     return h('section', { className: `dtd-root dtd-review${mode === 'commits' ? ' dtd-review-commits' : ''}` },
-      h('div', { className: 'dtd-toolbar' }, h('div', { role: 'group', 'aria-label': '改动范围', className: 'dtd-scopes' },
-        [['task', '本轮对话'], ['uncommitted', '未提交'], ['staged', '暂存 Staged'], ['unstaged', '未暂存 Unstaged'], ['branch', '分支对比'], ['commits', '历史提交 Commits']].map(([key, label]) => h('button', { key, type: 'button', 'aria-pressed': mode === key, onClick: () => changeMode(key) }, label))),
+      h('div', { className: 'dtd-toolbar' }, h('div', { className: 'dtd-scope-summary' },
+        h('select', { className: 'dtd-scope-select', 'aria-label': '代码审查范围', value: mode, onChange: event => changeMode(event.target.value) },
+          scopes.map(([key, label]) => h('option', { key, value: key }, label))),
+        value && !error && counts(value)),
         h('button', { type: 'button', onClick: () => { void refresh(); if (mode === 'commits') setHistoryRevision(value => value + 1) } }, '刷新')),
       mode === 'commits' && h(HistoryBrowser, { sessionId, branch: historyBranch, revision: historyRevision, selected: commit,
         onBranch: branch => { setHistoryBranch(branch); setCommit(''); setParent(0); setChoices(value => ({ ...value, index: 0 })) },
@@ -138,11 +144,12 @@ export function createViews(React, ctx, open) {
           value.commit.parents.map((hash, index) => h('option', { key: hash, value: index }, `父提交 ${index + 1} · ${hash}`))))),
       mode === 'branch' && h('label', { className: 'dtd-options' }, '基准分支 ', h('select', { value: base || value?.base || '', onChange: event => { setBase(event.target.value); setChoices(value => ({ ...value, index: 0 })) } }, (value?.branches ?? []).map(branch => h('option', { key: branch, value: branch }, branch)))),
       mode === 'task' && Boolean(value?.histories?.length) && h('label', { className: 'dtd-options' }, '任务 ', h('select', { value: taskId || value.taskId, onChange: event => { setTaskId(event.target.value); setChoices(value => ({ ...value, index: 0 })) } }, value.histories.map(task => h('option', { key: task.id, value: task.id }, `${new Date(task.started).toLocaleString()} · ${states[task.status] || task.status}`)))),
-      h('div', { className: 'dtd-totals', role: 'status' }, error || (mode === 'commits' && !commit ? '选择一个提交查看详情与文件 Diff' : value ? `${value.total} 个文件 · ${states[value.status] || value.status}` : '正在读取…'), !error && (mode !== 'commits' || commit) && counts(value)),
+      h('div', { className: 'dtd-totals', role: 'status' }, error || (mode === 'commits' && !commit ? '选择一个提交查看详情与文件 Diff' : value ? `${value.total} 个文件 · ${states[value.status] || value.status}` : '正在读取…')),
       h(Warnings, { value }),
       value && value.files.length > 0 && h(FileList, { value, selected: index, select: index => setChoices(value => ({ ...value, index })) }),
       value?.files[index] && h('div', { className: 'dtd-fullpath', title: value.files[index].path }, value.files[index].path),
-      mode === 'commits' && !commit ? null : original?.component && !error ? h('div', { className: 'dtd-native' }, h(NativeBoundary, null, h(original.component, {
+      value && value.files.length === 0 && !error && (mode !== 'commits' || commit) && h('p', { className: 'dtd-empty', role: 'status' }, emptyStates[mode]),
+      !value?.files.length || error ? null : original?.component ? h('div', { className: 'dtd-native' }, h(NativeBoundary, null, h(original.component, {
         ...props, sessionId, useTabInfo: () => ({ tab: nativeTab }),
         useStore: selector => selector({ byTab: { [tab.id]: choices } }), actions: nativeActions,
         useChangesSummary: selector => selector({ [summaryKey]: value || 'loading' }),
