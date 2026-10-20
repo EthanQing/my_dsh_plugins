@@ -1,0 +1,6 @@
+[
+  { "name": "dsh-markdown-editor", "directory": "dsh-markdown-editor", "title": "Markdown 辅助编辑与消息渲染" },
+  { "name": "dsh-message-edit-retry", "directory": "dsh-message-edit-retry", "title": "消息编辑、继续与重试" },
+  { "name": "dsh-session-delete-manager", "directory": "dsh-session-delete-manager", "title": "会话删除管理" },
+  { "name": "dsh-smart-session-title", "directory": "dsh-smart-session-title", "title": "智能会话标题" }
+]

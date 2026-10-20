@@ -1,0 +1,15 @@
+# Distribution only. The user chooses which existing plugins to activate.
+# Relative paths are resolved against this bundle patch, not the Desktop Profile.
+- insert:
+    - id: dsh-markdown-editor
+      name: ./dsh-markdown-editor/lib/index.js
+      disabled: true
+    - id: dsh-message-edit-retry
+      name: ./dsh-message-edit-retry/lib/index.js
+      disabled: true
+    - id: dsh-session-delete-manager
+      name: ./dsh-session-delete-manager/lib/index.js
+      disabled: true
+    - id: dsh-smart-session-title
+      name: ./dsh-smart-session-title/lib/index.js
+      disabled: true

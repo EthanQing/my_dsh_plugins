@@ -1,0 +1,64 @@
+{
+  "name": "my-dsh-plugins",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Prebuilt optional DSH plugins by EthanQing. All collection entries are disabled until selected by the user.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EthanQing/my_dsh_plugins.git"
+  },
+  "homepage": "https://github.com/EthanQing/my_dsh_plugins#readme",
+  "bugs": "https://github.com/EthanQing/my_dsh_plugins/issues",
+  "license": "MIT",
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "cordis.patch.yml",
+    "plugins.json",
+    "examples/",
+    "scripts/",
+    "dsh-markdown-editor/package.json",
+    "dsh-markdown-editor/lib/",
+    "dsh-markdown-editor/locale/",
+    "dsh-markdown-editor/icon.svg",
+    "dsh-markdown-editor/cordis.patch.yml",
+    "dsh-markdown-editor/docs/",
+    "dsh-markdown-editor/README.md",
+    "dsh-message-edit-retry/package.json",
+    "dsh-message-edit-retry/lib/",
+    "dsh-message-edit-retry/locale/",
+    "dsh-message-edit-retry/icon.svg",
+    "dsh-message-edit-retry/cordis.patch.yml",
+    "dsh-message-edit-retry/README.md",
+    "dsh-message-edit-retry/LICENSE",
+    "dsh-session-delete-manager/package.json",
+    "dsh-session-delete-manager/lib/",
+    "dsh-session-delete-manager/locale/",
+    "dsh-session-delete-manager/icon.svg",
+    "dsh-session-delete-manager/cordis.patch.yml",
+    "dsh-session-delete-manager/README.md",
+    "dsh-session-delete-manager/LICENSE",
+    "dsh-smart-session-title/package.json",
+    "dsh-smart-session-title/lib/",
+    "dsh-smart-session-title/locale/",
+    "dsh-smart-session-title/icon.svg",
+    "dsh-smart-session-title/cordis.patch.yml",
+    "dsh-smart-session-title/README.md",
+    "dsh-smart-session-title/LICENSE"
+  ],
+  "scripts": {
+    "check": "node scripts/check-package.mjs",
+    "pack:plugins": "node scripts/pack-plugins.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "engines": {
+    "node": ">=24",
+    "dsh": "0.2.1-rc.2"
+  }
+}

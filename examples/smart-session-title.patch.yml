@@ -1,0 +1,5 @@
+# The title service accepts one provider. Apply both changes together.
+- id: session-title-llm
+  disabled: true
+- id: dsh-smart-session-title
+  disabled: false

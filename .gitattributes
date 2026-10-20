@@ -1,0 +1,2 @@
+# esbuild's checked-in output must retain LF for the source/artifact check.
+dsh-markdown-editor/lib/client.js text eol=lf
