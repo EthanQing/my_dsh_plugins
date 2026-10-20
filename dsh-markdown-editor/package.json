@@ -1,0 +1,46 @@
+{
+  "name": "dsh-markdown-editor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Render user bubbles as Markdown, collapse long messages, color Markdown syntax inside the composer via the CSS Custom Highlight API, and shadow the stray 'preview' header button.",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "lib/",
+    "locale/",
+    "cordis.patch.yml",
+    "icon.svg",
+    "README.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-primitives",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-session"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Markdown Bubbles & Composer Tinting",
+    "description": "Render user bubbles as Markdown, collapse long messages, and tint Markdown syntax in place inside the composer with the CSS Custom Highlight API."
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Markdown 气泡与输入框着色",
+    "description": "把用户气泡按 Markdown 渲染、长消息自动折叠，并用 CSS Custom Highlight API 在输入框原位着色 Markdown 语法。"
+  }
+}
