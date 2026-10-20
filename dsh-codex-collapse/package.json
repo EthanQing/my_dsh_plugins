@@ -1,0 +1,33 @@
+{
+  "name": "dsh-codex-collapse",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "One compact execution disclosure per DSH turn, with live progress and native details retained.",
+  "main": "lib/index.js",
+  "exports": {
+    ".": { "default": "./lib/index.js" },
+    "./client": { "default": "./lib/client.js" },
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": ["lib/", "locale/", "icon.svg", "cordis.patch.yml", "README.md", "docs/", "LICENSE"],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs --check && node --check lib/client.js && node --check lib/index.js",
+    "test": "node --test test/*.test.js",
+    "pack:plugin": "node scripts/pack.mjs"
+  },
+  "devDependencies": { "esbuild": "0.25.12" },
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": ["@deepseek-ai/dsh-client-locale", "@deepseek-ai/dsh-client-ui-chat", "@deepseek-ai/dsh-client-ui-renderer"]
+    }
+  },
+  "engines": { "node": ">=24", "dsh": "0.2.1-rc.2" },
+  "license": "MIT"
+}

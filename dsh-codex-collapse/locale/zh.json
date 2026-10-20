@@ -1,0 +1,10 @@
+{
+  "meta": { "title": "Codex 风格执行折叠", "description": "每回合一个紧凑执行入口，实时显示进度，保留正文、原生详情和待处理交互。" },
+  "running": "正在执行", "completed": "已完成", "stopped": "已停止", "failed": "执行失败", "incomplete": "未完成", "waiting": "等待确认或输入",
+  "doing": { "thinking": "正在分析…", "read": "正在读取文件…", "edit": "正在修改文件…", "search": "正在搜索…", "command": "正在执行命令…", "build": "正在运行构建或检查…", "subagent": "子代理正在工作…", "question": "等待你的回答", "tool": "正在调用工具…" },
+  "count": { "read": "读取 {n} 个文件", "edit": "修改 {n} 个文件", "calls": "{n} 次工具操作", "errors": "{n} 项操作失败" },
+  "last": "上一步：{detail}",
+  "mode": { "required": "单层折叠需要将 DSH 工作详情切换为“全部展开”（适用于所有会话）。", "enable": "切换到全部展开", "failed": "未能切换详情模式，请在 DSH 设置中手动选择“全部展开”。" },
+  "attention": { "visible": "需要操作的原生工具项保持可见。" },
+  "failed.visible": "错误信息保留在原生消息中。"
+}

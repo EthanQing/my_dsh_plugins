@@ -1,0 +1,10 @@
+{
+  "meta": { "title": "Codex-style execution collapse", "description": "One compact execution disclosure per turn, with live progress, visible replies, native details and actionable requests." },
+  "running": "Working", "completed": "Completed", "stopped": "Stopped", "failed": "Failed", "incomplete": "Incomplete", "waiting": "Waiting for confirmation or input",
+  "doing": { "thinking": "Analyzing…", "read": "Reading files…", "edit": "Editing files…", "search": "Searching…", "command": "Running a command…", "build": "Running a build or check…", "subagent": "Subagent working…", "question": "Waiting for your answer", "tool": "Running a tool…" },
+  "count": { "read": "Read {n} files", "edit": "Changed {n} files", "calls": "{n} tool operations", "errors": "{n} failed operations" },
+  "last": "Last: {detail}",
+  "mode": { "required": "Single-level collapse requires native Verbose work details (applies to all sessions).", "enable": "Switch to Verbose", "failed": "Could not change work-details mode. Select Verbose in DSH settings." },
+  "attention": { "visible": "Native tool items requiring action remain visible." },
+  "failed.visible": "Error information remains in the native transcript."
+}
