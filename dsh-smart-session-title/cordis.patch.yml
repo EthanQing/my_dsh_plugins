@@ -1,0 +1,39 @@
+# The dsh-smart-session-title bundle patch.
+#
+# Applied after dsh-base (and the surface bundle), so it addresses the base
+# title rows by id:
+#   - `session-title` (the title service and its provider registry) STAYS as the
+#     bundle ships it; this plugin never disables the service that owns every
+#     title event.
+#   - `session-title-llm` (the built-in first-prompt provider) is disabled: the
+#     title service accepts exactly ONE provider, so the goal-aware provider
+#     below must be the only registration.
+#
+# A patch replaces the targeted row's whole `config`. The execution controls
+# below are this plugin's own policy and restate every key they own.
+
+- id: session-title-llm
+  disabled: true
+
+- insert:
+    - id: dsh-smart-session-title
+      name: dsh-smart-session-title
+      config:
+        # Throttling: one generation per Session at a time, at most one start
+        # per 30 s, a 2 s merge window, and two concurrent model calls overall.
+        minIntervalMs: 30000
+        mergeWindowMs: 2000
+        concurrency: 2
+        # A turn that never ends must not hold a generation slot forever.
+        turnTimeoutMs: 90000
+        # Without a substantive assistant reply the model is never called.
+        minAssistantChars: 40
+        # Batch preview bounds: sessions per preview and preview lifetime.
+        batchLimit: 20
+        previewTtlMs: 600000
+        # Shared title-LLM execution controls (input bytes, output ceiling,
+        # per-call deadline). No provider/model override: the route comes from
+        # each Session's logged request header.
+        maxInputBytes: 12288
+        maxOutputTokens: 4096
+        timeoutMs: 60000

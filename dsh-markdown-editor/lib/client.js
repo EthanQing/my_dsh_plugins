@@ -794,6 +794,888 @@ window.__ModuleLoader__.load({
     }
     //#endregion
 
+    //#region composer rich text
+    /*
+     * The composer's node set is fixed by the shell (`dsh-composer`:
+     * ReferenceChip, CommandChip, TextRef) and the loader exposes no `lexical`
+     * seed, so there is no way to register a heading/list/quote/code node. Rich
+     * text therefore has to be built out of two things that never change the
+     * document text:
+     *
+     *   1. `TextNode.setStyle(css)` — Lexical applies the CSS itself through
+     *      `createDOM`/`updateDOM`, and `getTextContent()` is untouched. Sending,
+     *      detect offsets, the clipboard projection, selection mapping and IME
+     *      all keep seeing the exact source string. This is the pivot of the
+     *      whole feature.
+     *   2. Capture-phase gestures (Enter, Tab, paste) that edit plain text: one
+     *      `editor.update` per gesture, so one undo step.
+     *
+     * Everything here depends on shell-private surface (`__lexicalEditor`, the
+     * EditorState's `_nodeMap`/`_selection`, `RangeSelection.insertParagraph`).
+     * That dependency was approved explicitly; every touch is capability-probed
+     * and degrades to the stock composer, never to a broken one.
+     *
+     * Deliberately NOT done: rewriting `getTextContent()`, replacing nodes or
+     * the editor, changing the DOM structure, `require('lexical')`, hiding list
+     * markers, renumbering sibling list items, or splitting non-focused blocks.
+     */
+    const FEATURE_FLAGS = {
+      lineStyles: true,
+      enterList: true,
+      tabIndent: true,
+      pasteMarkdown: true,
+    }
+
+    /** Approved behavior change: Tab inside a list item indents instead of leaving the field. */
+    const INDENT_UNIT = 2
+    /** Same burst budget as the highlighter: one style pass per typing burst. */
+    const STYLE_DELAY_MS = 40
+    /** Past this many source lines a Markdown paste goes to the stock handler. */
+    const MAX_PASTE_LINES = 2000
+    const MAX_STYLE_CACHE = 4000
+
+    const CODE_LINE_STYLE =
+      'font-family:var(--dsw-font-family-code,ui-monospace,monospace);background-color:var(--dsw-alias-bg-layer-2,rgba(128,128,128,.08))'
+    const QUOTE_LINE_STYLE = 'color:var(--dsw-alias-label-tertiary);font-weight:500'
+    /** `#` … `######`; levels 4-6 share the body size and only keep the weight. */
+    const HEADING_SCALE = ['1.35em', '1.22em', '1.12em', '1em', '1em', '1em']
+
+    /**
+     * Classify one source line.
+     *
+     * Pure and total: it runs over every block of the composer on each debounced
+     * pass, so it must never throw on odd input (chips, lone markers, tabs) and
+     * must not allocate per-character.
+     */
+    function classifyLine(line) {
+      if (typeof line !== 'string' || line.trim() === '') return { kind: 'blank' }
+
+      const fence = /^[ \t]*```([\w+-]*)[ \t]*$/.exec(line)
+      if (fence !== null) return { kind: 'fence', info: fence[1] }
+
+      // A heading owns the line only when `#` opens the line itself; indented
+      // `#` stays literal text, which is also what the block scanner above does.
+      const heading = /^(#{1,6})[ \t]+/.exec(line)
+      if (heading !== null) return { kind: 'heading', level: heading[1].length }
+
+      if (/^[ \t]*>[ \t]?/.test(line) === true) return { kind: 'quote' }
+
+      const list = /^([ \t]*)([-*+]|\d{1,9}[.)])([ \t]+)/.exec(line)
+      if (list !== null) {
+        const indent = list[1]
+        const marker = list[2]
+        const spacer = list[3]
+        const ordered = /^\d/.test(marker) === true
+        const bodyStart = indent.length + marker.length + spacer.length
+        return {
+          kind: 'list',
+          indent,
+          marker,
+          spacer,
+          ordered,
+          number: ordered === true ? Number.parseInt(marker, 10) : 0,
+          delimiter: ordered === true ? marker.slice(-1) : '',
+          markerEnd: indent.length + marker.length,
+          bodyStart,
+          body: line.slice(bodyStart),
+        }
+      }
+
+      return { kind: 'text' }
+    }
+
+    /**
+     * Classify a whole block (a block's text may contain line breaks) and thread
+     * the fenced-code state forward. The fence is the only block syntax with
+     * memory, so document order is the input contract.
+     */
+    function classifyLines(text, inFence) {
+      const items = []
+      let fenced = inFence === true
+      for (const line of String(text).split('\n')) {
+        if (fenced === true) {
+          const item = classifyLine(line)
+          if (item.kind === 'fence') {
+            items.push(item)
+            fenced = false
+          } else {
+            items.push({ kind: 'code' })
+          }
+          continue
+        }
+        const item = classifyLine(line)
+        if (item.kind === 'fence') fenced = true
+        items.push(item)
+      }
+      return { items, inFence: fenced }
+    }
+
+    /** The CSS a line kind contributes to the text nodes of its block. */
+    function lineStyleForItem(item) {
+      if (item === null || item === undefined) return ''
+      if (item.kind === 'heading') {
+        const scale = HEADING_SCALE[item.level - 1]
+        return `font-size:${scale === undefined ? '1em' : scale};font-weight:600`
+      }
+      if (item.kind === 'quote') return QUOTE_LINE_STYLE
+      if (item.kind === 'code' || item.kind === 'fence') return CODE_LINE_STYLE
+      // List lines get no style on purpose: the marker "fading" belongs to the
+      // highlight painter, and writing the same property twice would fight it.
+      return ''
+    }
+
+    /** Memoized classifier: a typing burst re-reads the same blocks repeatedly. */
+    function createLineStyleState() {
+      return { fingerprint: null, cache: new Map(), writing: false }
+    }
+
+    /**
+     * Per-block style in document order, decided by each block's first line.
+     * A block is a paragraph today, so its first line is the line the caret is
+     * on for every block the user can see. The fence state threads through
+     * blocks, so the cache key carries it.
+     */
+    function planBlockStyles(blockTexts, state) {
+      const cache = state.cache
+      const styles = []
+      let inFence = false
+      for (const text of blockTexts) {
+        const key = `${inFence === true ? 'C' : 'N'}:${text}`
+        let entry = cache.get(key)
+        if (entry === undefined) {
+          const classified = classifyLines(text, inFence)
+          entry = { style: lineStyleForItem(classified.items[0]), fence: classified.inFence }
+          if (cache.size > MAX_STYLE_CACHE) cache.clear()
+          cache.set(key, entry)
+        }
+        inFence = entry.fence
+        styles.push(entry.style)
+      }
+      return styles
+    }
+
+    /**
+     * Live editor state.
+     *
+     * Inside `editor.update()` the pending state is the live one; outside it the
+     * committed state is. Both the gesture plans and the style pass read nodes
+     * through this, so a plan never resolves nodes against a stale state.
+     */
+    function activeState(editor) {
+      if (editor === null || editor === undefined) return null
+      const pending = editor._pendingEditorState
+      if (pending !== undefined && pending !== null) return pending
+      if (typeof editor.getEditorState !== 'function') return null
+      const committed = editor.getEditorState()
+      return committed === undefined ? null : committed
+    }
+
+    /**
+     * The live range selection, or null.
+     *
+     * Read as a field, not through `$getSelection()`: the loader hands plugins no
+     * lexical binding, and the approved fallback is this private field with a
+     * shape check at every use site.
+     */
+    function selectionOf(state) {
+      if (state === null || state === undefined) return null
+      const selection = state._selection
+      if (selection === undefined || selection === null) return null
+      if (typeof selection.isCollapsed !== 'function') return null
+      return selection
+    }
+
+    /** Root node of a state, or null when the private node map changed shape. */
+    function rootOf(state) {
+      if (state === null || state === undefined) return null
+      const map = state._nodeMap
+      if (map === undefined || map === null || typeof map.get !== 'function') return null
+      const root = map.get('root')
+      if (root === null || root === undefined || typeof root.getChildren !== 'function') return null
+      return root
+    }
+
+    /** Run `fn` with the state's node context active (node accessors need it). */
+    function readState(state, fn) {
+      if (typeof state.read !== 'function') return null
+      return state.read(() => fn(state))
+    }
+
+    /** Block texts in document order, or null when the editor cannot answer. */
+    function readBlockTexts(editor) {
+      const state = activeState(editor)
+      if (state === null) return null
+      try {
+        return readState(state, () => {
+          const root = rootOf(state)
+          if (root === null) return null
+          const blocks = root.getChildren()
+          if (Array.isArray(blocks) === false) return null
+          return blocks.map((block) => (typeof block.getTextContent === 'function' ? block.getTextContent() : ''))
+        })
+      } catch (error) {
+        console.warn(`[${NS}] unable to read composer blocks:`, error)
+        return null
+      }
+    }
+
+    /**
+     * Is an IME composition in flight?
+     *
+     * Two independent signals, because neither is reliable alone: the shell's
+     * `data-composer-composing` attribute (which additionally survives the
+     * Safari "compositionend before keydown" ordering) and the editor's own
+     * `isComposing()` (Lexical tracks the composition key). Either one means
+     * "leave the current DOM alone".
+     */
+    function isComposing(editor, rootElement) {
+      if (rootElement !== null && rootElement !== undefined && typeof rootElement.hasAttribute === 'function') {
+        if (rootElement.hasAttribute('data-composer-composing') === true) return true
+      }
+      if (editor !== null && editor !== undefined && typeof editor.isComposing === 'function') {
+        try {
+          if (editor.isComposing() === true) return true
+        } catch (error) {
+          // A private-shape change must not stop styling forever.
+          console.warn(`[${NS}] unable to read composer composition state:`, error)
+        }
+      }
+      return false
+    }
+
+    /**
+     * Apply line styles: one update, only when the document fingerprint changed.
+     *
+     * `history-merge` keeps a styling pass out of the undo history — a heading
+     * that appears while typing must not become its own undo step.
+     */
+    function applyLineStyles(editor, state, rootElement) {
+      if (editor === null || editor === undefined) return
+      if (FEATURE_FLAGS.lineStyles !== true) return
+      // Re-entrancy lock: the update notifies listeners, and a synchronous
+      // listener could otherwise start a second pass inside the first.
+      if (state.writing === true) return
+      // An IME preedit must not be repainted, exactly as in the highlighter: the
+      // update would rewrite styles under the candidate window and fight it. The
+      // fingerprint is not consumed, so the next listener tick (after
+      // compositionend, which is itself an update) does the work instead.
+      if (isComposing(editor, rootElement) === true) return
+      state.writing = true
+      try {
+        const blockTexts = readBlockTexts(editor)
+        if (blockTexts === null) return
+        const fingerprint = blockTexts.join('\u0000')
+        if (fingerprint === state.fingerprint) return
+        const styles = planBlockStyles(blockTexts, state)
+        editor.update(() => {
+          const live = activeState(editor)
+          if (live === null) return
+          const root = rootOf(live)
+          if (root === null) return
+          const blocks = root.getChildren()
+          if (Array.isArray(blocks) === false) return
+          for (let index = 0; index < blocks.length; index += 1) {
+            const style = styles[index]
+            if (style === undefined) continue
+            for (const node of collectLeafNodes(blocks[index])) {
+              if (typeof node.isSimpleText !== 'function' || node.isSimpleText() !== true) continue
+              // A `/skill` or `@file` token paints its own chrome from its class;
+              // restyling it would fight that class, so entities stay untouched.
+              if (typeof node.isTextEntity === 'function' && node.isTextEntity() === true) continue
+              if (typeof node.getStyle !== 'function' || node.getStyle() === style) continue
+              // The only write this region makes to a node: `__style` feeds
+              // Lexical's own DOM write and leaves the text untouched.
+              node.setStyle(style)
+            }
+          }
+        }, { tag: 'history-merge' })
+        // Committed only after the update returned: a failed pass keeps the old
+        // fingerprint, so the next listener tick retries it.
+        state.fingerprint = fingerprint
+      } catch (error) {
+        console.warn(`[${NS}] line styling failed; composer keeps the stock look:`, error)
+      } finally {
+        state.writing = false
+      }
+    }
+
+    /** Leaf nodes of a block in document order (text, line breaks, chips). */
+    function collectLeafNodes(block) {
+      const leaves = []
+      const visit = (node) => {
+        if (node === null || node === undefined) return
+        if (typeof node.getChildren === 'function') {
+          const children = node.getChildren()
+          if (Array.isArray(children) === true && children.length > 0) {
+            for (const child of children) visit(child)
+            return
+          }
+        }
+        leaves.push(node)
+      }
+      visit(block)
+      return leaves
+    }
+
+    /** Nearest ancestor that is a child of the document root. */
+    function topLevelBlockOf(node) {
+      let current = node
+      let guard = 0
+      while (current !== null && current !== undefined && guard < 100) {
+        if (typeof current.getParent !== 'function') return null
+        const parent = current.getParent()
+        if (parent === null || parent === undefined) return current
+        if (typeof parent.getType === 'function' && parent.getType() === 'root') return current
+        current = parent
+        guard += 1
+      }
+      return null
+    }
+
+    /** Character offset of `node` inside `block`, or -1 when it is not a descendant. */
+    function offsetOfNode(block, node) {
+      const key = typeof node.getKey === 'function' ? node.getKey() : null
+      let offset = 0
+      let found = false
+      const visit = (current) => {
+        if (found === true || current === null || current === undefined) return
+        if (typeof current.getChildren === 'function') {
+          const children = current.getChildren()
+          if (Array.isArray(children) === true) {
+            for (const child of children) {
+              if (found === true) return
+              visit(child)
+            }
+            return
+          }
+        }
+        if (key !== null && typeof current.getKey === 'function' && current.getKey() === key) {
+          found = true
+          return
+        }
+        if (typeof current.getTextContent === 'function') offset += current.getTextContent().length
+      }
+      visit(block)
+      return found === true ? offset : -1
+    }
+
+    /**
+     * Caret facts for the gesture handlers, or null when the gesture must fall
+     * through. Only a collapsed caret on a block's first line is actionable:
+     * anything else (a selection, a chip caret, a caret on a later line) belongs
+     * to the official behavior.
+     */
+    function readCaret(editor) {
+      const state = activeState(editor)
+      if (state === null) return null
+      const selection = selectionOf(state)
+      if (selection === null) return null
+      try {
+        if (selection.isCollapsed() !== true) return null
+        return readState(state, () => {
+          const anchor = selection.anchor
+          if (anchor === null || anchor === undefined || anchor.type !== 'text') return null
+          if (typeof anchor.getNode !== 'function') return null
+          const node = anchor.getNode()
+          if (node === null || node === undefined || typeof node.getTextContent !== 'function') return null
+          const block = topLevelBlockOf(node)
+          if (block === null || typeof block.getTextContent !== 'function') return null
+          const text = block.getTextContent()
+          const headOffset = offsetOfNode(block, node)
+          if (headOffset < 0) return null
+          const offset = headOffset + anchor.offset
+          const lineBreak = text.indexOf('\n')
+          const firstLine = lineBreak === -1 ? text : text.slice(0, lineBreak)
+          if (offset < 0 || offset > firstLine.length) return null
+          return {
+            selection,
+            block,
+            text,
+            firstLine,
+            offset,
+            item: classifyLine(firstLine),
+          }
+        })
+      } catch (error) {
+        console.warn(`[${NS}] unable to read the composer caret:`, error)
+        return null
+      }
+    }
+
+    /**
+     * The follow-up of a list item, or null when the caret is not on one.
+     * `exit` means "the item has no body": consume Enter and drop the marker.
+     */
+    function continuationOf(item) {
+      if (item === null || item === undefined || item.kind !== 'list') return null
+      if (item.body.trim() === '') return { mode: 'exit', removeEnd: item.markerEnd }
+      // Ordered items increment; bullets and their delimiter/spacing are copied
+      // verbatim, indentation included, so nested items keep their depth.
+      const marker = item.ordered === true ? `${item.number + 1}${item.delimiter}` : item.marker
+      return { mode: 'next', text: `${item.indent}${marker} ` }
+    }
+
+    /**
+     * Reasons Enter must keep its official meaning. Any one of them is a hard
+     * veto: IME, an open trigger menu, a disabled composer, or a modifier that
+     * the shell already maps (Ctrl/Cmd+Enter accelerated submit, Shift+Enter soft
+     * line break).
+     */
+    function enterMustPass(event, root) {
+      if (event.isComposing === true || event.keyCode === 229) return true
+      if (root !== null && root !== undefined && typeof root.hasAttribute === 'function') {
+        if (root.hasAttribute('data-composer-composing') === true) return true
+        if (root.getAttribute('aria-disabled') === 'true') return true
+      }
+      if (event.ctrlKey === true || event.metaKey === true || event.altKey === true || event.shiftKey === true) return true
+      return composerMenuOpen(root)
+    }
+
+    /**
+     * Is a composer popup open right now?
+     *
+     * The two probes below are the only dynamic ones available to a plugin:
+     *
+     * - `[data-trigger-menu]` is the mention/slash candidate menu. Its view
+     *   returns `null` while closed (`ui-input-trigger` MenuView: `if (!state.open)
+     *   return null`), so presence in the DOM *does* mean "open".
+     * - `[role="listbox"]` inside the editable host is the same menu's viewport.
+     *
+     * Deliberately NOT used: `[data-composer-overlay]`. That node is a *permanent
+     * anchor*, not a state flag — ui-conversation renders it whenever
+     * `sessionId !== undefined` (a session-scoped prop that is always present in
+     * a real conversation), and the popups inside it are the ones that come and
+     * go. Probing the anchor would report "a menu is open" forever and veto every
+     * Enter/Tab gesture.
+     */
+    function composerMenuOpen(root) {
+      const owner = root !== null && root !== undefined && root.ownerDocument !== null && root.ownerDocument !== undefined
+        ? root.ownerDocument
+        : typeof document === 'undefined'
+          ? null
+          : document
+      if (owner !== null && owner !== undefined && typeof owner.querySelector === 'function') {
+        // The candidate menu mounts into the overlay anchor, outside the
+        // editable host, so it is searched document-wide.
+        if (owner.querySelector('[data-trigger-menu]') !== null) return true
+      }
+      if (root !== null && root !== undefined && typeof root.querySelector === 'function') {
+        if (root.querySelector('[role="listbox"]') !== null) return true
+      }
+      return false
+    }
+
+    /**
+     * Would the stock handler paste this text as plain text? Deliberately a
+     * *pre-parse*: any Markdown shape (heading/list/quote/fence/inline) opts in,
+     * prose stays with the official path.
+     */
+    function isMarkdownLike(text) {
+      if (typeof text !== 'string' || text === '') return false
+      if (/^[ \t]*#{1,6}[ \t]/m.test(text) === true) return true
+      if (/^[ \t]*>[ \t]?/m.test(text) === true) return true
+      if (/^[ \t]*[-*+][ \t]/m.test(text) === true) return true
+      if (/^[ \t]*\d{1,9}[.)][ \t]/m.test(text) === true) return true
+      if (/^[ \t]*```/m.test(text) === true) return true
+      if (/`[^`\n]{1,1000}`/m.test(text) === true) return true
+      if (/\*\*[^\n]{1,800}?\*\*/m.test(text) === true) return true
+      if (/~~[^\n]{1,800}?~~/m.test(text) === true) return true
+      if (/\[[^\]\n]{0,500}\]\([^()\s]{1,2000}\)/m.test(text) === true) return true
+      return false
+    }
+
+    /**
+     * Delete the list marker at the head of the caret's block by widening the
+     * collapsed selection over it and letting Lexical delete the range — the
+     * same path a manual selection delete takes, so undo stays one step.
+     */
+    function removeListMarker(selection, end) {
+      if (selection === null || selection === undefined) return false
+      const anchor = selection.anchor
+      if (anchor === null || anchor === undefined || anchor.type !== 'text') return false
+      if (typeof anchor.getNode !== 'function') return false
+      const block = topLevelBlockOf(anchor.getNode())
+      if (block === null) return false
+      const leaves = collectLeafNodes(block).filter(
+        (node) => typeof node.isSimpleText === 'function' && node.isSimpleText() === true,
+      )
+      if (leaves.length === 0) return false
+      let remaining = end
+      let to = null
+      for (const node of leaves) {
+        const length = node.getTextContent().length
+        if (remaining <= length) {
+          to = { node, offset: remaining }
+          break
+        }
+        remaining -= length
+      }
+      if (to === null) return false
+      if (typeof selection.anchor.set !== 'function' || typeof selection.focus.set !== 'function') return false
+      selection.anchor.set(leaves[0].getKey(), 0, 'text')
+      selection.focus.set(to.node.getKey(), to.offset, 'text')
+      if (selection.isCollapsed() === true) return false
+      selection.removeText()
+      return true
+    }
+
+    /** Shift+Tab: remove up to `unit` spaces immediately before the caret. */
+    function unindentBeforeCaret(selection, unit) {
+      if (selection === null || selection === undefined) return false
+      const anchor = selection.anchor
+      if (anchor === null || anchor === undefined || anchor.type !== 'text') return false
+      if (typeof anchor.getNode !== 'function') return false
+      const node = anchor.getNode()
+      if (node === null || node === undefined) return false
+      if (typeof node.spliceText !== 'function' || typeof node.getTextContent !== 'function') return false
+      const text = node.getTextContent()
+      const offset = anchor.offset
+      let count = 0
+      while (count < unit && offset - count > 0 && text[offset - count - 1] === ' ') count += 1
+      if (count === 0) return false
+      const from = offset - count
+      node.spliceText(from, count, '')
+      anchor.set(node.getKey(), from, 'text')
+      selection.focus.set(node.getKey(), from, 'text')
+      return true
+    }
+
+    /**
+     * Own the composer's rich-text behavior for the lifetime of one editor.
+     *
+     * The root element (not the editor) is where the shell attaches its own
+     * Lexical listeners, and those are bubble-phase. Binding the gestures in the
+     * capture phase means a handled gesture can stop the official command from
+     * dispatching at all — no double Enter, no double send.
+     */
+    function createRichTextComposer() {
+      let editor = null
+      let rootElement = null
+      let timer = 0
+      let disposed = false
+      let announced = false
+      let warned = false
+      let retrying = false
+      const editorDisposers = []
+      const rootDisposers = []
+      const lineStyleState = createLineStyleState()
+
+      const listen = (target, type, handler, options) => {
+        target.addEventListener(type, handler, options)
+        rootDisposers.push(() => target.removeEventListener(type, handler, options))
+      }
+
+      function warnDisabled(reason) {
+        if (warned === true) return
+        warned = true
+        console.warn(`[${NS}] rich text disabled: ${reason}`)
+      }
+
+      function detachRoot() {
+        for (const off of rootDisposers.splice(0)) {
+          try {
+            off()
+          } catch (error) {
+            console.warn(`[${NS}] composer root listener cleanup failed:`, error)
+          }
+        }
+        rootElement = null
+      }
+
+      function bindRoot(root) {
+        detachRoot()
+        if (root === null || root === undefined) return false
+        if (typeof root.addEventListener !== 'function') return false
+        rootElement = root
+        listen(root, 'keydown', onKeyDown, { capture: true })
+        listen(root, 'paste', onPaste, { capture: true })
+        // A new root means a new document: force one full style pass.
+        lineStyleState.fingerprint = null
+        schedule()
+        return true
+      }
+
+      function schedule() {
+        if (disposed === true || editor === null || timer !== 0) return
+        timer = window.setTimeout(() => {
+          timer = 0
+          if (disposed === true || editor === null) return
+          applyLineStyles(editor, lineStyleState, rootElement)
+        }, STYLE_DELAY_MS)
+      }
+
+      function isEditable() {
+        if (editor === null) return false
+        if (typeof editor.isEditable === 'function' && editor.isEditable() !== true) return false
+        if (rootElement !== null && typeof rootElement.getAttribute === 'function') {
+          if (rootElement.getAttribute('aria-disabled') === 'true') return false
+        }
+        return true
+      }
+
+      function onKeyDown(event) {
+        if (disposed === true || editor === null || rootElement === null) return
+        if (event.key === 'Enter') {
+          handleEnter(event)
+          return
+        }
+        if (event.key === 'Tab') handleTab(event)
+      }
+
+      function handleEnter(event) {
+        if (FEATURE_FLAGS.enterList !== true) return
+        // Every veto is a hard pass: the official Enter path must keep working
+        // for IME, menus, disabled composers and modified keys.
+        if (enterMustPass(event, rootElement) === true) return
+        if (isEditable() === false) return
+        const facts = readCaret(editor)
+        if (facts === null) return
+        const next = continuationOf(facts.item)
+        if (next === null) return
+        let applied = false
+        try {
+          // One update per gesture: Lexical records exactly one undo step.
+          editor.update(() => {
+            const live = activeState(editor)
+            const selection = selectionOf(live)
+            if (selection === null || selection.isCollapsed() !== true) return
+            if (next.mode === 'next') {
+              if (typeof selection.insertParagraph !== 'function') return
+              const paragraph = selection.insertParagraph()
+              if (paragraph === null || paragraph === undefined) return
+              selection.insertText(next.text)
+              applied = true
+              return
+            }
+            applied = removeListMarker(selection, next.removeEnd)
+          }, { tag: 'history-push', discrete: true })
+        } catch (error) {
+          // Never let a private-API failure reach the user: the event is left
+          // unclaimed, so the official Enter handler still runs.
+          console.warn(`[${NS}] list continuation failed; Enter keeps its official behavior:`, error)
+          return
+        }
+        if (applied !== true) return
+        event.preventDefault()
+        event.stopPropagation()
+      }
+
+      function handleTab(event) {
+        if (FEATURE_FLAGS.tabIndent !== true) return
+        if (event.isComposing === true || event.keyCode === 229) return
+        if (event.ctrlKey === true || event.metaKey === true || event.altKey === true) return
+        if (isEditable() === false) return
+        // A trigger menu owns Tab for keyboard navigation while it is open.
+        if (composerMenuOpen(rootElement) === true) return
+        const facts = readCaret(editor)
+        if (facts === null || facts.item.kind !== 'list') return
+        // Shift+Tab is a whitespace *removal*: it is only well defined while the
+        // caret still sits in the line's leading whitespace run, so a caret after
+        // visible text keeps the official behavior (focus stays reachable).
+        if (event.shiftKey === true && facts.firstLine.slice(0, facts.offset).trim() !== '') return
+        let applied = false
+        try {
+          editor.update(() => {
+            const live = activeState(editor)
+            const selection = selectionOf(live)
+            if (selection === null || selection.isCollapsed() !== true) return
+            if (event.shiftKey === true) {
+              applied = unindentBeforeCaret(selection, INDENT_UNIT)
+              return
+            }
+            selection.insertText(' '.repeat(INDENT_UNIT))
+            applied = true
+          }, { tag: 'history-push', discrete: true })
+        } catch (error) {
+          console.warn(`[${NS}] list indentation failed; Tab keeps its official behavior:`, error)
+          return
+        }
+        if (applied !== true) return
+        event.preventDefault()
+        event.stopPropagation()
+      }
+
+      function onPaste(event) {
+        if (FEATURE_FLAGS.pasteMarkdown !== true) return
+        if (disposed === true || editor === null || rootElement === null) return
+        // Another handler (or a host layer) already claimed this paste: touching
+        // it again would insert the text twice.
+        if (event.defaultPrevented === true) return
+        if (isEditable() === false) return
+        const clipboard = event.clipboardData
+        if (clipboard === null || clipboard === undefined || typeof clipboard.getData !== 'function') return
+        // Files mean attachments: that route belongs to the shell, unconditionally.
+        const files = clipboard.files
+        if (files !== null && files !== undefined && typeof files.length === 'number' && files.length > 0) return
+        let text = ''
+        try {
+          text = clipboard.getData('text/plain')
+        } catch (error) {
+          return
+        }
+        if (typeof text !== 'string' || text === '') return
+        // Only line endings are normalized; every other character must survive.
+        const normalized = text.replace(/\r\n?/g, '\n')
+        if (isMarkdownLike(normalized) !== true) return
+        const lines = normalized.split('\n')
+        // A pathological paste (a 10k-line file) is left to the stock handler:
+        // one block per line would be a lot of work for no formatting gain.
+        if (lines.length > MAX_PASTE_LINES) return
+        let applied = false
+        try {
+          // One update, tagged `paste`: the whole insertion is one undo step.
+          // Any failure mid-way throws, which makes Lexical roll the whole
+          // update back — the text is never half-written.
+          editor.update(() => {
+            const live = activeState(editor)
+            if (live === null) throw new Error('composer state unavailable')
+            let selection = selectionOf(live)
+            if (selection === null) throw new Error('composer selection unavailable')
+            if (selection.isCollapsed() !== true) {
+              selection.removeText()
+              selection = selectionOf(activeState(editor))
+              if (selection === null) throw new Error('composer selection lost')
+            }
+            // One paragraph per source line: the block gap is exactly one
+            // newline in the composer projection, so the pasted text is
+            // reproduced character for character without newlines inside a text
+            // node. An empty source line becomes an empty block (a blank line).
+            for (let index = 0; index < lines.length; index += 1) {
+              if (index > 0) {
+                if (typeof selection.insertParagraph !== 'function') throw new Error('insertParagraph unavailable')
+                const paragraph = selection.insertParagraph()
+                if (paragraph === null || paragraph === undefined) throw new Error('paragraph not created')
+              }
+              if (lines[index] !== '') selection.insertText(lines[index])
+            }
+            applied = true
+          }, { tag: 'paste', discrete: true })
+        } catch (error) {
+          // Lexical rolls a failed update back, so the text is still unclaimed:
+          // falling through to the official paste handler loses nothing.
+          console.warn(`[${NS}] markdown paste failed; falling back to the plain paste path:`, error)
+          return
+        }
+        if (applied !== true) return
+        event.preventDefault()
+        event.stopPropagation()
+      }
+
+      /** Bind the composer editor once; report why when the private hook is missing. */
+      function attach() {
+        if (editor !== null || disposed === true) return 'bound'
+        const candidate = findComposerRoot()
+        if (candidate === null) return 'absent'
+        const instance = candidate.__lexicalEditor
+        if (instance === undefined || instance === null || typeof instance.registerRootListener !== 'function') {
+          return 'unsupported'
+        }
+        try {
+          editorDisposers.push(instance.registerRootListener((root, prevRoot) => {
+            if (prevRoot !== null && prevRoot !== root) detachRoot()
+            bindRoot(root)
+          }))
+          editorDisposers.push(instance.registerUpdateListener(() => schedule()))
+        } catch (error) {
+          editor = null
+          for (const off of editorDisposers.splice(0)) {
+            try {
+              off()
+            } catch (cleanupError) {
+              console.warn(`[${NS}] composer listener cleanup failed:`, cleanupError)
+            }
+          }
+          console.warn(`[${NS}] rich text disabled: composer editor refused the listeners:`, error)
+          return 'unsupported'
+        }
+        editor = instance
+        // `registerRootListener` fires synchronously *before* the assignment
+        // above, so the root bind inside it could not schedule the first pass.
+        schedule()
+        if (announced === false) {
+          announced = true
+          console.info(`[${NS}] rich text enabled`)
+        }
+        return 'bound'
+      }
+
+      function onFocusIn() {
+        if (disposed === true) return
+        if (editor === null) {
+          const result = attach()
+          if (result === 'unsupported') warnDisabled('composer root is not a Lexical editor')
+          // Bound now: the retry listener has done its job.
+          if (result === 'bound') stopRetry()
+          return
+        }
+        // A session switch detaches and re-attaches the same editor's root; the
+        // listeners must follow it without waiting for a root-listener callback.
+        if (rootElement === null && typeof editor.getRootElement === 'function') {
+          const current = editor.getRootElement()
+          if (current !== null && current !== undefined) bindRoot(current)
+        }
+        schedule()
+      }
+
+      function start() {
+        if (disposed === true) return
+        const result = attach()
+        if (result === 'unsupported') {
+          warnDisabled('composer root is not a Lexical editor')
+          return
+        }
+        if (result === 'absent') {
+          // The composer mounts after the plugin in hero/embedded views: retry on
+          // focus instead of polling.
+          if (typeof document === 'undefined') return
+          document.addEventListener('focusin', onFocusIn, true)
+          retrying = true
+        }
+      }
+
+      function stopRetry() {
+        if (retrying !== true || typeof document === 'undefined') return
+        document.removeEventListener('focusin', onFocusIn, true)
+        retrying = false
+      }
+
+      function dispose() {
+        disposed = true
+        if (timer !== 0) {
+          window.clearTimeout(timer)
+          timer = 0
+        }
+        detachRoot()
+        stopRetry()
+        for (const off of editorDisposers.splice(0)) {
+          try {
+            off()
+          } catch (error) {
+            console.warn(`[${NS}] composer listener cleanup failed:`, error)
+          }
+        }
+        editor = null
+        lineStyleState.fingerprint = null
+        lineStyleState.cache.clear()
+      }
+
+      return { start, dispose }
+    }
+
+    /** The composer's contenteditable host, using the same selectors as the highlighter. */
+    function findComposerRoot() {
+      if (typeof document === 'undefined') return null
+      const direct = document.querySelector('[data-composer-input][contenteditable="true"]')
+      if (direct !== null) return direct
+      const scoped = document.querySelector('[data-conversation-content] [contenteditable="true"]')
+      if (scoped !== null) return scoped
+      for (const candidate of document.querySelectorAll('[contenteditable="true"]')) {
+        if (candidate.__lexicalEditor !== undefined && candidate.__lexicalEditor !== null) return candidate
+      }
+      return null
+    }
+    //#endregion
+
     //#region plugin
     function apply(ctx) {
       primitivesRef = loadPrimitives(require)
@@ -862,6 +1744,22 @@ window.__ModuleLoader__.load({
         highlighter.start()
         return () => highlighter.dispose()
       }, `${NS}: composer markdown highlight`)
+
+      /*
+       * Rich text is a second, independent effect: the highlighter only paints,
+       * while this one writes node styles and owns three gestures. Keeping them
+       * apart means a failure here can never take the syntax coloring with it
+       * (and vice versa) — both degrade to the stock composer on their own.
+       */
+      ctx.effect(() => {
+        const richText = createRichTextComposer()
+        try {
+          richText.start()
+        } catch (error) {
+          console.warn(`[${NS}] rich text disabled: composer setup failed:`, error)
+        }
+        return () => richText.dispose()
+      }, `${NS}: composer rich text`)
     }
 
     return {

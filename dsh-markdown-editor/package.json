@@ -1,9 +1,9 @@
 {
   "name": "dsh-markdown-editor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Render user bubbles as Markdown, collapse long messages, color Markdown syntax inside the composer via the CSS Custom Highlight API, and shadow the stray 'preview' header button.",
+  "description": "Render user bubbles as Markdown, collapse long messages, color Markdown syntax inside the composer via the CSS Custom Highlight API, add composer line styles plus Enter list continuation, Tab list indent and Markdown paste, and shadow the stray 'preview' header button.",
   "main": "lib/index.js",
   "exports": {
     ".": {
