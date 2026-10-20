@@ -1,6 +1,6 @@
 {
   "name": "my-dsh-plugins",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "description": "Prebuilt optional DSH plugins by EthanQing. All collection entries are disabled until selected by the user.",
@@ -46,7 +46,15 @@
     "dsh-smart-session-title/icon.svg",
     "dsh-smart-session-title/cordis.patch.yml",
     "dsh-smart-session-title/README.md",
-    "dsh-smart-session-title/LICENSE"
+    "dsh-smart-session-title/LICENSE",
+    "dsh-codex-collapse/package.json",
+    "dsh-codex-collapse/lib/",
+    "dsh-codex-collapse/locale/",
+    "dsh-codex-collapse/icon.svg",
+    "dsh-codex-collapse/cordis.patch.yml",
+    "dsh-codex-collapse/docs/",
+    "dsh-codex-collapse/README.md",
+    "dsh-codex-collapse/LICENSE"
   ],
   "scripts": {
     "check": "node scripts/check-package.mjs",

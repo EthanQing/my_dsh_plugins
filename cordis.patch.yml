@@ -13,3 +13,6 @@
     - id: dsh-smart-session-title
       name: ./dsh-smart-session-title/lib/index.js
       disabled: true
+    - id: dsh-codex-collapse
+      name: ./dsh-codex-collapse/lib/index.js
+      disabled: true

@@ -25,6 +25,11 @@ export async function checkPackage() {
   assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
   assert.equal(manifest.engines.dsh, '0.2.1-rc.2')
   assert.equal(new Set(plugins.map(p => p.name)).size, plugins.length)
+  for (const entry of await readdir(root, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith('dsh-')) continue
+    const pkg = await readJson(`${entry.name}/package.json`)
+    if (pkg.dsh?.bundle) assert.ok(plugins.some(p => p.directory === entry.name), `${entry.name}: plugin missing from GitHub installation catalog`)
+  }
   for (const script of ['prepare', 'preinstall', 'install', 'postinstall', 'prepack']) {
     assert.equal(manifest.scripts?.[script], undefined, `${script} must not run during GitHub installation`)
   }

@@ -1,0 +1,5 @@
+# Disable the competing folding plugin before enabling this one.
+- id: dsh-auto-collapse
+  disabled: true
+- id: dsh-codex-collapse
+  disabled: false

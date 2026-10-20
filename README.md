@@ -10,6 +10,7 @@ EthanQing 的 DSH 插件仓库。现有插件独立维护，仓库根目录提�
 | [dsh-message-edit-retry](dsh-message-edit-retry/README.md) | 编辑消息、继续、重试 | 编辑/重试通过 fork 新会话发送 |
 | [dsh-session-delete-manager](dsh-session-delete-manager/README.md) | 会话与项目范围删除 | 删除行为详见插件说明 |
 | [dsh-smart-session-title](dsh-smart-session-title/README.md) | 智能会话标题 | 启用时需替换官方标题 LLM provider |
+| [dsh-codex-collapse](dsh-codex-collapse/README.md) | Codex 风格执行过程折叠 | 需停用 dsh-auto-collapse，并选择原生“全部展开” |
 
 ## 从 GitHub 安装合集
 
@@ -21,7 +22,7 @@ EthanQing 的 DSH 插件仓库。现有插件独立维护，仓库根目录提�
 
 `main` 会随仓库变化。需要固定版本时，将 `#main` 换成你已发布的 tag 或完整 commit SHA。其他机器请使用自身 Desktop 的 `resources/runtime/cli/bin/dsh.cmd` 路径；已经注册 Desktop CLI 的机器可使用 `dsh` 命令。
 
-合集的包名是 **my-dsh-plugins**，提供四个已有插件的代码，**默认全部关闭**，也不禁用官方标题功能。根 bundle 使用包内相对路径加载各插件，保留它们原有的 manifest、Host 入口与浏览器模块 ID；不需要把四个目录复制到 Profile，也不创建第五个功能插件。
+合集的包名是 **my-dsh-plugins**，提供五个插件的代码，**默认全部关闭**，也不禁用官方标题功能。根 bundle 使用包内相对路径加载各插件，保留它们原有的 manifest、Host 入口与浏览器模块 ID；不需要把插件目录复制到 Profile，合集本身不另建功能插件。
 
 **合集与独立包二选一。** 如果已经单独安装了本仓库的插件，不要叠加安装合集，否则相同插件 ID/模块可能重复。请自行移除旧的独立包后切换合集，或继续使用下面的单插件 Release 包。
 
@@ -29,6 +30,7 @@ EthanQing 的 DSH 插件仓库。现有插件独立维护，仓库根目录提�
 
 安装合集后，将需要的示例内容**追加或合并**到你的 `~/.dsh/profiles/desktop/cordis.patch.yml`，保留现有配置；不要用示例文件覆盖整个 Profile patch。然后自行启动/重启 DSH。
 
+- [启用 Codex 风格执行折叠](examples/codex-collapse.patch.yml)：同时停用 `dsh-auto-collapse`，首次使用选择原生“全部展开”。
 - [仅启用 Markdown 插件](examples/markdown-editor.patch.yml)
 - [启用消息编辑/重试](examples/message-edit-retry.patch.yml)
 - [启用会话删除管理](examples/session-delete-manager.patch.yml)
@@ -55,7 +57,7 @@ npm run check
 npm run pack:plugins
 ```
 
-`dist/` 输出合集、四个独立包和 `SHA256SUMS.txt`。独立包沿用各自的原始 bundle，安装它意味着启用该插件；智能标题独立包还会切换官方标题 provider。请按需选择。
+`dist/` 输出合集、五个独立包和 `SHA256SUMS.txt`。独立包沿用各自的原始 bundle，安装它意味着启用该插件；智能标题独立包还会切换官方标题 provider。请按需选择。
 
 发布流程：将改动提交并推送；推送你选择的 `v*` tag 后，GitHub Actions 检查并打包，创建 **Draft Release**。由维护者核对附件后手动发布。普通 push/PR 只上传 Actions artifacts，不发布 Release。不执行 npm install、不修改任何 Desktop Profile。
 
@@ -71,6 +73,8 @@ Release 尚未发布前，不存在可用的附件下载地址。更新时选择
 ## 开发与验证
 
 根目录检查不依赖第三方安装：验证包入口、浏览器模块 ID、locale、语法、合集默认关闭及打包文件。`npm run pack:plugins` 使用 `npm pack --ignore-scripts`，只使用已有运行产物。
+
+以后完成的新插件必须同时接入根合集：更新 `plugins.json`、根 `package.json` 的 `files`、`cordis.patch.yml`、启用示例和本文档。检查会拒绝遗漏目录中的 DSH bundle 插件；合集继续默认关闭，由使用者选择启用。
 
 修改插件源码后，先按各插件 README 构建并提交 `lib/`。Markdown 插件的构建与测试依赖由开发者自行安装；不要把本机链接、node_modules、Profile 或凭据提交到仓库。
 
