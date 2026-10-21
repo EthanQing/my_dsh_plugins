@@ -1,5 +1,6 @@
 import { createViews } from './views.js'
 import { createActionsPanel } from './actions-view.js'
+import { createComposerTool } from '../../shared/composer-tools.js'
 import styles from './style.css'
 import zh from '../locale/zh.json'
 import en from '../locale/en.json'
@@ -8,6 +9,7 @@ window.__ModuleLoader__.load({
   id: 'dsh-task-diff-review',
   factory: require => {
     const React = require('react')
+    const { createPortal } = require('react-dom')
     return {
       inject: ['slots', 'locale', 'sidebarRight', 'sidebarRightTabs'],
       apply(ctx) {
@@ -40,7 +42,8 @@ window.__ModuleLoader__.load({
         }))
         ctx.slots.inject('sidebar.right.tab.guide.entry', () => ctx.slots.register({ name: 'sidebar.right.tab.guide.entry', key: 'dsh-task-diff-review' }, ReviewGuide))
         ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({ name: 'conversation.input.dock', id: 'dsh-task-diff-review', order: 10 }, views.Dock))
-        ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({ name: 'conversation.input.dock', id: 'dsh-task-diff-review-actions', order: 100 }, createActionsPanel(React)))
+        const ActionsTool = createComposerTool(React, createPortal, { id: 'dsh-task-diff-review-actions', order: 20 }, createActionsPanel(React))
+        ctx.slots.inject('conversation.composer.dock', () => ctx.slots.register({ name: 'conversation.composer.dock', id: 'dsh-task-diff-review-actions' }, ActionsTool))
         ctx.slots.inject('sidebar.right.pane.tab', () => ctx.slots.register({ name: 'sidebar.right.pane.tab', key: 'dsh-task-diff-review' }, views.Review))
       },
     }

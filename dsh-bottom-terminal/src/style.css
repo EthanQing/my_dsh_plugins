@@ -32,7 +32,8 @@
 .dbt-empty button{border-color:var(--dsw-alias-border-l3,#d9dce2);padding:7px 12px}
 .dbt-terminal-pane{display:flex;flex:1;min-width:0;min-height:0;overflow:hidden}
 .dbt-terminal-pane[hidden]{display:none}
-.dbt-launcher{padding:4px 8px;color:var(--dsw-alias-label-secondary,inherit);white-space:nowrap}
+.dbt-launcher{box-sizing:border-box;display:inline-flex;flex:none;align-items:center;justify-content:center;width:22px;height:22px;padding:0;border:0;border-radius:4px;background:transparent;color:var(--dsw-alias-label-secondary,inherit);transition:background-color .12s ease}
+.dbt-launcher svg{display:block;flex:none;pointer-events:none}
 .dbt-dock.is-collapsed{padding-top:0}
 .dbt-dock.is-collapsed .dbt-toolbar{border-bottom:0}
 .dbt-terminal-status,.dbt-terminal-error{padding:4px 10px;max-height:96px;overflow:auto;overflow-wrap:anywhere}

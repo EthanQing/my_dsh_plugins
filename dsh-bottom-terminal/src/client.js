@@ -3,6 +3,7 @@ import { createDock } from './dock.js'
 import { createTerminalGuide } from './guide.js'
 import { createDockMount } from './mount.js'
 import { createShellPreferences } from './shell.js'
+import { createComposerTool } from '../../shared/composer-tools.js'
 import guideStyles from './guide.css'
 import styles from './style.css'
 import xtermStyles from '../vendor/xterm/css/xterm.css'
@@ -92,7 +93,7 @@ window.__ModuleLoader__.load({
         ctx.slots.inject('sidebar.right.tab.guide.entry', () => {
           const key = '@deepseek-ai/dsh-client-ui-sidebar-terminal'
           if (ctx.slots.entries('sidebar.right.tab.guide.entry').some(entry => entry.options.key === key && (entry.options.priority ?? 0) !== 0)) {
-            ctx.logger.warn('终端引导入口已有自定义扩展，保留其入口；可通过输入框旁的终端按钮打开底部')
+            ctx.logger.warn('终端引导入口已有自定义扩展，保留其入口；可通过输入区底部右侧的终端图标打开底部')
             return
           }
           return ctx.slots.register({ name: 'sidebar.right.tab.guide.entry', key, priority: -1 }, Guide)
@@ -101,9 +102,10 @@ window.__ModuleLoader__.load({
         function Launcher() {
           const current = React.useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot)
           const status = React.useSyncExternalStore(activity.subscribe, activity.getSnapshot, activity.getSnapshot)
-          return React.createElement('button', { type: 'button', className: 'dbt-launcher', disabled: !current || !status.available, title: status.available ? '显示底部终端' : '请先打开主聊天会话', onClick: () => store.show() }, '终端')
+          return React.createElement('button', { type: 'button', className: 'dbt-launcher', disabled: !current || !status.available, 'aria-label': '显示底部终端', title: status.available ? '显示底部终端' : '请先打开主聊天会话', onClick: () => store.show() }, React.createElement(primitives.PluginArtworkTerminal, { size: 16 }))
         }
-        ctx.slots.inject('conversation.composer.dock', () => ctx.slots.register({ name: 'conversation.composer.dock', id: ID }, Launcher))
+        const LauncherTool = createComposerTool(React, createPortal, { id: ID, order: 10, shrink: false }, Launcher)
+        ctx.slots.inject('conversation.composer.dock', () => ctx.slots.register({ name: 'conversation.composer.dock', id: ID }, LauncherTool))
         ctx.effect(() => {
           const binding = { code: 'Backquote', modifiers: ['control', 'shift'] }
           const description = ctx.shortcuts.describeBinding(binding)

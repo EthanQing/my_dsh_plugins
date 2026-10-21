@@ -80,7 +80,7 @@
   }
   function createViews(React, ctx, open) {
     const { createElement: h, useState, useEffect, useCallback, useMemo, useRef } = React;
-    const { IconChevron, IconChevronRight, IconCheck, IconRefresh, IconInfo } = createIcons(React);
+    const { IconBranch, IconChevron, IconChevronRight, IconCheck, IconRefresh, IconInfo } = createIcons(React);
     class NativeBoundary extends React.Component {
       constructor(props) {
         super(props);
@@ -197,6 +197,9 @@
         setExpanded(false);
       }, [sessionId, value?.taskId]);
       if (!value || value.total <= 0) return null;
+      const toggle = () => setExpanded((value2) => !value2);
+      const status = error || (value?.warnings?.length > 1 ? "覆盖有限 · " : "") + (states[value?.status] || "正在读取…");
+      const disclosureLabel = expanded ? "折叠文件列表" : "展开文件列表";
       return h(
         "div",
         { className: "dtd-dock-seat" },
@@ -206,38 +209,30 @@
           h(
             "div",
             { className: "dtd-dock-bar-main" },
-            // Left side: SVG Chevron + File count + Line counts
             h(
               "button",
-              {
-                type: "button",
-                className: "dtd-dock-trigger",
-                "aria-expanded": expanded,
-                onClick: () => setExpanded(!expanded),
-                title: expanded ? "折叠文件列表" : "展开文件列表"
-              },
-              h(IconChevronRight, { size: 12, className: `dtd-chevron-rotate ${expanded ? "is-expanded" : ""}` }),
-              h("span", { className: "dtd-dock-files-label" }, `${value?.warnings?.length > 1 ? "已覆盖 " : ""}${value?.total ?? 0} 个文件`),
-              counts(value)
-            ),
-            // Right side: Status indicator + Review button
-            h(
-              "div",
-              { className: "dtd-dock-right" },
+              { type: "button", className: "dtd-dock-trigger", "aria-expanded": expanded, onClick: toggle, title: disclosureLabel },
+              h("span", { className: "dtd-dock-lead", "aria-hidden": true }, h(IconBranch, { size: 16 })),
+              h("span", { className: "dtd-dock-title" }, "实时审查"),
               h(
                 "span",
-                { className: "dtd-dock-status" },
-                h("span", { className: "dtd-pulse-dot" }),
-                error || (value?.warnings?.length > 1 ? "覆盖有限 · " : "") + (states[value?.status] || "正在读取…")
-              ),
-              h("button", { type: "button", className: "dtd-dock-open-btn", onClick: () => open(sessionId) }, "查看审查")
+                { className: "dtd-dock-summary" },
+                h("span", { className: "dtd-dock-files-label" }, `${value?.warnings?.length > 1 ? "已覆盖 " : ""}${value.total} 个文件`),
+                counts(value),
+                h("span", { className: "dtd-dock-status", title: status }, status)
+              )
+            ),
+            h("button", { type: "button", className: "dtd-dock-open-btn", onClick: () => open(sessionId) }, "查看审查"),
+            h(
+              "button",
+              { type: "button", className: "dtd-dock-chevron", "aria-label": disclosureLabel, "aria-expanded": expanded, onClick: toggle, title: disclosureLabel },
+              h(IconChevron, { size: 14, className: expanded ? "" : "is-collapsed" })
             )
           ),
-          // Expanded file list drawer inside dock
           expanded && h(
             "div",
             { className: "dtd-dock-drawer" },
-            value && h(FileList, { value, select: (index) => open(sessionId, index) }),
+            h(FileList, { value, select: (index) => open(sessionId, index) }),
             h(
               "div",
               { className: "dtd-dock-drawer-foot" },
@@ -649,11 +644,15 @@
   }
   function observeGitPopoverSpace(row, onHeight) {
     const scroller = row.closest("[data-conversation-scroll]");
+    const tools = row.closest("[data-dsh-composer-tools]");
     let frame;
     const measure = () => {
       frame = void 0;
+      const rect = row.getBoundingClientRect();
+      const boundary = tools || scroller;
+      if (boundary) row.style.setProperty("--dtd-popover-width", `${Math.max(0, Math.floor(rect.right - boundary.getBoundingClientRect().left))}px`);
       const top = scroller ? scroller.getBoundingClientRect().top + scroller.clientTop : void 0;
-      onHeight(top === void 0 ? 460 : Math.max(0, Math.min(460, Math.floor(row.getBoundingClientRect().top - top - 8))));
+      onHeight(top === void 0 ? 460 : Math.max(0, Math.min(460, Math.floor(rect.top - top - 8))));
     };
     const schedule = () => {
       if (frame === void 0) frame = requestAnimationFrame(measure);
@@ -661,6 +660,7 @@
     const observer = new ResizeObserver(schedule);
     observer.observe(row);
     if (scroller) observer.observe(scroller);
+    if (tools) observer.observe(tools);
     const composer = row.closest("[data-composer-seat]");
     if (composer) observer.observe(composer);
     scroller?.addEventListener("scroll", schedule, { passive: true });
@@ -1176,6 +1176,66 @@
     return (props) => h(ActionsPanel, { ...props, key: props.sessionId });
   }
 
+  // ../shared/composer-tools.js
+  function attachComposerTool(anchor, { id, order = 0, shrink = true }) {
+    if (!anchor || anchor.closest("[data-sidebar-right-session], [data-rightbar-col]")) return null;
+    const seat = anchor.closest("[data-composer-seat]");
+    const content = seat?.closest("[data-conversation-content]");
+    if (!seat || !content || !seat.closest("[data-conversation-scroll]")) return null;
+    let row = Array.from(seat.children).find((node) => node.hasAttribute("data-dsh-composer-tools"));
+    if (!row) {
+      row = seat.ownerDocument.createElement("div");
+      row.setAttribute("data-dsh-composer-tools", "");
+      Object.assign(row.style, {
+        position: "relative",
+        display: "flex",
+        flex: "none",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        gap: "8px",
+        minWidth: "0",
+        maxWidth: "100%",
+        boxSizing: "border-box",
+        width: "min(var(--dsh-composer-card-max-width,100%),calc(100% - 2 * var(--dsh-composer-side-clearance,16px)))",
+        margin: "0 auto",
+        padding: "4px 0"
+      });
+      seat.appendChild(row);
+    }
+    if (Array.from(row.children).some((node) => node.getAttribute("data-dsh-composer-tool") === id)) return null;
+    const member = seat.ownerDocument.createElement("div");
+    member.setAttribute("data-dsh-composer-tool", id);
+    member.setAttribute("data-dsh-composer-tool-order", String(order));
+    Object.assign(member.style, { display: "flex", alignItems: "center", minWidth: "0", maxWidth: "100%", flex: shrink ? "0 1 auto" : "none" });
+    const next = Array.from(row.children).find((node) => Number(node.getAttribute("data-dsh-composer-tool-order")) > order);
+    row.insertBefore(member, next || null);
+    let disposed = false;
+    return { member, row, dispose() {
+      if (disposed) return;
+      disposed = true;
+      member.remove();
+      if (!row.children.length) row.remove();
+    } };
+  }
+  function createComposerTool(React, createPortal, options, Component) {
+    const { createElement: h, useLayoutEffect, useRef, useState } = React;
+    return function ComposerTool(props) {
+      const anchor = useRef(null);
+      const [member, setMember] = useState(null);
+      useLayoutEffect(() => {
+        const mount = attachComposerTool(anchor.current, options);
+        setMember(mount?.member || null);
+        return () => mount?.dispose();
+      }, [props.sessionId]);
+      return h(
+        React.Fragment,
+        null,
+        h("span", { ref: anchor, hidden: true, "aria-hidden": true, "data-dsh-composer-tool-anchor": options.id }),
+        member && createPortal(h(Component, props), member)
+      );
+    };
+  }
+
   // src/style.css
   var style_default = `.dtd-root,.dtd-actions-row,.dtd-actions-dialog{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei UI",sans-serif;color:inherit;min-width:0;font-size:12.5px;--dtd-green:#16a34a;--dtd-green-bg:rgba(22,163,74,0.12);--dtd-red:#dc2626;--dtd-red-bg:rgba(220,38,38,0.12);--dtd-amber:#d97706;--dtd-amber-bg:rgba(217,119,6,0.12);--dtd-blue:#2563eb;--dtd-blue-bg:rgba(37,99,235,0.12);--dtd-surface-overlay:var(--dsw-alias-bg-layer-2,#ffffff);--dtd-surface-subtle:var(--dsw-alias-bg-layer-3,#f4f4f5);--dtd-border:rgba(128,128,128,0.18);--dtd-border-hover:rgba(128,128,128,0.32);--dtd-shadow:0 8px 24px -4px rgba(0,0,0,0.14),0 2px 6px -1px rgba(0,0,0,0.08)}
 body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-row,body[data-ds-dark-theme] .dtd-actions-dialog{--dtd-surface-overlay:var(--dsw-alias-bg-layer-2,#1e1e20);--dtd-surface-subtle:var(--dsw-alias-bg-layer-3,#27272a);--dtd-border:rgba(255,255,255,0.12);--dtd-border-hover:rgba(255,255,255,0.22);--dtd-shadow:0 12px 32px -4px rgba(0,0,0,0.45),0 4px 10px -2px rgba(0,0,0,0.3)}
@@ -1192,20 +1252,28 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-row,bod
 .dtd-pill-chevron{transition:transform .18s ease;flex:none}
 .dtd-pill-chevron.is-expanded{transform:rotate(180deg)}
 
-/* 形态 A：输入框上方改动摘要条 (高 32px 单层圆角横条，杜绝嵌套) */
-.dtd-dock-seat{box-sizing:border-box;width:100%;min-width:0;flex:none;display:flex;justify-content:center;padding-inline:var(--dsh-composer-side-clearance,16px);margin-bottom:6px}
-.dtd-dock-bar{box-sizing:border-box;width:100%;max-width:var(--dsh-composer-card-max-width,952px);min-width:0;flex:none;border:1px solid var(--dtd-border);border-radius:8px;margin:0;padding:0 10px;background:var(--dtd-surface-overlay);box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;flex-direction:column}
-.dtd-dock-bar-main{height:32px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.dtd-dock-trigger{display:inline-flex;align-items:center;gap:6px;line-height:1;border:0;background:transparent;color:inherit;cursor:pointer;padding:0;font-size:12px;font-weight:500}
-.dtd-dock-files-label{color:var(--dsw-alias-label-primary)}
-.dtd-dock-right{display:inline-flex;align-items:center;gap:10px}
-.dtd-dock-status{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--dsw-alias-label-secondary)}
-.dtd-pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--dtd-green);animation:dtd-pulse 1.6s ease-in-out infinite}
-@keyframes dtd-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(0.85)}}
-.dtd-dock-open-btn{height:22px;padding:0 8px;border-radius:5px;background:var(--dtd-surface-subtle);border:1px solid var(--dtd-border);font-size:11.5px;cursor:pointer}
-.dtd-dock-open-btn:hover{background:rgba(128,128,128,0.18);border-color:var(--dtd-border-hover)}
-.dtd-dock-drawer{border-top:1px solid var(--dtd-border);padding:6px 0}
-.dtd-dock-drawer-foot{display:flex;justify-content:flex-end;padding:4px 8px}
+/* Live review card: match the native conversation TodoPanel tokens and spacing. */
+.dtd-dock-seat{box-sizing:border-box;width:100%;min-width:0;flex:none;display:flex;justify-content:center}
+.dtd-dock-bar{box-sizing:border-box;width:calc(100% - 2 * var(--dsh-composer-side-clearance,16px) - 4 * var(--dsh-composer-dock-inset,8px));max-width:calc(var(--dsh-composer-card-max-width,952px) - 4 * var(--dsh-composer-dock-inset,8px));min-width:0;flex:none;--dsw-elevation-stroke-color:var(--dsw-alias-border-l1,var(--dtd-border));border:0;border-radius:var(--dsw-radius-lg,16px);margin:0 auto;padding:6px 12px;background:var(--dsw-specific-menu,var(--dtd-surface-subtle));backdrop-filter:var(--dsw-menu-backdrop-filter,none);box-shadow:var(--dsw-elevation-panel,0 0 0 1px var(--dtd-border));display:flex;flex-direction:column;gap:8px;overflow:hidden;container-type:inline-size;container-name:dtd-review-card}
+.dtd-dock-bar-main{display:flex;align-items:center;gap:10px;min-width:0}
+.dtd-dock-bar .dtd-dock-trigger{display:flex;flex:1;min-width:0;flex-wrap:wrap;align-items:center;gap:8px 10px;text-align:left;border:0;background:transparent;padding:0;color:inherit;cursor:pointer}
+.dtd-dock-lead{display:grid;place-items:center;flex:none;color:var(--dsw-alias-label-tertiary,inherit)}
+.dtd-dock-title{flex:none;font-size:13px;line-height:24px;font-weight:500;color:var(--dsw-alias-label-primary,inherit)}
+.dtd-dock-summary{display:flex;align-items:center;flex:1 1 180px;min-width:0;flex-wrap:wrap;gap:4px 8px;font-size:13px;line-height:20px;font-weight:400;color:var(--dsw-alias-label-tertiary,inherit)}
+.dtd-dock-files-label{white-space:nowrap}
+.dtd-dock-status{min-width:0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;color:var(--dsw-alias-label-tertiary,inherit)}
+.dtd-dock-bar .dtd-dock-open-btn{flex:none;min-height:24px;padding:0 4px;border:0;border-radius:4px;white-space:nowrap;font-size:12px;line-height:20px;color:var(--dsw-alias-label-secondary,inherit);background:transparent}
+.dtd-dock-bar .dtd-dock-chevron{display:grid;place-items:center;flex:none;width:22px;height:22px;padding:0;border:0;border-radius:4px;color:var(--dsw-alias-label-tertiary,inherit);background:transparent}
+.dtd-dock-chevron svg{transition:transform .18s ease}
+.dtd-dock-chevron .is-collapsed{transform:rotate(180deg)}
+.dtd-dock-bar .dtd-dock-trigger:hover,.dtd-dock-bar .dtd-dock-open-btn:hover,.dtd-dock-bar .dtd-dock-chevron:hover{background:var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,.1))}
+.dtd-dock-drawer{display:flex;flex-direction:column;gap:8px;min-width:0}
+.dtd-dock-drawer .dtd-files{display:flex;flex-direction:column;gap:8px;max-height:180px;margin:0;padding:0;border:0}
+.dtd-dock-drawer .dtd-file{gap:10px;min-height:20px;padding:0;border:0;line-height:20px;color:var(--dsw-alias-label-secondary,inherit)}
+.dtd-dock-drawer .dtd-path{font-size:13px}
+.dtd-dock-drawer-foot{display:flex;justify-content:flex-end}
+.dtd-dock-drawer-foot .dtd-btn-compact{min-height:24px;padding:0 4px;border:0;font-size:12px;color:var(--dsw-alias-label-secondary,inherit)}
+@container dtd-review-card (max-width:420px){.dtd-dock-bar-main{flex-wrap:wrap}.dtd-dock-bar .dtd-dock-trigger{flex-basis:calc(100% - 32px);order:0}.dtd-dock-bar .dtd-dock-chevron{order:1}.dtd-dock-bar .dtd-dock-open-btn{order:2;margin-left:26px}}
 
 /* Single-line 38px Toolbar */
 .dtd-toolbar-compact{height:38px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;border-bottom:1px solid var(--dtd-border);background:var(--dtd-surface-overlay);flex:none;position:relative;z-index:10}
@@ -1283,9 +1351,9 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-row,bod
 .dtd-native>div{height:100%;min-height:150px}
 .dtd-message{padding:14px;font-size:12px;opacity:.7}
 
-/* Git action row above the input bar; the popover uses the full row width. */
-.dtd-actions-row{position:relative;box-sizing:border-box;flex:none;width:min(var(--dsh-composer-card-max-width,100%),calc(100% - 2 * var(--dsh-composer-side-clearance,16px)));margin-inline:auto;min-height:32px;user-select:none;z-index:1}
-.dtd-actions-container{display:flex;justify-content:flex-end;align-items:center;gap:8px;width:100%;min-width:0}
+/* Git tool at the right of the independent composer tools row. */
+.dtd-actions-row{position:relative;box-sizing:border-box;display:inline-flex;flex:none;max-width:100%;min-width:0;min-height:32px;user-select:none;z-index:1}
+.dtd-actions-container{display:flex;justify-content:flex-end;align-items:center;gap:8px;max-width:100%;min-width:0}
 .dtd-actions-space-hint{flex:1;min-width:0;max-height:32px;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;font-size:11px;line-height:16px;overflow-wrap:anywhere;color:var(--dsw-alias-label-secondary,inherit)}
 .dtd-status-pill{max-width:100%;min-width:0;height:32px;box-sizing:border-box;padding:0 12px;border-radius:16px;background:var(--dtd-surface-overlay);border:1px solid var(--dtd-border);box-shadow:var(--dtd-shadow);display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;cursor:pointer;backdrop-filter:blur(14px);transition:all .18s ease}
 .dtd-status-pill:hover,.dtd-status-pill-active{border-color:#3b82f6;background:var(--dtd-surface-overlay)}
@@ -1297,7 +1365,7 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-row,bod
 .dtd-pill-ahead{color:var(--dtd-blue);font-weight:600}
 
 /* Upward Popover */
-.dtd-git-popover{position:absolute;bottom:calc(100% + 8px);right:0;box-sizing:border-box;width:min(380px,100%);max-height:460px;background:var(--dtd-surface-overlay);border:1px solid var(--dtd-border);border-radius:10px;box-shadow:var(--dtd-shadow);backdrop-filter:blur(16px);display:flex;flex-direction:column;overflow:auto;overflow-wrap:anywhere;z-index:1}
+.dtd-git-popover{position:absolute;bottom:calc(100% + 8px);right:0;box-sizing:border-box;width:min(380px,var(--dtd-popover-width,100%));max-height:460px;background:var(--dtd-surface-overlay);border:1px solid var(--dtd-border);border-radius:10px;box-shadow:var(--dtd-shadow);backdrop-filter:blur(16px);display:flex;flex-direction:column;overflow:auto;overflow-wrap:anywhere;z-index:1}
 .dtd-git-popover>*{flex-shrink:0}
 .dtd-popover-header{min-height:36px;box-sizing:border-box;padding:6px 12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--dtd-border);background:var(--dtd-surface-subtle)}
 .dtd-popover-title{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;min-width:0;max-width:100%}
@@ -1415,6 +1483,7 @@ body[data-ds-dark-theme] .dtd-actions-dialog{background:#1e1e20;background:linea
     id: "dsh-task-diff-review",
     factory: (require2) => {
       const React = require2("react");
+      const { createPortal } = require2("react-dom");
       return {
         inject: ["slots", "locale", "sidebarRight", "sidebarRightTabs"],
         apply(ctx) {
@@ -1471,7 +1540,8 @@ body[data-ds-dark-theme] .dtd-actions-dialog{background:#1e1e20;background:linea
           }));
           ctx.slots.inject("sidebar.right.tab.guide.entry", () => ctx.slots.register({ name: "sidebar.right.tab.guide.entry", key: "dsh-task-diff-review" }, ReviewGuide));
           ctx.slots.inject("conversation.input.dock", () => ctx.slots.register({ name: "conversation.input.dock", id: "dsh-task-diff-review", order: 10 }, views.Dock));
-          ctx.slots.inject("conversation.input.dock", () => ctx.slots.register({ name: "conversation.input.dock", id: "dsh-task-diff-review-actions", order: 100 }, createActionsPanel(React)));
+          const ActionsTool = createComposerTool(React, createPortal, { id: "dsh-task-diff-review-actions", order: 20 }, createActionsPanel(React));
+          ctx.slots.inject("conversation.composer.dock", () => ctx.slots.register({ name: "conversation.composer.dock", id: "dsh-task-diff-review-actions" }, ActionsTool));
           ctx.slots.inject("sidebar.right.pane.tab", () => ctx.slots.register({ name: "sidebar.right.pane.tab", key: "dsh-task-diff-review" }, views.Review));
         }
       };

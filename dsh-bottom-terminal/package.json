@@ -1,6 +1,6 @@
 {
   "name": "dsh-bottom-terminal",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "type": "module",
   "description": "A bottom terminal dock using DSH terminal models, native PTYs and xterm.js, with persistent shell selection.",

@@ -13,7 +13,7 @@
 | [Codex 风格执行折叠](dsh-codex-collapse/README.md) | 把 AI 的工具调用等执行细节收成一行，运行时显示进度，展开后可看原始记录，正文和最终回答保持可见。 |
 | [子代理侧边栏管理器](dsh-subagent-sidebar-default/README.md) | 搜索、查看和管理子代理；点击后在右侧栏标签页中打开，主窗口继续保留父代理会话。 |
 | [Aegis 工程工作流](dsh-aegis-workflow/README.zh-CN.md) | 主代理协调规划、编码、审查等六个可续聊角色。优先复用你准备好的详细任务，审批后按需实施。 |
-| [代码改动概览与 Git 操作](dsh-task-diff-review/README.md) | 有改动时在输入框上方显示概览，右侧栏可通过中文菜单查看六种 Diff；输入框上方的 Git 胶囊可暂存、取消暂存、AI 辅助写提交信息、确认提交和选择 Remote 推送。 |
+| [代码改动概览与 Git 操作](dsh-task-diff-review/README.md) | 有改动时在输入框上方显示概览，右侧栏可通过中文菜单查看六种 Diff；输入框底部右侧的 Git 胶囊可暂存、取消暂存、AI 辅助写提交信息、确认提交和选择 Remote 推送。 |
 | [底部集成终端](dsh-bottom-terminal/README.md) | 主聊天列内可拖动高度的多标签终端，左右侧栏保持完整；支持重命名、折叠、隐藏和最大化。原有引导页“新建终端”卡片默认打开底部，也可选择右侧。复用原生终端服务，支持配置 NuShell。 |
 
 ## 怎么安装

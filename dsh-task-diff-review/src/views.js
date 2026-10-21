@@ -21,7 +21,7 @@ function timeAgo(dateStr) {
 
 export function createViews(React, ctx, open) {
   const { createElement: h, useState, useEffect, useCallback, useMemo, useRef } = React
-  const { IconChevron, IconChevronRight, IconCheck, IconRefresh, IconInfo } = createIcons(React)
+  const { IconBranch, IconChevron, IconChevronRight, IconCheck, IconRefresh, IconInfo } = createIcons(React)
 
   class NativeBoundary extends React.Component {
     constructor(props) { super(props); this.state = { failed: false } }
@@ -87,38 +87,31 @@ export function createViews(React, ctx, open) {
         h('span', { className: 'dtd-path' }, file.untracked ? file.display.replace(/^\[未跟踪\] /, '') : file.display), file.untracked && h('span', { className: 'dtd-untracked' }, '未跟踪'), fileCount(file)))))
   }
 
-  // 形态 A：内联摘要条（输入框上方，高 32px 单层圆角横条，SVG 旋转箭头）
+  // Match the native TodoPanel card while keeping live summaries and review navigation.
   function Dock({ sessionId }) {
     const { value, error, refresh } = useSummary(sessionId)
     const [expanded, setExpanded] = useState(false)
     useEffect(() => { setExpanded(false) }, [sessionId, value?.taskId])
     if (!value || value.total <= 0) return null
+    const toggle = () => setExpanded(value => !value)
+    const status = error || (value?.warnings?.length > 1 ? '覆盖有限 · ' : '') + (states[value?.status] || '正在读取…')
+    const disclosureLabel = expanded ? '折叠文件列表' : '展开文件列表'
 
     return h('div', { className: 'dtd-dock-seat' },
       h('section', { className: 'dtd-root dtd-dock-bar', 'aria-label': '本轮代码改动' },
         h('div', { className: 'dtd-dock-bar-main' },
-          // Left side: SVG Chevron + File count + Line counts
-          h('button', {
-            type: 'button',
-            className: 'dtd-dock-trigger',
-            'aria-expanded': expanded,
-            onClick: () => setExpanded(!expanded),
-            title: expanded ? '折叠文件列表' : '展开文件列表',
-          },
-            h(IconChevronRight, { size: 12, className: `dtd-chevron-rotate ${expanded ? 'is-expanded' : ''}` }),
-            h('span', { className: 'dtd-dock-files-label' }, `${value?.warnings?.length > 1 ? '已覆盖 ' : ''}${value?.total ?? 0} 个文件`),
-            counts(value)),
-
-          // Right side: Status indicator + Review button
-          h('div', { className: 'dtd-dock-right' },
-            h('span', { className: 'dtd-dock-status' },
-              h('span', { className: 'dtd-pulse-dot' }),
-              error || (value?.warnings?.length > 1 ? '覆盖有限 · ' : '') + (states[value?.status] || '正在读取…')),
-            h('button', { type: 'button', className: 'dtd-dock-open-btn', onClick: () => open(sessionId) }, '查看审查'))),
-
-        // Expanded file list drawer inside dock
+          h('button', { type: 'button', className: 'dtd-dock-trigger', 'aria-expanded': expanded, onClick: toggle, title: disclosureLabel },
+            h('span', { className: 'dtd-dock-lead', 'aria-hidden': true }, h(IconBranch, { size: 16 })),
+            h('span', { className: 'dtd-dock-title' }, '实时审查'),
+            h('span', { className: 'dtd-dock-summary' },
+              h('span', { className: 'dtd-dock-files-label' }, `${value?.warnings?.length > 1 ? '已覆盖 ' : ''}${value.total} 个文件`),
+              counts(value),
+              h('span', { className: 'dtd-dock-status', title: status }, status))),
+          h('button', { type: 'button', className: 'dtd-dock-open-btn', onClick: () => open(sessionId) }, '查看审查'),
+          h('button', { type: 'button', className: 'dtd-dock-chevron', 'aria-label': disclosureLabel, 'aria-expanded': expanded, onClick: toggle, title: disclosureLabel },
+            h(IconChevron, { size: 14, className: expanded ? '' : 'is-collapsed' }))),
         expanded && h('div', { className: 'dtd-dock-drawer' },
-          value && h(FileList, { value, select: index => open(sessionId, index) }),
+          h(FileList, { value, select: index => open(sessionId, index) }),
           h('div', { className: 'dtd-dock-drawer-foot' },
             h('button', { type: 'button', className: 'dtd-btn-compact', onClick: refresh }, '刷新')))))
   }

@@ -19,16 +19,21 @@ export function pushPreviewIssue(preview, remote, state, statusError = '') {
 
 export function observeGitPopoverSpace(row, onHeight) {
   const scroller = row.closest('[data-conversation-scroll]')
+  const tools = row.closest('[data-dsh-composer-tools]')
   let frame
   const measure = () => {
     frame = undefined
+    const rect = row.getBoundingClientRect()
+    const boundary = tools || scroller
+    if (boundary) row.style.setProperty('--dtd-popover-width', `${Math.max(0, Math.floor(rect.right - boundary.getBoundingClientRect().left))}px`)
     const top = scroller ? scroller.getBoundingClientRect().top + scroller.clientTop : undefined
-    onHeight(top === undefined ? 460 : Math.max(0, Math.min(460, Math.floor(row.getBoundingClientRect().top - top - 8))))
+    onHeight(top === undefined ? 460 : Math.max(0, Math.min(460, Math.floor(rect.top - top - 8))))
   }
   const schedule = () => { if (frame === undefined) frame = requestAnimationFrame(measure) }
   const observer = new ResizeObserver(schedule)
   observer.observe(row)
   if (scroller) observer.observe(scroller)
+  if (tools) observer.observe(tools)
   const composer = row.closest('[data-composer-seat]')
   if (composer) observer.observe(composer)
   scroller?.addEventListener('scroll', schedule, { passive: true })

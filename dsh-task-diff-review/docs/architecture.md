@@ -64,6 +64,6 @@
 
 推送默认目标遵循 branch.pushRemote → remote.pushDefault → branch.remote → origin。目标分支优先所选 upstream Remote 的 branch.merge，否则当前分支同名。预览通过 ls-remote 查询每个 Push URL 的真实目标，不 fetch；远端 tip 不在本地或不是 HEAD 祖先时拒绝推送。确认再验证 HEAD、分支、Remote 配置和远端 tip，执行明确 OID:refs/heads/目标，禁用 force/mirror/follow-tags/submodule recursion。用户选择 Remote 不写配置。多地址的计数分别展示，不重复相加；认证走已有 Git 配置/GCM，不存储凭据，返回信息隐藏 URL 内的常见敏感字段。
 
-Git 胶囊独立注册 `conversation.input.dock`（order 100，概览仍为 order 10），依照 [官方 Slots](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/client/ui-conversation/src/client/contract/slots.ts) 在输入卡片上方正常流行内右对齐。整行是 relative 定位容器，向上展开层宽度取 380px 与行宽的较小值；不使用 fixed、不测量全局侧栏。展开期间仅观察本行、最近的 `data-conversation-scroll` 和 `data-composer-seat`，高度受局部上方空间及 460px 限制，不足 88px 则提示缩小终端。确认窗口仍使用原生 dialog 模态、焦点及 Escape 行为。切会话按 Session key 重新挂载面板，丢弃旧窗口响应，不将旧仓库状态显示在新会话。
+Git 胶囊通过 `conversation.composer.dock` 隐藏锚点定位本会话的 `data-composer-seat`，与终端入口共同挂在原生底部信息之后的插件正常流工具行。概览继续注册 `conversation.input.dock`，order 10。共享工具行中终端顺序在前、Git 在最后，两个插件分别管理自己的挂载与清理；右侧嵌入会话排除，不重排原生信息。向上展开层宽度最多 380px 且受聊天列约束；不使用 fixed、不测量全局侧栏。展开期间仅观察局部容器、最近的 `data-conversation-scroll` 和 `data-composer-seat`，高度受局部上方空间及 460px 限制，不足 88px 则提示缩小终端。确认窗口仍使用原生 dialog 模态、焦点及 Escape 行为。切会话按 Session key 重新挂载面板，丢弃旧窗口响应，不将旧仓库状态显示在新会话。
 
 Git 依据：[add](https://git-scm.com/docs/git-add)、[restore](https://git-scm.com/docs/git-restore)、[commit](https://git-scm.com/docs/git-commit)、[push](https://git-scm.com/docs/git-push)、[remote](https://git-scm.com/docs/git-remote)。

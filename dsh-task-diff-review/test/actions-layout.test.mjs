@@ -5,6 +5,7 @@ import { spawn } from 'node:child_process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import path from 'node:path'
 import { createActionsPanel, observeGitPopoverSpace } from '../src/actions-view.js'
+import { attachComposerTool } from '../../shared/composer-tools.js'
 
 function renderPanel(popoverHeight = 460) {
   const status = { repository: true, branch: 'feature/' + 'long-branch-'.repeat(20), files: Array.from({ length: 30 }, (_, index) => ({ path: `src/${'long-file-'.repeat(30)}${index}.js`, xy: ' M', unstaged: true })), remotes: [{ name: 'origin' }, { name: 'very-long-remote-name'.repeat(12) }], defaultRemote: 'origin', ahead: 12 }
@@ -55,14 +56,17 @@ test('local observer updates on resize/scroll and releases all listeners', () =>
   const observed = []
   const scroller = { clientTop: 2, getBoundingClientRect: () => ({ top: 100 }), addEventListener: (_type, fn) => { scroll = fn }, removeEventListener: (_type, fn) => { removed = fn === scroll } }
   const composer = {}
-  const row = { closest: selector => selector === '[data-conversation-scroll]' ? scroller : composer, getBoundingClientRect: () => ({ top: rowTop }) }
+  const tools = { getBoundingClientRect: () => ({ left: 20 }) }
+  const widths = []
+  const row = { style: { setProperty: (_key, value) => widths.push(value) }, closest: selector => selector === '[data-conversation-scroll]' ? scroller : selector === '[data-dsh-composer-tools]' ? tools : composer, getBoundingClientRect: () => ({ top: rowTop, right: 320 }) }
   globalThis.ResizeObserver = class { constructor(fn) { resize = fn } observe(node) { observed.push(node) } disconnect() { disconnected = true } }
   globalThis.requestAnimationFrame = fn => { frame = fn; return 1 }
   globalThis.cancelAnimationFrame = () => { frame = undefined }
   try {
     const heights = []
     const stop = observeGitPopoverSpace(row, value => heights.push(value))
-    assert.deepEqual(observed, [row, scroller, composer])
+    assert.deepEqual(observed, [row, scroller, tools, composer])
+    assert.deepEqual(widths, ['300px'])
     assert.deepEqual(heights, [190])
     rowTop = 160; resize(); frame()
     assert.equal(heights.at(-1), 50)
@@ -81,21 +85,36 @@ test('Git layout stays inside the composer at wide and narrow widths', { skip: !
   await mkdir(output, { recursive: true })
   const css = await readFile(path.join(root, 'src/style.css'), 'utf8')
   const fixture = `<!doctype html><meta charset="utf-8"><style>${css}
-  html,body{margin:0;font:13px sans-serif}#chat{--dsh-composer-card-max-width:500px;--dsh-composer-side-clearance:16px;margin:20px;width:640px;height:1000px;display:flex;flex-direction:column}#history{flex:1;min-height:0;overflow:auto}#composer{display:flex;flex-direction:column;gap:8px;flex:none}#input{box-sizing:border-box;width:min(var(--dsh-composer-card-max-width),calc(100% - 2 * var(--dsh-composer-side-clearance)));margin-inline:auto;height:80px;border:1px solid #888}#terminal{height:0;flex:none}
-  </style><div id="chat"><div id="history"></div><div id="composer">${html(renderPanel())}<div id="input">Input bar</div></div><div id="terminal"></div></div><script>
+  html,body{margin:0;font:13px sans-serif}#chat{--dsh-composer-card-max-width:500px;--dsh-composer-side-clearance:16px;margin:20px;width:640px;height:1000px;display:flex;flex-direction:column}#scroller{flex:1;min-height:0;overflow-y:auto}#history{height:900px}#composer{display:flex;flex-direction:column;gap:8px;position:sticky;bottom:0;background:white}#input,#info{box-sizing:border-box;width:min(var(--dsh-composer-card-max-width),calc(100% - 2 * var(--dsh-composer-side-clearance)));margin-inline:auto}#input{height:80px;border:1px solid #888}#info{display:flex;justify-content:space-between;gap:12px;font-size:10px}#info>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#terminal{height:0;flex:none}.fixture-launcher{width:22px;height:22px;padding:0;border:0;background:transparent}
+  </style><div id="chat" data-conversation-content><div id="scroller" data-conversation-scroll><div id="history"></div><div id="composer" data-composer-seat><div id="input">Input bar</div><div id="info" data-composer-dock><span>Sandbox</span><span>Context</span><span>Tokens</span><div data-slot="conversation.composer.dock" style="display:contents"><span id="git-anchor" hidden></span><span id="terminal-anchor" hidden></span></div></div></div></div><div id="terminal"></div></div><script>
   const results=[];
   const check=(name,ok)=>{results.push({name,passed:!!ok});if(!ok)throw Error(name)};
+  const attach = ${attachComposerTool.toString()};
+  const observeSpace = ${observeGitPopoverSpace.toString()};
+  const infoRects=()=>Array.from(document.querySelectorAll('#info>span')).map(node=>{const r=node.getBoundingClientRect();return [r.left,r.right,r.width]});
   try {
+    const nativeBefore=JSON.stringify(infoRects());
+    const git=attach(document.querySelector('#git-anchor'),{id:'git',order:20});
+    const terminal=attach(document.querySelector('#terminal-anchor'),{id:'terminal',order:10,shrink:false});
+    git.member.innerHTML=${JSON.stringify(html(renderPanel()))};
+    terminal.member.innerHTML='<button class="fixture-launcher" aria-label="显示底部终端"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 4L7 8L3 12M9 12H14" fill="none" stroke="currentColor"/></svg></button>';
+    check('members share one host',git.row===terminal.row && document.querySelectorAll('[data-dsh-composer-tools]').length===1);
+    check('terminal immediately precedes Git',git.row.children[0]===terminal.member && git.row.children[1]===git.member);
+    check('native three info items do not move',JSON.stringify(infoRects())===nativeBefore);
+    check('shared host follows native composer',git.row.previousElementSibling===document.querySelector('#info'));
     for (const width of [800,640,380,280,220]) {
       document.querySelector('#chat').style.width=width+'px';
       for (const terminalHeight of [0,240]) {
         document.querySelector('#terminal').style.height=terminalHeight+'px';
         const row=document.querySelector('.dtd-actions-row'), pill=document.querySelector('.dtd-status-pill'), panel=document.querySelector('.dtd-git-popover');
-        const r=row.getBoundingClientRect(), p=pill.getBoundingClientRect(), d=panel.getBoundingClientRect(), input=document.querySelector('#input').getBoundingClientRect();
-        check('row reserves pill height '+width+'/'+terminalHeight, r.height>=32 && r.bottom<=input.top);
-        check('row matches composer card width '+width+'/'+terminalHeight, Math.abs(r.width-Math.min(500,width-32))<1 && Math.abs(r.left-input.left)<1 && Math.abs(r.right-input.right)<1);
-        check('pill right aligned '+width+'/'+terminalHeight, Math.abs(p.right-input.right)<1 && p.left>=r.left-1);
-        check('popover uses row width '+width+'/'+terminalHeight, Math.abs(d.width-Math.min(380,r.width))<1 && d.left>=r.left-1 && d.right<=r.right+1);
+        const stopMeasure=observeSpace(document.querySelector('.dtd-actions-container'),value=>{panel.style.maxHeight=value+'px'});
+        const r=row.getBoundingClientRect(), p=pill.getBoundingClientRect(), d=panel.getBoundingClientRect(), input=document.querySelector('#input').getBoundingClientRect(), tools=git.row.getBoundingClientRect(), info=document.querySelector('#info').getBoundingClientRect(), launch=terminal.member.getBoundingClientRect();
+        check('tools below input and native info '+width+'/'+terminalHeight, r.height>=32 && r.top>=info.bottom && info.top>=input.bottom);
+        check('tools match composer card width '+width+'/'+terminalHeight, Math.abs(tools.width-Math.min(500,document.querySelector('#scroller').clientWidth-32))<1 && Math.abs(tools.left-input.left)<1 && Math.abs(tools.right-input.right)<1);
+        check('pill right aligned '+width+'/'+terminalHeight, Math.abs(p.right-input.right)<1 && p.left>=tools.left-1 && launch.right<=p.left-7 && launch.left>=tools.left-1);
+        const launcher=terminal.member.querySelector('button'), button=launcher.getBoundingClientRect();
+        check('terminal actual button remains 22px and clickable '+width+'/'+terminalHeight, Math.abs(button.width-22)<1 && button.right+7<=p.left && button.left>=tools.left-1 && launcher.contains(document.elementFromPoint(button.left+11,button.top+11)));
+        check('popover uses local tools width '+width+'/'+terminalHeight, Math.abs(d.width-Math.min(380,tools.width))<1 && d.left>=tools.left-1 && d.right<=tools.right+1);
         check('popover grows upward '+width+'/'+terminalHeight,d.bottom<r.top && d.height<=460);
         check('panel has no horizontal overflow '+width+'/'+terminalHeight,panel.scrollWidth<=panel.clientWidth+1);
         check('expanded panel scrolls '+width+'/'+terminalHeight,panel.scrollHeight>panel.clientHeight && getComputedStyle(panel).overflowY==='auto');
@@ -103,14 +122,13 @@ test('Git layout stays inside the composer at wide and narrow widths', { skip: !
         // The class sets display:flex, so emulate React removing the expanded element.
         panel.style.display='none';
         check('collapse preserves input position '+width+'/'+terminalHeight,document.querySelector('#input').getBoundingClientRect().top===input.top);
-        panel.style.display='';panel.hidden=false;
+        panel.style.display='';panel.hidden=false;stopMeasure();
       }
     }
-    const observeSpace = ${observeGitPopoverSpace.toString()};
     const chat=document.querySelector('#chat'), composer=document.querySelector('#composer'), history=document.querySelector('#history');
-    const scroller=document.createElement('div');scroller.setAttribute('data-conversation-scroll','');scroller.style.cssText='position:relative;overflow-y:auto;width:100%;flex:none';
-    composer.setAttribute('data-composer-seat','');composer.style.cssText='position:sticky;bottom:0';history.style.cssText='height:900px;flex:none';
-    scroller.append(history,composer);chat.prepend(scroller);document.querySelector('#terminal').style.display='none';
+    const scroller=document.querySelector('#scroller');scroller.style.cssText='position:relative;overflow-y:auto;width:100%;flex:none';
+    composer.style.cssText='position:sticky;bottom:0';history.style.cssText='height:900px;flex:none';
+    document.querySelector('#terminal').style.display='none';
     const panel=document.querySelector('.dtd-git-popover'), row=document.querySelector('.dtd-actions-container');
     const hint=document.createElement('span');hint.className='dtd-actions-space-hint';hint.textContent='请先缩小终端面板以显示 Git 操作';row.prepend(hint);
     for (const height of [600,300,180,48]) {
@@ -127,6 +145,20 @@ test('Git layout stays inside the composer at wide and narrow widths', { skip: !
       }
       stop();
     }
+    terminal.dispose();
+    check('terminal unload leaves Git attached',git.row.isConnected && git.member.isConnected && !terminal.member.isConnected);
+    git.dispose();
+    check('last member removes shared host',!document.querySelector('[data-dsh-composer-tools]'));
+    const unchanged=JSON.stringify(infoRects());
+    const t2=attach(document.querySelector('#terminal-anchor'),{id:'terminal',order:10,shrink:false});
+    const g2=attach(document.querySelector('#git-anchor'),{id:'git',order:20});
+    t2.member.innerHTML='<button class="fixture-launcher">tool</button>';g2.member.innerHTML='<button>Git</button>';
+    g2.dispose();
+    check('Git unload leaves terminal attached',t2.row.isConnected && t2.member.isConnected && !g2.member.isConnected);
+    t2.dispose();
+    check('native info geometry survives both unload orders',JSON.stringify(infoRects())===unchanged && !document.querySelector('[data-dsh-composer-tools]'));
+    const right=document.createElement('div');right.setAttribute('data-sidebar-right-session','same');right.append(chat.cloneNode(true));
+    check('right sidebar same-session anchor excluded',attach(right.querySelector('#git-anchor'),{id:'git',order:20})===null);
   } catch(error) { results.push({error:error.message}) }
   const report=document.createElement('pre');report.id='result';report.textContent=JSON.stringify(results);document.body.append(report);
   </script>`
@@ -146,5 +178,5 @@ test('Git layout stays inside the composer at wide and narrow widths', { skip: !
   assert.ok(match, 'browser produced layout results')
   const results = JSON.parse(match[1].replaceAll('&quot;', '"').replaceAll('&amp;', '&'))
   assert.equal(results.filter(result => result.error || result.passed === false).length, 0, JSON.stringify(results.filter(result => result.error || result.passed === false)))
-  assert.equal(results.length, 88)
+  assert.equal(results.length, 107)
 })

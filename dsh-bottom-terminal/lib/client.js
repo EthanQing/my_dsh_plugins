@@ -9849,11 +9849,71 @@ ${h2.join(`
     };
   }
 
+  // ../shared/composer-tools.js
+  function attachComposerTool(anchor, { id, order = 0, shrink = true }) {
+    if (!anchor || anchor.closest("[data-sidebar-right-session], [data-rightbar-col]")) return null;
+    const seat = anchor.closest("[data-composer-seat]");
+    const content = seat?.closest("[data-conversation-content]");
+    if (!seat || !content || !seat.closest("[data-conversation-scroll]")) return null;
+    let row = Array.from(seat.children).find((node) => node.hasAttribute("data-dsh-composer-tools"));
+    if (!row) {
+      row = seat.ownerDocument.createElement("div");
+      row.setAttribute("data-dsh-composer-tools", "");
+      Object.assign(row.style, {
+        position: "relative",
+        display: "flex",
+        flex: "none",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        gap: "8px",
+        minWidth: "0",
+        maxWidth: "100%",
+        boxSizing: "border-box",
+        width: "min(var(--dsh-composer-card-max-width,100%),calc(100% - 2 * var(--dsh-composer-side-clearance,16px)))",
+        margin: "0 auto",
+        padding: "4px 0"
+      });
+      seat.appendChild(row);
+    }
+    if (Array.from(row.children).some((node) => node.getAttribute("data-dsh-composer-tool") === id)) return null;
+    const member = seat.ownerDocument.createElement("div");
+    member.setAttribute("data-dsh-composer-tool", id);
+    member.setAttribute("data-dsh-composer-tool-order", String(order));
+    Object.assign(member.style, { display: "flex", alignItems: "center", minWidth: "0", maxWidth: "100%", flex: shrink ? "0 1 auto" : "none" });
+    const next = Array.from(row.children).find((node) => Number(node.getAttribute("data-dsh-composer-tool-order")) > order);
+    row.insertBefore(member, next || null);
+    let disposed = false;
+    return { member, row, dispose() {
+      if (disposed) return;
+      disposed = true;
+      member.remove();
+      if (!row.children.length) row.remove();
+    } };
+  }
+  function createComposerTool(React, createPortal, options, Component) {
+    const { createElement: h2, useLayoutEffect, useRef, useState } = React;
+    return function ComposerTool(props) {
+      const anchor = useRef(null);
+      const [member, setMember] = useState(null);
+      useLayoutEffect(() => {
+        const mount = attachComposerTool(anchor.current, options);
+        setMember(mount?.member || null);
+        return () => mount?.dispose();
+      }, [props.sessionId]);
+      return h2(
+        React.Fragment,
+        null,
+        h2("span", { ref: anchor, hidden: true, "aria-hidden": true, "data-dsh-composer-tool-anchor": options.id }),
+        member && createPortal(h2(Component, props), member)
+      );
+    };
+  }
+
   // src/guide.css
   var guide_default = "/* Match the official TerminalGuide/Guide card metrics; native Menu owns its popup. */\n.dbt-terminal-guide{box-sizing:border-box;border:.5px solid var(--dsw-alias-border-l3);border-radius:var(--dsl-guide-entry-radius);background:var(--dsw-alias-bg-layer-1);align-items:center;gap:14px;width:100%;min-height:56px;padding:14px 20px;display:flex;position:relative;overflow:hidden}\n.dbt-terminal-guide-main{border-radius:0;width:100%;height:100%;position:absolute;inset:0}\n.dbt-terminal-guide-main:focus-visible{outline-offset:-2px}\n.dbt-terminal-guide-icon{width:26px;height:26px;color:var(--dsw-alias-label-secondary);pointer-events:none;flex:none;justify-content:center;align-items:center;display:flex;position:relative}\n.dbt-terminal-guide-text{pointer-events:none;flex-direction:column;flex:1;gap:3px;min-width:0;display:flex;position:relative}\n.dbt-terminal-guide-title{color:var(--dsw-alias-label-primary);white-space:nowrap;text-overflow:ellipsis;font-size:14px;line-height:1.4;overflow:hidden}\n.dbt-terminal-guide-description{color:var(--dsw-alias-label-tertiary);white-space:nowrap;text-overflow:ellipsis;font-size:11px;line-height:1.4;overflow:hidden}\n.dbt-terminal-guide-menu{pointer-events:auto;flex:none;display:flex;position:relative}\n.dbt-terminal-guide-trigger{box-sizing:border-box;border:0;border-radius:4px;flex:none;width:22px;height:22px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;transition:background-color .12s ease}\n.dbt-terminal-guide-trigger:hover{background:var(--dsh-hover-bg,var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,.1)))}\n.dbt-terminal-guide-trigger svg{width:12px;height:12px;color:var(--dsw-alias-label-tertiary)}\n.dbt-terminal-guide-menu-list{min-width:180px;max-width:calc(100vw - 24px);border-radius:8px;padding:4px;box-shadow:0 8px 24px -4px #00000024,0 2px 6px -1px #00000014}\n.dbt-terminal-guide-menu-list [role=menuitem]{box-sizing:border-box;min-height:30px;height:30px}\n";
 
   // src/style.css
-  var style_default = "/* Only the locally discovered main conversation content receives these rules. */\n[data-conversation-content][data-dbt-main]{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}\n[data-dbt-main]>[data-conversation-scroll]{flex:1 1 0%;min-height:0;overflow-y:auto}\n.dbt-host{flex:0 0 auto;width:100%;min-width:0;min-height:0}\n.dbt-host:empty{display:none}\n.dbt-dock{box-sizing:border-box;position:relative;display:flex;flex:0 0 auto;flex-direction:column;width:100%;min-width:0;min-height:0;overflow:hidden;padding-top:4px;color:var(--dsw-alias-label-primary,#202124);background:var(--dsw-alias-bg-base,#fff);border-top:1px solid var(--dsw-alias-border-l3,#d9dce2);font:12px/1.4 system-ui,sans-serif;container-type:inline-size;container-name:dbt-terminal}\n.dbt-dock button,.dbt-launcher{font:inherit;color:inherit;background:transparent;border:1px solid transparent;border-radius:4px;cursor:pointer}\n.dbt-dock button:hover:not(:disabled),.dbt-launcher:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,.08))}\n.dbt-dock button:focus-visible,.dbt-resize:focus-visible,.dbt-launcher:focus-visible{outline:2px solid var(--dsw-alias-state-business-primary,#4f8cff);outline-offset:-2px}\n.dbt-dock button:disabled,.dbt-launcher:disabled{cursor:default;opacity:.5}\n.dbt-resize{position:absolute;top:0;left:0;right:0;height:4px;cursor:row-resize;touch-action:none}\n.dbt-resize:hover,.dbt-resize:focus-visible{background:#4f8cff66}\n.dbt-toolbar{display:flex;align-items:center;flex:none;gap:4px;min-width:0;height:36px;padding:0 8px;border-bottom:1px solid var(--dsw-alias-border-l3,#d9dce2)}\n.dbt-dock .dbt-action-btn{box-sizing:border-box;flex:none;width:22px;min-width:22px;height:22px;padding:0;border:0;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;background:transparent;color:var(--dsh-icon-color,var(--dsw-alias-label-secondary,rgba(0,0,0,.65)));cursor:pointer;transition:background-color .12s ease}\n.dbt-dock .dbt-action-btn:hover:not(:disabled){background:var(--dsh-hover-bg,var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,.1)))}\n.dbt-action-btn svg{display:block;flex:none;pointer-events:none}\n.dbt-label{font-weight:500;margin-right:8px;flex:none}\n.dbt-tabs{display:flex;align-items:stretch;flex:1;min-width:0;height:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}\n.dbt-tab{display:flex;flex:none;align-items:center;max-width:230px;border-bottom:2px solid transparent;padding:0 2px}\n.dbt-tab.is-active{border-bottom-color:var(--dsw-alias-state-business-primary,#4f8cff);background:var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,.08))}\n.dbt-tab>[role=tab]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:36px;max-width:190px;padding:5px 8px}\n.dbt-rename{width:120px;min-width:40px;max-width:180px;padding:3px 5px;color:inherit;background:var(--dsw-alias-bg-base,#fff);border:1px solid #4f8cff;border-radius:4px;font:inherit}\n.dbt-tab-close{flex:none}\n.dbt-new-menu{display:flex;align-items:center;flex:none}\n.dbt-shell-trigger{display:flex;flex:none}\n.dbt-shell-menu{min-width:180px;max-width:calc(100vw - 24px);border-radius:8px;padding:4px;box-shadow:0 8px 24px -4px #00000024,0 2px 6px -1px #00000014}\n.dbt-shell-menu [role=menuitem]{box-sizing:border-box;min-height:30px;height:30px}\n.dbt-content{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;overflow:hidden}\n.dbt-message{flex:none;padding:5px 10px;overflow-wrap:anywhere;max-height:100px;overflow:auto;color:var(--dsw-alias-label-secondary,inherit)}\n.dbt-message button{text-decoration:underline}\n.dbt-empty{display:flex;flex:1;align-items:center;justify-content:center;color:var(--dsw-alias-label-secondary,#737780)}\n.dbt-empty button{border-color:var(--dsw-alias-border-l3,#d9dce2);padding:7px 12px}\n.dbt-terminal-pane{display:flex;flex:1;min-width:0;min-height:0;overflow:hidden}\n.dbt-terminal-pane[hidden]{display:none}\n.dbt-launcher{padding:4px 8px;color:var(--dsw-alias-label-secondary,inherit);white-space:nowrap}\n.dbt-dock.is-collapsed{padding-top:0}\n.dbt-dock.is-collapsed .dbt-toolbar{border-bottom:0}\n.dbt-terminal-status,.dbt-terminal-error{padding:4px 10px;max-height:96px;overflow:auto;overflow-wrap:anywhere}\n.dbt-terminal-status button{margin-left:8px;text-decoration:underline}\n.dbt-terminal-error{color:var(--dsw-alias-status-error,#d64545)}\nbody[data-ds-dark-theme] .dbt-dock,body[data-ds-dark-theme] .dbt-rename{background:var(--dsw-alias-bg-base,#17191d);color:var(--dsw-alias-label-primary,#e6e8ed)}\n@container dbt-terminal (max-width:420px){.dbt-label{display:none}.dbt-toolbar{padding:0 4px;gap:2px}.dbt-tab{max-width:160px}.dbt-tab>[role=tab]{max-width:120px}}\n";
+  var style_default = "/* Only the locally discovered main conversation content receives these rules. */\n[data-conversation-content][data-dbt-main]{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}\n[data-dbt-main]>[data-conversation-scroll]{flex:1 1 0%;min-height:0;overflow-y:auto}\n.dbt-host{flex:0 0 auto;width:100%;min-width:0;min-height:0}\n.dbt-host:empty{display:none}\n.dbt-dock{box-sizing:border-box;position:relative;display:flex;flex:0 0 auto;flex-direction:column;width:100%;min-width:0;min-height:0;overflow:hidden;padding-top:4px;color:var(--dsw-alias-label-primary,#202124);background:var(--dsw-alias-bg-base,#fff);border-top:1px solid var(--dsw-alias-border-l3,#d9dce2);font:12px/1.4 system-ui,sans-serif;container-type:inline-size;container-name:dbt-terminal}\n.dbt-dock button,.dbt-launcher{font:inherit;color:inherit;background:transparent;border:1px solid transparent;border-radius:4px;cursor:pointer}\n.dbt-dock button:hover:not(:disabled),.dbt-launcher:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,.08))}\n.dbt-dock button:focus-visible,.dbt-resize:focus-visible,.dbt-launcher:focus-visible{outline:2px solid var(--dsw-alias-state-business-primary,#4f8cff);outline-offset:-2px}\n.dbt-dock button:disabled,.dbt-launcher:disabled{cursor:default;opacity:.5}\n.dbt-resize{position:absolute;top:0;left:0;right:0;height:4px;cursor:row-resize;touch-action:none}\n.dbt-resize:hover,.dbt-resize:focus-visible{background:#4f8cff66}\n.dbt-toolbar{display:flex;align-items:center;flex:none;gap:4px;min-width:0;height:36px;padding:0 8px;border-bottom:1px solid var(--dsw-alias-border-l3,#d9dce2)}\n.dbt-dock .dbt-action-btn{box-sizing:border-box;flex:none;width:22px;min-width:22px;height:22px;padding:0;border:0;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;background:transparent;color:var(--dsh-icon-color,var(--dsw-alias-label-secondary,rgba(0,0,0,.65)));cursor:pointer;transition:background-color .12s ease}\n.dbt-dock .dbt-action-btn:hover:not(:disabled){background:var(--dsh-hover-bg,var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,.1)))}\n.dbt-action-btn svg{display:block;flex:none;pointer-events:none}\n.dbt-label{font-weight:500;margin-right:8px;flex:none}\n.dbt-tabs{display:flex;align-items:stretch;flex:1;min-width:0;height:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}\n.dbt-tab{display:flex;flex:none;align-items:center;max-width:230px;border-bottom:2px solid transparent;padding:0 2px}\n.dbt-tab.is-active{border-bottom-color:var(--dsw-alias-state-business-primary,#4f8cff);background:var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,.08))}\n.dbt-tab>[role=tab]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:36px;max-width:190px;padding:5px 8px}\n.dbt-rename{width:120px;min-width:40px;max-width:180px;padding:3px 5px;color:inherit;background:var(--dsw-alias-bg-base,#fff);border:1px solid #4f8cff;border-radius:4px;font:inherit}\n.dbt-tab-close{flex:none}\n.dbt-new-menu{display:flex;align-items:center;flex:none}\n.dbt-shell-trigger{display:flex;flex:none}\n.dbt-shell-menu{min-width:180px;max-width:calc(100vw - 24px);border-radius:8px;padding:4px;box-shadow:0 8px 24px -4px #00000024,0 2px 6px -1px #00000014}\n.dbt-shell-menu [role=menuitem]{box-sizing:border-box;min-height:30px;height:30px}\n.dbt-content{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;overflow:hidden}\n.dbt-message{flex:none;padding:5px 10px;overflow-wrap:anywhere;max-height:100px;overflow:auto;color:var(--dsw-alias-label-secondary,inherit)}\n.dbt-message button{text-decoration:underline}\n.dbt-empty{display:flex;flex:1;align-items:center;justify-content:center;color:var(--dsw-alias-label-secondary,#737780)}\n.dbt-empty button{border-color:var(--dsw-alias-border-l3,#d9dce2);padding:7px 12px}\n.dbt-terminal-pane{display:flex;flex:1;min-width:0;min-height:0;overflow:hidden}\n.dbt-terminal-pane[hidden]{display:none}\n.dbt-launcher{box-sizing:border-box;display:inline-flex;flex:none;align-items:center;justify-content:center;width:22px;height:22px;padding:0;border:0;border-radius:4px;background:transparent;color:var(--dsw-alias-label-secondary,inherit);transition:background-color .12s ease}\n.dbt-launcher svg{display:block;flex:none;pointer-events:none}\n.dbt-dock.is-collapsed{padding-top:0}\n.dbt-dock.is-collapsed .dbt-toolbar{border-bottom:0}\n.dbt-terminal-status,.dbt-terminal-error{padding:4px 10px;max-height:96px;overflow:auto;overflow-wrap:anywhere}\n.dbt-terminal-status button{margin-left:8px;text-decoration:underline}\n.dbt-terminal-error{color:var(--dsw-alias-status-error,#d64545)}\nbody[data-ds-dark-theme] .dbt-dock,body[data-ds-dark-theme] .dbt-rename{background:var(--dsw-alias-bg-base,#17191d);color:var(--dsw-alias-label-primary,#e6e8ed)}\n@container dbt-terminal (max-width:420px){.dbt-label{display:none}.dbt-toolbar{padding:0 4px;gap:2px}.dbt-tab{max-width:160px}.dbt-tab>[role=tab]{max-width:120px}}\n";
 
   // vendor/xterm/css/xterm.css
   var xterm_default = `/**
@@ -10266,7 +10326,7 @@ ${guide_default}`;
           ctx.slots.inject("sidebar.right.tab.guide.entry", () => {
             const key = "@deepseek-ai/dsh-client-ui-sidebar-terminal";
             if (ctx.slots.entries("sidebar.right.tab.guide.entry").some((entry) => entry.options.key === key && (entry.options.priority ?? 0) !== 0)) {
-              ctx.logger.warn("终端引导入口已有自定义扩展，保留其入口；可通过输入框旁的终端按钮打开底部");
+              ctx.logger.warn("终端引导入口已有自定义扩展，保留其入口；可通过输入区底部右侧的终端图标打开底部");
               return;
             }
             return ctx.slots.register({ name: "sidebar.right.tab.guide.entry", key, priority: -1 }, Guide);
@@ -10274,9 +10334,10 @@ ${guide_default}`;
           function Launcher() {
             const current = React.useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
             const status = React.useSyncExternalStore(activity.subscribe, activity.getSnapshot, activity.getSnapshot);
-            return React.createElement("button", { type: "button", className: "dbt-launcher", disabled: !current || !status.available, title: status.available ? "显示底部终端" : "请先打开主聊天会话", onClick: () => store.show() }, "终端");
+            return React.createElement("button", { type: "button", className: "dbt-launcher", disabled: !current || !status.available, "aria-label": "显示底部终端", title: status.available ? "显示底部终端" : "请先打开主聊天会话", onClick: () => store.show() }, React.createElement(primitives.PluginArtworkTerminal, { size: 16 }));
           }
-          ctx.slots.inject("conversation.composer.dock", () => ctx.slots.register({ name: "conversation.composer.dock", id: ID }, Launcher));
+          const LauncherTool = createComposerTool(React, createPortal, { id: ID, order: 10, shrink: false }, Launcher);
+          ctx.slots.inject("conversation.composer.dock", () => ctx.slots.register({ name: "conversation.composer.dock", id: ID }, LauncherTool));
           ctx.effect(() => {
             const binding = { code: "Backquote", modifiers: ["control", "shift"] };
             const description = ctx.shortcuts.describeBinding(binding);
