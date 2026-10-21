@@ -1125,8 +1125,8 @@
   }
 
   // src/style.css
-  var style_default = `.dtd-root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei UI",sans-serif;color:inherit;min-width:0;font-size:12.5px;--dtd-green:#16a34a;--dtd-green-bg:rgba(22,163,74,0.12);--dtd-red:#dc2626;--dtd-red-bg:rgba(220,38,38,0.12);--dtd-amber:#d97706;--dtd-amber-bg:rgba(217,119,6,0.12);--dtd-blue:#2563eb;--dtd-blue-bg:rgba(37,99,235,0.12);--dtd-surface-overlay:var(--dsw-alias-bg-layer-2,#ffffff);--dtd-surface-subtle:var(--dsw-alias-bg-layer-3,#f4f4f5);--dtd-border:rgba(128,128,128,0.18);--dtd-border-hover:rgba(128,128,128,0.32);--dtd-shadow:0 8px 24px -4px rgba(0,0,0,0.14),0 2px 6px -1px rgba(0,0,0,0.08)}
-body[data-ds-dark-theme] .dtd-root{--dtd-surface-overlay:#1e1e20;--dtd-surface-subtle:#27272a;--dtd-border:rgba(255,255,255,0.12);--dtd-border-hover:rgba(255,255,255,0.22);--dtd-shadow:0 12px 32px -4px rgba(0,0,0,0.45),0 4px 10px -2px rgba(0,0,0,0.3)}
+  var style_default = `.dtd-root,.dtd-actions-fixed-wrap{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei UI",sans-serif;color:inherit;min-width:0;font-size:12.5px;--dtd-green:#16a34a;--dtd-green-bg:rgba(22,163,74,0.12);--dtd-red:#dc2626;--dtd-red-bg:rgba(220,38,38,0.12);--dtd-amber:#d97706;--dtd-amber-bg:rgba(217,119,6,0.12);--dtd-blue:#2563eb;--dtd-blue-bg:rgba(37,99,235,0.12);--dtd-surface-overlay:var(--dsw-alias-bg-layer-2,#ffffff);--dtd-surface-subtle:var(--dsw-alias-bg-layer-3,#f4f4f5);--dtd-border:rgba(128,128,128,0.18);--dtd-border-hover:rgba(128,128,128,0.32);--dtd-shadow:0 8px 24px -4px rgba(0,0,0,0.14),0 2px 6px -1px rgba(0,0,0,0.08)}
+body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-fixed-wrap{--dtd-surface-overlay:#1e1e20;--dtd-surface-subtle:#27272a;--dtd-border:rgba(255,255,255,0.12);--dtd-border-hover:rgba(255,255,255,0.22);--dtd-shadow:0 12px 32px -4px rgba(0,0,0,0.45),0 4px 10px -2px rgba(0,0,0,0.3)}
 
 .dtd-root button,.dtd-root select{font:inherit;color:inherit;border:1px solid transparent;border-radius:6px;background:transparent;cursor:pointer;padding:4px 8px;transition:all .15s ease}
 .dtd-root button:hover{background:var(--dtd-surface-subtle)}
@@ -1305,13 +1305,19 @@ body[data-ds-dark-theme] .dtd-root{--dtd-surface-overlay:#1e1e20;--dtd-surface-s
 .dtd-action-error{padding:6px 10px;margin:4px 8px;border-radius:5px;background:var(--dtd-red-bg);color:var(--dtd-red);font-size:11.5px;max-height:80px;overflow-y:auto}
 
 /* Dialog */
-.dtd-actions-dialog{font:inherit;background:var(--dtd-surface-overlay);color:inherit;border:1px solid var(--dtd-border);border-radius:10px;width:min(420px,calc(100vw - 40px));padding:16px;box-shadow:var(--dtd-shadow)}
+.dtd-actions-dialog{box-sizing:border-box;position:fixed;inset:0;margin:auto;font:inherit;line-height:1.5;background:var(--dtd-surface-overlay,#fff);color:var(--dsw-alias-label-primary,#18181b);border:1px solid var(--dtd-border,rgba(128,128,128,.18));border-radius:10px;width:min(420px,calc(100vw - 40px));max-height:calc(100dvh - 40px);overflow:auto;padding:20px;box-shadow:var(--dtd-shadow,0 12px 36px rgba(0,0,0,.25));user-select:text;pointer-events:auto;overflow-wrap:anywhere}
+body[data-ds-dark-theme] .dtd-actions-dialog{color:var(--dsw-alias-label-primary,#fafafa)}
 .dtd-actions-dialog::backdrop{background:rgba(0,0,0,0.4)}
-.dtd-dialog-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-size:14px}
-.dtd-dialog-close-btn{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;cursor:pointer;padding:0}
-.dtd-dialog-close-btn:hover{background:rgba(128,128,128,0.15)}
-.dtd-dialog-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;margin:8px 0}
-.dtd-push-urls{font-size:11px;opacity:.7;padding:6px 0}
+.dtd-dialog-title{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;font-size:14px}
+.dtd-actions-dialog .dtd-dialog-close-btn{flex:none;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;color:inherit;border-radius:6px;cursor:pointer;padding:0}
+.dtd-actions-dialog .dtd-dialog-close-btn:hover:not(:disabled){background:var(--dtd-surface-subtle)}
+.dtd-actions-dialog button:disabled{opacity:.45;cursor:not-allowed}
+.dtd-actions-dialog button:focus-visible,.dtd-actions-dialog select:focus-visible{outline:2px solid #3b82f6;outline-offset:2px}
+.dtd-dialog-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;margin:8px 0}
+.dtd-dialog-row select{min-width:0;max-width:70%;padding:6px 8px;font:inherit;color:inherit;background:var(--dtd-surface-subtle);border:1px solid var(--dtd-border);border-radius:6px}
+.dtd-push-urls{font-size:12px;color:var(--dsw-alias-label-secondary,inherit);padding:10px 12px;margin:12px 0 16px;border-radius:6px;background:var(--dtd-surface-subtle);overflow-wrap:anywhere}
+.dtd-actions-dialog .dtd-btn-primary{min-height:32px;height:auto;padding:6px 12px;background:#3b82f6;color:#fff;border:0}
+.dtd-actions-dialog .dtd-btn-primary:hover:not(:disabled){background:#2563eb}
 
 /* Guide Entry */
 .dtd-guide-entry{box-sizing:border-box;width:380px;max-width:100%;min-height:56px;display:flex;align-items:center;gap:14px;padding:14px 20px;text-align:left;font:inherit;background:var(--dtd-surface-overlay);color:inherit;border:.5px solid var(--dtd-border);border-radius:14px;cursor:pointer}
