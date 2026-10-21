@@ -337,7 +337,8 @@ window.__ModuleLoader__.load({
         }
         const toast = document.createElement('div')
         toast.className = `dsh-sst-toast dsh-sst-toast-${type}`
-        toast.innerHTML = `<span class="dsh-sst-toast-icon">${type === 'error' ? '⚠️' : 'ℹ️'}</span><span class="dsh-sst-toast-msg">${message}</span>`
+        toast.setAttribute('role', type === 'error' ? 'alert' : 'status')
+        toast.textContent = message
         container.appendChild(toast)
         setTimeout(() => {
           toast.classList.add('dsh-sst-toast-fadeout')
@@ -347,19 +348,20 @@ window.__ModuleLoader__.load({
 
       /** Non-blocking inline single session rename */
       const renameOne = async sessionId => {
-        const row = document.querySelector(`[data-row-key="session:${CSS.escape(sessionId)}"]`)
+        let row = null
         let spinner = null
-        if (row) {
-          row.classList.add('dsh-sst-session-renaming')
-          spinner = document.createElement('span')
-          spinner.className = 'dsh-sst-inline-spinner'
-          spinner.title = tr('single.busy')
-          spinner.innerHTML = '<svg class="dsh-sst-inline-spinner" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6" stroke-opacity="0.25"/><path d="M14 8a6 6 0 0 0-6-6"/></svg>'
-          const titleEl = row.querySelector('[class*="title"], [class*="name"]') || row.firstElementChild
-          if (titleEl) titleEl.prepend(spinner)
-          else row.prepend(spinner)
-        }
         try {
+          row = document.querySelector(`[data-row-key="session:${globalThis.CSS.escape(sessionId)}"]`)
+          if (row) {
+            row.classList.add('dsh-sst-session-renaming')
+            spinner = document.createElement('span')
+            spinner.className = 'dsh-sst-inline-spinner'
+            spinner.title = tr('single.busy')
+            spinner.innerHTML = '<svg class="dsh-sst-inline-spinner" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6" stroke-opacity="0.25"/><path d="M14 8a6 6 0 0 0-6-6"/></svg>'
+            const titleEl = row.querySelector('[class*="title"], [class*="name"]') || row.firstElementChild
+            if (titleEl) titleEl.prepend(spinner)
+            else row.prepend(spinner)
+          }
           const value = await call('renameSession', { sessionId })
           if (row) {
             row.classList.remove('dsh-sst-session-renaming')
