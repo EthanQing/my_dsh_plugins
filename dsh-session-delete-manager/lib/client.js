@@ -132,8 +132,9 @@ window.__ModuleLoader__.load({
 .dsh-sdm-inline-btn-danger{color:var(--dsw-alias-state-error-primary,#dc2626);border-color:rgba(220,38,38,0.25);background:rgba(220,38,38,0.08)}
 .dsh-sdm-inline-btn-danger:hover:not(:disabled){background:rgba(220,38,38,0.18);border-color:#dc2626}
 .dsh-sdm-modal-root{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:24px;pointer-events:auto}
-.dsh-sdm-modal-mask{position:absolute;inset:0;background:var(--dsw-alias-bg-mask-1);backdrop-filter:var(--dsw-mask-blur)}
-.dsh-sdm-modal{position:relative;z-index:1;width:min(420px,100%);box-sizing:border-box;display:flex;flex-direction:column;gap:20px;padding:0 0 24px;border-radius:var(--dsw-radius-panel);background:var(--dsw-alias-bg-layer-2);box-shadow:var(--dsw-elevation-prominent);color:var(--dsw-alias-label-primary)}
+.dsh-sdm-modal-mask{position:absolute;inset:0;background:var(--dsw-alias-bg-mask,rgba(0,0,0,0.45));backdrop-filter:var(--dsw-mask-blur,blur(4px))}
+.dsh-sdm-modal{position:relative;z-index:1;width:min(420px,calc(100vw - 32px));box-sizing:border-box;display:flex;flex-direction:column;gap:16px;padding:20px;border-radius:10px;background:var(--dsw-alias-bg-layer-2,#ffffff);box-shadow:0 12px 36px rgba(0,0,0,0.25);color:var(--dsw-alias-label-primary,#171717);border:1px solid var(--dsw-alias-border-l2,rgba(128,128,128,0.2))}
+body[data-ds-dark-theme] .dsh-sdm-modal{background:#1e1e20;color:#ffffff;border-color:rgba(255,255,255,0.14)}
 .dsh-sdm-modal-header{padding:22px 14px 12px 24px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .dsh-sdm-modal-title{margin:0;font-size:16px;line-height:24px;font-weight:500;overflow-wrap:anywhere}
 .dsh-sdm-modal-close{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;border:0;border-radius:var(--dsw-radius-md);background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer}
@@ -805,7 +806,12 @@ window.__ModuleLoader__.load({
           workspaces,
           controller: {
             startBatch,
+            stopBatch,
             toggle,
+            selectAll,
+            openBatchConfirm,
+            confirmDelete,
+            closeModal,
           },
         })
         dom = adapter
@@ -1185,6 +1191,28 @@ window.__ModuleLoader__.load({
               bar.id = 'dsh-sdm-inline-bar'
               bar.className = 'dsh-sdm-inline-bar'
               bar.setAttribute('role', 'toolbar')
+              bar.addEventListener('mousedown', (e) => e.stopPropagation())
+              bar.addEventListener('pointerdown', (e) => e.stopPropagation())
+              bar.addEventListener('click', (e) => {
+                e.stopPropagation()
+                const delBtn = e.target.closest('.dsh-sdm-inline-btn-danger')
+                if (delBtn) {
+                  e.preventDefault()
+                  if (!delBtn.disabled) controller.openBatchConfirm()
+                  return
+                }
+                const cancelBtn = e.target.closest('.dsh-sdm-inline-btn-cancel')
+                if (cancelBtn) {
+                  e.preventDefault()
+                  if (!cancelBtn.disabled) controller.stopBatch()
+                  return
+                }
+                const selectAllBox = e.target.closest('input[type="checkbox"]')
+                if (selectAllBox) {
+                  if (!selectAllBox.disabled) controller.selectAll()
+                  return
+                }
+              })
             }
             if (workspaceRow.nextElementSibling !== bar) {
               workspaceRow.after(bar)
@@ -1199,15 +1227,9 @@ window.__ModuleLoader__.load({
               </div>
               <div class="dsh-sdm-inline-right">
                 <button type="button" class="dsh-sdm-inline-btn dsh-sdm-inline-btn-danger" ${state.busy || state.selected.size === 0 ? 'disabled' : ''}>删除(${state.selected.size})</button>
-                <button type="button" class="dsh-sdm-inline-btn" ${state.busy ? 'disabled' : ''}>${tr('batch.cancel')}</button>
+                <button type="button" class="dsh-sdm-inline-btn dsh-sdm-inline-btn-cancel" ${state.busy ? 'disabled' : ''}>${tr('batch.cancel')}</button>
               </div>
             `
-            const selectAllBox = bar.querySelector('input[type="checkbox"]')
-            if (selectAllBox) selectAllBox.onchange = () => controller.selectAll()
-            const deleteBtn = bar.querySelector('.dsh-sdm-inline-btn-danger')
-            if (deleteBtn) deleteBtn.onclick = () => controller.openBatchConfirm()
-            const cancelBtn = bar.querySelector('.dsh-sdm-inline-btn:not(.dsh-sdm-inline-btn-danger)')
-            if (cancelBtn) cancelBtn.onclick = () => controller.stopBatch()
           }
         }
       }
@@ -1290,8 +1312,11 @@ window.__ModuleLoader__.load({
           if (!disposed && pendingWorkspace !== null) scanMenus()
         })
         menuObserver.observe(observationRoot, { childList: true, subtree: true })
-        rowObserver = new MutationObserver(() => {
-          if (!disposed && getState().mode === 'batch') scheduleRowScan()
+        rowObserver = new MutationObserver((mutations) => {
+          if (disposed || getState().mode !== 'batch') return
+          const selfOnly = Array.isArray(mutations) && mutations.every(m => m.target && (m.target.id === 'dsh-sdm-inline-bar' || m.target.closest?.('#dsh-sdm-inline-bar')))
+          if (selfOnly) return
+          scheduleRowScan()
         })
         rowObserver.observe(observationRoot, { childList: true, subtree: true })
       }
