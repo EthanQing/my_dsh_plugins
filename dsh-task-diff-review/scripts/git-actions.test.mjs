@@ -35,6 +35,19 @@ for (const change of ['branch', 'head', 'remote', 'tip', 'late-branch']) {
     assert.equal(f.calls.length, 0)
   })
 }
+test('preparePush response preserves HEAD and both branch names through JSON', async () => {
+  const f = fixture()
+  f.actions.repository = async () => process.cwd()
+  f.actions.remoteTip = async () => f.state.head
+  const preview = JSON.parse(JSON.stringify(await f.actions.preparePush(process.cwd(), 'session', 'origin')))
+  assert.equal(preview.head, f.state.head)
+  assert.equal(preview.localBranch, f.state.branch)
+  assert.equal(preview.branch, f.remote.branch)
+  assert.equal(preview.remote, 'origin')
+  assert.equal(preview.count, 0)
+  assert.ok(preview.ticket)
+})
+
 test('push uses confirmed immutable source and consumes ticket', async () => {
   const f = fixture()
   await f.actions.push('/repo', 'session', f.body)

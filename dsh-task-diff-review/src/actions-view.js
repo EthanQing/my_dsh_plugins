@@ -1,6 +1,22 @@
 import { subscribeGitRefresh, refreshGitViews } from './refresh.js'
 import { createIcons } from './icons.js'
 
+export function pushPreviewIssue(preview, remote, state, statusError = '') {
+  if (!preview?.ticket) return ''
+  const missing = ['remote', 'branch', 'localBranch', 'head'].filter(key => typeof preview[key] !== 'string' || !preview[key])
+  if (missing.length) return `推送预览缺少 ${missing.join('、')}，Host 与 Client 可能未同步加载。请重启 DSH、刷新页面后重新检查推送目标。`
+  if (!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i.test(preview.head) || !Number.isSafeInteger(preview.count) || preview.count < 0 || !Array.isArray(preview.targets) || !preview.targets.length || preview.targets.some(target => !target || typeof target.url !== 'string' || !Number.isSafeInteger(target.count) || target.count < 0)) return '推送预览数据无效，请重新检查推送目标。'
+  if (remote !== preview.remote) return '所选 Remote 已变化，请重新检查推送目标。'
+  if (statusError) return '当前 Git 状态读取失败，请重新检查推送目标。'
+  if (!state?.repository || !state.head || !state.branch) return '当前分支状态不可用，请重新检查推送目标。'
+  if (state.head !== preview.head) return '本地 HEAD 已变化，请重新检查推送目标。'
+  if (state.branch !== preview.localBranch) return '本地分支已变化，请重新检查推送目标。'
+  const destination = state.remotes?.find(item => item.name === remote)
+  if (!destination || destination.branch !== preview.branch || JSON.stringify(destination.urls) !== JSON.stringify(preview.targets.map(target => target.url))) return 'Remote 地址或目标分支已变化，请重新检查推送目标。'
+  if (preview.count === 0) return '没有需要推送的提交。'
+  return ''
+}
+
 export function createActionsPanel(React) {
   const { createElement: h, useState, useEffect, useRef, useCallback } = React
   const { IconBranch, IconChevron, IconClose, IconSparkles } = createIcons(React)
@@ -166,9 +182,13 @@ export function createActionsPanel(React) {
     }
 
     const previewPush = async name => {
+      generation.current++ // Ignore status reads started before this preview.
       setModal({ kind: 'push' })
       const result = await act('preparePush', { remote: name })
-      if (result) setModal({ kind: 'push', ...result })
+      if (!result || !mounted.current) return
+      setModal({ kind: 'push', ...result, checkingStatus: true })
+      await load()
+      if (mounted.current) setModal(previous => previous?.ticket === result.ticket ? { ...previous, checkingStatus: false } : previous)
     }
 
     const changeRemote = name => {
@@ -228,6 +248,12 @@ export function createActionsPanel(React) {
     }
 
     const errors = (error || statusError) && h('p', { className: 'dtd-action-error', role: 'alert' }, error || statusError)
+    const pushIssue = modal?.kind === 'push' ? pushPreviewIssue(modal, remote, state, statusError) : ''
+    const pushChecking = busy || modal?.checkingStatus
+    const confirmPush = () => {
+      if (pushChecking || pushIssue || !modal?.ticket) return
+      return act('push', { ticket: modal.ticket, remote, branch: modal.branch, head: modal.head, confirmed: true })
+    }
 
     // Formatted Pill Label (Task 3: 精简文案，零值隐藏)
     const stagedCount = staged.length
@@ -415,12 +441,13 @@ export function createActionsPanel(React) {
           h('label', { className: 'dtd-dialog-row' }, '推送 Remote ', remotes.length === 1 ? h('strong', null, remote) : h('select', { value: remote, disabled: busy, onChange: event => changeRemote(event.target.value) }, remotes.map(item => h('option', { key: item.name, value: item.name }, `${item.name} · ${item.urls.join(' ; ')}`)))),
           h('div', { className: 'dtd-push-urls' }, remotes.find(item => item.name === remote)?.urls.map(url => h('div', { key: url }, url))),
           errors,
-          !modal.ticket ? h('button', { type: 'button', className: 'dtd-btn-primary', disabled: busy || !remotes.some(item => item.name === remote), onClick: () => previewPush(remote) }, busy ? '正在核对…' : '检查推送目标') : h(React.Fragment, null,
-            h('p', null, `目标：${modal.remote} / ${modal.branch} · ${modal.targets.length === 1 ? `待推送 ${modal.count} 个提交` : '各推送地址分别统计如下'}`),
-            h('p', null, '提交：', h('code', null, modal.head)),
-            modal.targets.map(target => h('p', { key: target.url, className: 'dtd-muted' }, `${target.url} · ${target.count} 个提交`)),
-            modal.count === 0 && h('p', null, '没有需要推送的提交'),
-            h('button', { type: 'button', className: 'dtd-btn-primary', disabled: busy || modal.count === 0 || remote !== modal.remote || state.head !== modal.head || state.branch !== modal.localBranch, onClick: () => act('push', { ticket: modal.ticket, remote, branch: modal.branch, head: modal.head, confirmed: true }) }, busy ? '正在推送…' : '确认推送')))
+          h('button', { type: 'button', className: 'dtd-btn-primary', disabled: pushChecking || !remotes.some(item => item.name === remote), onClick: () => previewPush(remote) }, pushChecking ? '正在核对…' : modal.ticket ? '重新检查推送目标' : '检查推送目标'),
+          modal.ticket && h(React.Fragment, null,
+            h('p', null, `目标：${modal.remote || '未返回'} / ${modal.branch || '未返回'} · ${modal.targets?.length === 1 ? `待推送 ${modal.count} 个提交` : '各推送地址分别统计如下'}`),
+            h('p', null, '提交：', h('code', null, modal.head || 'Host 未返回 HEAD')),
+            Array.isArray(modal.targets) && modal.targets.filter(target => target && typeof target.url === 'string').map(target => h('p', { key: target.url, className: 'dtd-muted' }, `${target.url} · ${target.count} 个提交`)),
+            pushIssue && h('p', { className: 'dtd-action-error', role: 'alert' }, pushIssue),
+            h('button', { type: 'button', className: 'dtd-btn-primary', disabled: Boolean(pushChecking || pushIssue), onClick: confirmPush }, modal.checkingStatus ? '正在刷新状态…' : busy ? '处理中…' : '确认推送')))
       ))
   }
 
