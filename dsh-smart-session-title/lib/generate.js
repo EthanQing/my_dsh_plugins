@@ -104,6 +104,9 @@ export async function generateCandidate(ctx, config, options) {
   }
   const call = async system => {
     signal?.throwIfAborted()
+    if (Buffer.byteLength(input, 'utf8') > config.maxInputBytes) {
+      throw new Error('smart-session-title: input exceeds maxInputBytes')
+    }
     const response = await executeSessionTitleLlm(ctx, executionConfig(config), request, titleProvider, {
       system,
       input,

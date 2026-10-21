@@ -7,8 +7,7 @@
     return () => listeners.delete(listener);
   };
   var refreshGitViews = () => {
-    for (const listener of listeners)
-      listener();
+    for (const listener of listeners) listener();
   };
 
   // src/icons.js
@@ -71,16 +70,12 @@
   function timeAgo(dateStr) {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 6e4);
-    if (mins < 1)
-      return "刚刚";
-    if (mins < 60)
-      return `${mins} 分钟前`;
+    if (mins < 1) return "刚刚";
+    if (mins < 60) return `${mins} 分钟前`;
     const hours = Math.floor(mins / 60);
-    if (hours < 24)
-      return `${hours} 小时前`;
+    if (hours < 24) return `${hours} 小时前`;
     const days = Math.floor(hours / 24);
-    if (days < 30)
-      return `${days} 天前`;
+    if (days < 30) return `${days} 天前`;
     return new Date(dateStr).toLocaleDateString();
   }
   function createViews(React, ctx, open) {
@@ -105,8 +100,7 @@
     const read = async (kind, params, signal) => {
       const response = await fetch(api(kind, params), { signal, cache: "no-store" });
       const body = await response.json();
-      if (!response.ok)
-        throw new Error(body.error || `读取失败 (${response.status})`);
+      if (!response.ok) throw new Error(body.error || `读取失败 (${response.status})`);
       return body;
     };
     function useSummary(sessionId, mode = "task", base = "", taskId = "", commit = "", parent = 0) {
@@ -119,36 +113,35 @@
         setRevision((v) => v + 1);
       }), []);
       useEffect(() => {
-        let disposed = false, timer;
+        let disposed = false, timer, loading = false;
         setState({ key, value: cached.get(key) });
         setError("");
-        if (mode === "commits" && !commit)
-          return;
+        if (mode === "commits" && !commit) return;
         const load = async () => {
+          if (disposed || loading) return;
+          loading = true;
           try {
             if (!pending.has(key)) {
               const task = read("summary", { sessionId, mode, base, taskId, commit, parent: String(parent) });
               pending.set(key, task);
               void task.finally(() => {
-                if (pending.get(key) === task)
-                  pending.delete(key);
+                if (pending.get(key) === task) pending.delete(key);
               }).catch(() => {
               });
             }
             const result = await pending.get(key);
             cached.set(key, result);
-            while (cached.size > 30)
-              cached.delete(cached.keys().next().value);
+            while (cached.size > 30) cached.delete(cached.keys().next().value);
             if (!disposed) {
               setState({ key, value: result });
               setError("");
             }
           } catch (err) {
-            if (!disposed)
-              setError(err.message);
+            if (!disposed) setError(err.message);
+          } finally {
+            loading = false;
           }
-          if (!disposed && !document.hidden && mode !== "commits")
-            timer = setTimeout(load, mode === "task" ? 4e3 : 1e4);
+          if (!disposed && !document.hidden && mode !== "commits") timer = setTimeout(load, mode === "task" ? 4e3 : 1e4);
         };
         const visible = () => {
           if (!document.hidden) {
@@ -166,8 +159,7 @@
       }, [key, revision]);
       const refresh = useCallback(async () => {
         try {
-          if (mode !== "commits" || commit)
-            await read("refresh", { sessionId, mode, base, taskId, commit, parent: String(parent) });
+          if (mode !== "commits" || commit) await read("refresh", { sessionId, mode, base, taskId, commit, parent: String(parent) });
           setRevision((v) => v + 1);
         } catch (err) {
           setError(err.message);
@@ -204,8 +196,7 @@
       useEffect(() => {
         setExpanded(false);
       }, [sessionId, value?.taskId]);
-      if (!value || value.total <= 0)
-        return null;
+      if (!value || value.total <= 0) return null;
       return h(
         "div",
         { className: "dtd-dock-seat" },
@@ -266,23 +257,25 @@
       const menuRef = useRef(null);
       const triggerRef = useRef(null);
       const hoverTimer = useRef(null);
-      const loadCommits = useCallback(async (query = "") => {
+      useEffect(() => {
+        if (!open2 || !submenuOpen) return;
+        const abort = new AbortController();
         setLoadingCommits(true);
-        try {
-          const result = await read("history", { sessionId, branch: "HEAD", query, offset: "0", tip: "" });
-          setCommits(result.commits || []);
-        } catch {
-        } finally {
-          setLoadingCommits(false);
-        }
-      }, [sessionId]);
+        void read("history", { sessionId, branch: "HEAD", query: search, offset: "0", tip: "" }, abort.signal).then((result) => {
+          if (!abort.signal.aborted) setCommits(result.commits || []);
+        }).catch(() => {
+          if (!abort.signal.aborted) setCommits([]);
+        }).finally(() => {
+          if (!abort.signal.aborted) setLoadingCommits(false);
+        });
+        return () => abort.abort();
+      }, [open2, submenuOpen, search, historyRevision, sessionId]);
       useEffect(() => {
-        if (submenuOpen)
-          loadCommits(search);
-      }, [submenuOpen, search, historyRevision, loadCommits]);
+        if (!open2) setSubmenuOpen(false);
+        return () => clearTimeout(hoverTimer.current);
+      }, [open2]);
       useEffect(() => {
-        if (!open2)
-          return;
+        if (!open2) return;
         const onMouseDown = (e) => {
           if (menuRef.current && !menuRef.current.contains(e.target) && triggerRef.current && !triggerRef.current.contains(e.target)) {
             setOpen(false);
@@ -303,8 +296,7 @@
         };
       }, [open2]);
       const handleHoverCommits = (enter) => {
-        if (hoverTimer.current)
-          clearTimeout(hoverTimer.current);
+        if (hoverTimer.current) clearTimeout(hoverTimer.current);
         if (enter) {
           hoverTimer.current = setTimeout(() => {
             if (menuRef.current) {
@@ -379,8 +371,7 @@
             {
               className: `dtd-submenu-panel ${flipLeft ? "dtd-submenu-left" : "dtd-submenu-right"}`,
               onMouseEnter: () => {
-                if (hoverTimer.current)
-                  clearTimeout(hoverTimer.current);
+                if (hoverTimer.current) clearTimeout(hoverTimer.current);
               },
               onMouseLeave: () => handleHoverCommits(false)
             },
@@ -454,12 +445,10 @@
       const diff = diffState?.key === requestKey ? diffState.value : "loading";
       useEffect(() => {
         selections.set(selectionKey, { mode, base, taskId, choices, historyBranch, commit, parent });
-        while (selections.size > 100)
-          selections.delete(selections.keys().next().value);
+        while (selections.size > 100) selections.delete(selections.keys().next().value);
       }, [selectionKey, mode, base, taskId, choices, historyBranch, commit, parent]);
       useEffect(() => {
-        if (choices.navigated === tab.navigation.revision)
-          return;
+        if (choices.navigated === tab.navigation.revision) return;
         const params = tab.navigation.params;
         if (params?.mode === "task") {
           setMode("task");
@@ -475,11 +464,9 @@
         const abort = new AbortController();
         setDiffState({ key: requestKey, value: "loading" });
         void read("diff", { sessionId, token: value.token, index: String(index) }, abort.signal).then((diff2) => {
-          if (!abort.signal.aborted)
-            setDiffState({ key: requestKey, value: diff2 });
+          if (!abort.signal.aborted) setDiffState({ key: requestKey, value: diff2 });
         }).catch(() => {
-          if (!abort.signal.aborted)
-            setDiffState({ key: requestKey, value: "error" });
+          if (!abort.signal.aborted) setDiffState({ key: requestKey, value: "error" });
         });
         return () => abort.abort();
       }, [sessionId, value?.token, index, diffRevision]);
@@ -583,8 +570,7 @@
               title: "刷新改动",
               onClick: () => {
                 void refresh();
-                if (mode === "commits")
-                  setHistoryRevision((v) => v + 1);
+                if (mode === "commits") setHistoryRevision((v) => v + 1);
               }
             }, h(IconRefresh, { size: 13 }))
           )
@@ -656,22 +642,21 @@
         ...kind === "status" ? {} : { headers: { "content-type": "application/json", "x-dsh-git-action": "1" }, body: JSON.stringify({ ...data, sessionId }) }
       });
       const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.error || `Git 请求失败 (${response.status})`);
+      if (!response.ok) throw new Error(result.error || `Git 请求失败 (${response.status})`);
       return result;
     };
     function Dialog({ title, close, busy, children }) {
       const ref = useRef();
       useEffect(() => {
-        ref.current.showModal();
-        return () => ref.current?.close();
+        const dialog = ref.current;
+        dialog.showModal();
+        return () => dialog.close();
       }, []);
       return h(
         "dialog",
         { ref, className: "dtd-actions-dialog", "aria-label": title, onCancel: (event) => {
           event.preventDefault();
-          if (!busy)
-            close();
+          if (!busy) close();
         } },
         h(
           "div",
@@ -698,33 +683,39 @@
       const mounted = useRef(true);
       const dialogMessage = useRef("");
       const popoverRef = useRef(null);
+      const acting = useRef(false);
       useEffect(() => {
+        let sidebar, frame;
         const updateOffset = () => {
-          const rightbar = document.querySelector("[data-sidebar-right-open]");
-          if (rightbar) {
-            const rect = rightbar.getBoundingClientRect();
-            if (rect.width > 0 && rect.right >= window.innerWidth - 10) {
-              setRightOffset(rect.width);
-              return;
-            }
+          frame = void 0;
+          const next = document.querySelector("[data-sidebar-right-open]");
+          if (next !== sidebar) {
+            if (sidebar) ro.unobserve(sidebar);
+            sidebar = next;
+            if (sidebar) ro.observe(sidebar);
           }
-          setRightOffset(0);
+          const rect = sidebar?.getBoundingClientRect();
+          setRightOffset(rect && rect.width > 0 && rect.right >= window.innerWidth - 10 ? rect.width : 0);
         };
+        const schedule = () => {
+          if (frame === void 0) frame = requestAnimationFrame(updateOffset);
+        };
+        const ro = new ResizeObserver(schedule);
+        const mo = new MutationObserver((records) => {
+          if (records.some((record) => record.type === "attributes" || [...record.addedNodes, ...record.removedNodes].some((node) => node.nodeType === 1 && (node.matches("[data-sidebar-right-open]") || node.querySelector("[data-sidebar-right-open]"))))) schedule();
+        });
+        mo.observe(document.body, { attributes: true, childList: true, subtree: true, attributeFilter: ["data-sidebar-right-open"] });
         updateOffset();
-        const ro = new ResizeObserver(updateOffset);
-        ro.observe(document.body);
-        const mo = new MutationObserver(updateOffset);
-        mo.observe(document.body, { attributes: true, subtree: true, attributeFilter: ["data-sidebar-right-open", "style", "class"] });
-        window.addEventListener("resize", updateOffset);
+        window.addEventListener("resize", schedule);
         return () => {
           ro.disconnect();
           mo.disconnect();
-          window.removeEventListener("resize", updateOffset);
+          cancelAnimationFrame(frame);
+          window.removeEventListener("resize", schedule);
         };
       }, []);
       useEffect(() => {
-        if (!expanded)
-          return;
+        if (!expanded) return;
         const onMouseDown = (event) => {
           if (popoverRef.current && !popoverRef.current.contains(event.target)) {
             setExpanded(false);
@@ -746,28 +737,31 @@
         const epoch = ++generation.current;
         try {
           const result = await request("status", sessionId);
-          if (!mounted.current || epoch !== generation.current)
-            return;
+          if (!mounted.current || epoch !== generation.current) return;
           setState(result);
           setStatusError("");
           setSelected((previous) => new Set([...previous].filter((path) => result.files?.some((file) => file.path === path))));
         } catch (error2) {
-          if (mounted.current && epoch === generation.current)
-            setStatusError(error2.message);
+          if (mounted.current && epoch === generation.current) setStatusError(error2.message);
         }
       }, [sessionId]);
       useEffect(() => {
         mounted.current = true;
-        let stopped = false, timer;
+        let stopped = false, timer, polling = false;
         setState(void 0);
         setSelected(/* @__PURE__ */ new Set());
         setModal(void 0);
         setError("");
         setNotice("");
         const tick = async () => {
-          await load();
-          if (!stopped && !document.hidden)
-            timer = setTimeout(tick, 5e3);
+          if (stopped || polling) return;
+          polling = true;
+          try {
+            await load();
+          } finally {
+            polling = false;
+          }
+          if (!stopped && !document.hidden) timer = setTimeout(tick, 5e3);
         };
         const visible = () => {
           if (!document.hidden) {
@@ -790,15 +784,14 @@
         };
       }, [sessionId, load]);
       const act = async (action, data = {}) => {
-        if (busy)
-          return;
+        if (acting.current || !mounted.current) return;
+        acting.current = true;
         setBusy(true);
         setError("");
         setNotice("");
         try {
           const result = await request("action", sessionId, { action, ...data });
-          if (!mounted.current)
-            return;
+          if (!mounted.current) return;
           if (["stage", "unstage", "commit", "push"].includes(action)) {
             setNotice(result.message);
             setSelected(/* @__PURE__ */ new Set());
@@ -811,17 +804,15 @@
           }
           return result;
         } catch (error2) {
-          if (mounted.current)
-            setError(error2.message);
+          if (mounted.current) setError(error2.message);
         } finally {
-          if (mounted.current)
-            setBusy(false);
-          if (["stage", "unstage", "commit", "push"].includes(action))
-            refreshGitViews();
+          acting.current = false;
+          if (mounted.current) setBusy(false);
+          if (["stage", "unstage", "commit", "push"].includes(action)) refreshGitViews();
         }
       };
       const openPush = () => {
-        setRemote(state?.defaultRemote || (state?.remotes?.[0]?.name ?? ""));
+        setRemote(remotes.some((item) => item.name === remote) ? remote : state?.defaultRemote || remotes[0]?.name || "");
         setModal({ kind: "push" });
         setError("");
         setNotice("");
@@ -829,8 +820,12 @@
       const previewPush = async (name) => {
         setModal({ kind: "push" });
         const result = await act("preparePush", { remote: name });
-        if (result)
-          setModal({ kind: "push", ...result });
+        if (result) setModal({ kind: "push", ...result });
+      };
+      const changeRemote = (name) => {
+        setRemote(name);
+        setError("");
+        setModal((previous) => previous?.kind === "push" ? { kind: "push" } : previous);
       };
       const select = (path) => setSelected((previous) => {
         const next = new Set(previous);
@@ -847,15 +842,10 @@
         dialogMessage.current = value;
       };
       const generateAiMessage = async () => {
-        let ticket = modal?.ticket;
-        if (!ticket) {
-          const prep = await act("prepareCommit");
-          if (!prep)
-            return;
-          ticket = prep.ticket;
-        }
-        if (!ticket)
-          return;
+        if (!enabled || !staged.length) return;
+        const prep = await act("prepareCommit");
+        if (!prep?.ticket) return;
+        const ticket = prep.ticket;
         const previous = dialogMessage.current;
         const result = await act("generate", { ticket });
         if (result && dialogMessage.current === previous) {
@@ -863,28 +853,24 @@
         }
       };
       const handleCommit = async () => {
-        if (!message.trim() || busy)
+        if (!enabled || !message.trim()) return;
+        if (!staged.length) {
+          if (unstaged.length) setModal({ kind: "stageCommit", version: state.version, files: unstaged.length });
           return;
-        let ticket = modal?.ticket;
-        if (!ticket) {
-          if (staged.length === 0 && unstaged.length > 0) {
-            const stagedRes = await act("stage", { all: true, paths: [], version: state.version });
-            if (!stagedRes)
-              return;
-          }
-          const prep = await act("prepareCommit");
-          if (!prep)
-            return;
-          ticket = prep.ticket;
         }
-        await act("commit", { ticket, message: message.trim(), confirmed: true });
+        const prep = await act("prepareCommit");
+        if (prep) setModal({ kind: "commit", ...prep, message: message.trim() });
       };
-      if (!state)
-        return null;
+      const confirmStageCommit = async () => {
+        const result = await act("stage", { all: true, paths: [], version: modal.version });
+        if (!result) return;
+        const prep = await act("prepareCommit");
+        if (prep) setModal({ kind: "commit", ...prep, message: message.trim() });
+      };
+      if (!state) return null;
       const renderFileInfo = (path) => {
         const idx = path.lastIndexOf("/");
-        if (idx === -1)
-          return { dir: "", file: path };
+        if (idx === -1) return { dir: "", file: path };
         return { dir: path.slice(0, idx + 1), file: path.slice(idx + 1) };
       };
       const errors = (error || statusError) && h("p", { className: "dtd-action-error", role: "alert" }, error || statusError);
@@ -955,7 +941,8 @@
                 remotes.length > 1 && h("select", {
                   className: "dtd-popover-remote-select",
                   value: remote || state.defaultRemote,
-                  onChange: (e) => setRemote(e.target.value),
+                  disabled: busy,
+                  onChange: (e) => changeRemote(e.target.value),
                   title: "选择远端"
                 }, remotes.map((r) => h("option", { key: r.name, value: r.name }, r.name))),
                 remotes.length > 0 && h("button", {
@@ -1087,35 +1074,49 @@
                     type: "button",
                     className: "dtd-ai-generate-btn",
                     title: "使用本会话 AI 根据暂存改动生成提交说明",
-                    disabled: busy || staged.length === 0 && unstaged.length === 0,
+                    disabled: !enabled || !staged.length,
                     onClick: generateAiMessage
                   }, h(IconSparkles, { size: 12 }), h("span", null, "AI 生成"))
                 ),
                 h("button", {
                   type: "button",
                   className: "dtd-btn-primary dtd-btn-commit-main",
-                  disabled: busy || !message.trim() && staged.length === 0 && unstaged.length === 0,
+                  disabled: !enabled || !message.trim() || !staged.length && !unstaged.length,
                   onClick: handleCommit
                 }, busy ? "处理中…" : staged.length > 0 ? `提交更改 (Commit ${staged.length} 个暂存文件)` : unstaged.length > 0 ? "暂存全部并提交" : "提交更改")
               )
             )
           ),
+          modal?.kind === "stageCommit" && h(
+            Dialog,
+            { title: "暂存全部并提交", busy, close: () => setModal(void 0) },
+            h("p", null, `将全部 ${modal.files} 个未暂存文件加入暂存区，然后预览并确认提交。`),
+            errors,
+            h("button", { type: "button", className: "dtd-btn-primary", disabled: busy, onClick: confirmStageCommit }, busy ? "正在暂存…" : "确认暂存全部")
+          ),
+          modal?.kind === "commit" && h(
+            Dialog,
+            { title: "确认 Git 提交", busy, close: () => setModal(void 0) },
+            h("p", null, `分支：${modal.branch} · ${modal.files} 个暂存文件 · +${modal.added} / −${modal.deleted}`),
+            h("p", { className: "dtd-commit-preview" }, modal.message),
+            errors,
+            h("button", { type: "button", className: "dtd-btn-primary", disabled: busy, onClick: () => act("commit", { ticket: modal.ticket, message: modal.message, confirmed: true }) }, busy ? "正在提交…" : "确认提交")
+          ),
           // Push Dialog Modal
           modal && modal.kind === "push" && h(
             Dialog,
             { title: "确认 Git 推送", busy, close: () => setModal(void 0) },
-            h("label", { className: "dtd-dialog-row" }, "推送 Remote ", remotes.length === 1 ? h("strong", null, remote) : h("select", { value: remote, disabled: busy, onChange: (event) => {
-              setRemote(event.target.value);
-              setError("");
-            } }, remotes.map((item) => h("option", { key: item.name, value: item.name }, `${item.name} · ${item.urls.join(" ; ")}`)))),
+            h("label", { className: "dtd-dialog-row" }, "推送 Remote ", remotes.length === 1 ? h("strong", null, remote) : h("select", { value: remote, disabled: busy, onChange: (event) => changeRemote(event.target.value) }, remotes.map((item) => h("option", { key: item.name, value: item.name }, `${item.name} · ${item.urls.join(" ; ")}`)))),
             h("div", { className: "dtd-push-urls" }, remotes.find((item) => item.name === remote)?.urls.map((url) => h("div", { key: url }, url))),
+            errors,
             !modal.ticket ? h("button", { type: "button", className: "dtd-btn-primary", disabled: busy || !remotes.some((item) => item.name === remote), onClick: () => previewPush(remote) }, busy ? "正在核对…" : "检查推送目标") : h(
               React.Fragment,
               null,
               h("p", null, `目标：${modal.remote} / ${modal.branch} · ${modal.targets.length === 1 ? `待推送 ${modal.count} 个提交` : "各推送地址分别统计如下"}`),
+              h("p", null, "提交：", h("code", null, modal.head)),
               modal.targets.map((target) => h("p", { key: target.url, className: "dtd-muted" }, `${target.url} · ${target.count} 个提交`)),
               modal.count === 0 && h("p", null, "没有需要推送的提交"),
-              h("button", { type: "button", className: "dtd-btn-primary", disabled: busy || modal.count === 0, onClick: () => act("push", { ticket: modal.ticket, confirmed: true }) }, busy ? "正在推送…" : "确认推送")
+              h("button", { type: "button", className: "dtd-btn-primary", disabled: busy || modal.count === 0 || remote !== modal.remote || state.head !== modal.head || state.branch !== modal.localBranch, onClick: () => act("push", { ticket: modal.ticket, remote, branch: modal.branch, head: modal.head, confirmed: true }) }, busy ? "正在推送…" : "确认推送")
             )
           )
         )
@@ -1125,8 +1126,8 @@
   }
 
   // src/style.css
-  var style_default = `.dtd-root,.dtd-actions-fixed-wrap{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei UI",sans-serif;color:inherit;min-width:0;font-size:12.5px;--dtd-green:#16a34a;--dtd-green-bg:rgba(22,163,74,0.12);--dtd-red:#dc2626;--dtd-red-bg:rgba(220,38,38,0.12);--dtd-amber:#d97706;--dtd-amber-bg:rgba(217,119,6,0.12);--dtd-blue:#2563eb;--dtd-blue-bg:rgba(37,99,235,0.12);--dtd-surface-overlay:var(--dsw-alias-bg-layer-2,#ffffff);--dtd-surface-subtle:var(--dsw-alias-bg-layer-3,#f4f4f5);--dtd-border:rgba(128,128,128,0.18);--dtd-border-hover:rgba(128,128,128,0.32);--dtd-shadow:0 8px 24px -4px rgba(0,0,0,0.14),0 2px 6px -1px rgba(0,0,0,0.08)}
-body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-fixed-wrap{--dtd-surface-overlay:#1e1e20;--dtd-surface-subtle:#27272a;--dtd-border:rgba(255,255,255,0.12);--dtd-border-hover:rgba(255,255,255,0.22);--dtd-shadow:0 12px 32px -4px rgba(0,0,0,0.45),0 4px 10px -2px rgba(0,0,0,0.3)}
+  var style_default = `.dtd-root,.dtd-actions-fixed-wrap,.dtd-actions-dialog{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei UI",sans-serif;color:inherit;min-width:0;font-size:12.5px;--dtd-green:#16a34a;--dtd-green-bg:rgba(22,163,74,0.12);--dtd-red:#dc2626;--dtd-red-bg:rgba(220,38,38,0.12);--dtd-amber:#d97706;--dtd-amber-bg:rgba(217,119,6,0.12);--dtd-blue:#2563eb;--dtd-blue-bg:rgba(37,99,235,0.12);--dtd-surface-overlay:var(--dsw-alias-bg-layer-2,#ffffff);--dtd-surface-subtle:var(--dsw-alias-bg-layer-3,#f4f4f5);--dtd-border:rgba(128,128,128,0.18);--dtd-border-hover:rgba(128,128,128,0.32);--dtd-shadow:0 8px 24px -4px rgba(0,0,0,0.14),0 2px 6px -1px rgba(0,0,0,0.08)}
+body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-fixed-wrap,body[data-ds-dark-theme] .dtd-actions-dialog{--dtd-surface-overlay:var(--dsw-alias-bg-layer-2,#1e1e20);--dtd-surface-subtle:var(--dsw-alias-bg-layer-3,#27272a);--dtd-border:rgba(255,255,255,0.12);--dtd-border-hover:rgba(255,255,255,0.22);--dtd-shadow:0 12px 32px -4px rgba(0,0,0,0.45),0 4px 10px -2px rgba(0,0,0,0.3)}
 
 .dtd-root button,.dtd-root select{font:inherit;color:inherit;border:1px solid transparent;border-radius:6px;background:transparent;cursor:pointer;padding:4px 8px;transition:all .15s ease}
 .dtd-root button:hover{background:var(--dtd-surface-subtle)}
@@ -1305,8 +1306,8 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-fixed-w
 .dtd-action-error{padding:6px 10px;margin:4px 8px;border-radius:5px;background:var(--dtd-red-bg);color:var(--dtd-red);font-size:11.5px;max-height:80px;overflow-y:auto}
 
 /* Dialog */
-.dtd-actions-dialog{box-sizing:border-box;position:fixed;inset:0;margin:auto;font:inherit;line-height:1.5;background:var(--dtd-surface-overlay,#fff);color:var(--dsw-alias-label-primary,#18181b);border:1px solid var(--dtd-border,rgba(128,128,128,.18));border-radius:10px;width:min(420px,calc(100vw - 40px));max-height:calc(100dvh - 40px);overflow:auto;padding:20px;box-shadow:var(--dtd-shadow,0 12px 36px rgba(0,0,0,.25));user-select:text;pointer-events:auto;overflow-wrap:anywhere}
-body[data-ds-dark-theme] .dtd-actions-dialog{color:var(--dsw-alias-label-primary,#fafafa)}
+.dtd-actions-dialog{box-sizing:border-box;position:fixed;inset:0;margin:auto;font:inherit;line-height:1.5;background:#fff;background:linear-gradient(var(--dtd-surface-overlay,#fff),var(--dtd-surface-overlay,#fff)),#fff;color:var(--dsw-alias-label-primary,#18181b);border:1px solid var(--dtd-border,rgba(128,128,128,.18));border-radius:10px;width:min(420px,calc(100vw - 40px));max-height:calc(100dvh - 40px);overflow:auto;padding:20px;box-shadow:var(--dtd-shadow,0 12px 36px rgba(0,0,0,.25));user-select:text;pointer-events:auto;overflow-wrap:anywhere}
+body[data-ds-dark-theme] .dtd-actions-dialog{background:#1e1e20;background:linear-gradient(var(--dtd-surface-overlay,#1e1e20),var(--dtd-surface-overlay,#1e1e20)),#1e1e20;color:var(--dsw-alias-label-primary,#fafafa)}
 .dtd-actions-dialog::backdrop{background:rgba(0,0,0,0.4)}
 .dtd-dialog-title{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;font-size:14px}
 .dtd-actions-dialog .dtd-dialog-close-btn{flex:none;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;color:inherit;border-radius:6px;cursor:pointer;padding:0}
@@ -1326,6 +1327,8 @@ body[data-ds-dark-theme] .dtd-actions-dialog{color:var(--dsw-alias-label-primary
 .dtd-guide-copy{display:flex;flex-direction:column;gap:2px}
 .dtd-guide-title{font-size:13.5px;font-weight:500}
 .dtd-guide-description{font-size:11px;opacity:.65}
+
+.dtd-commit-preview{white-space:pre-wrap}
 `;
 
   // locale/zh.json

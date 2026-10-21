@@ -44,11 +44,9 @@ window.__ModuleLoader__.load({
       'error.generic': '操作失败：',
       'error.remote': '批量确认需要桌面/Web 主界面的连接，当前连接无法确认。',
       'single.busy': '正在重新命名…',
-      'single.done': '已更新为“{title}”',
       'single.locked': '该会话标题由你手动指定，自动命名不会覆盖它。',
       'single.running': '会话正在运行，请稍后再试。',
       'single.insufficient': '会话内容不足，暂不命名。',
-      'result.title': 'AI 重新命名',
     }
 
     const en = {
@@ -82,11 +80,9 @@ window.__ModuleLoader__.load({
       'error.generic': 'Failed: ',
       'error.remote': 'Batch confirmation needs the main desktop/web connection, which this connection cannot answer.',
       'single.busy': 'Renaming…',
-      'single.done': 'Renamed to “{title}”',
       'single.locked': 'This session is manually named; automatic naming never overwrites it.',
       'single.running': 'The session is running; try again once it settles.',
       'single.insufficient': 'This session has too little content to name.',
-      'result.title': 'AI rename',
     }
     //#endregion
 
@@ -184,12 +180,24 @@ window.__ModuleLoader__.load({
       }
       const listeners = new Set()
       let abort = null
+      const requests = new Set()
+      const timers = new Set()
+      const decorations = new Set()
+      let toastContainer = null
+      const later = (callback, ms) => {
+        const timer = setTimeout(() => {
+          timers.delete(timer)
+          if (!disposed) callback()
+        }, ms)
+        timers.add(timer)
+      }
       let disposed = false
       let remote = null
       let workspaces = null
       let tr = key => key
 
       const publish = patch => {
+        if (disposed) return
         snapshot = { ...snapshot, ...patch }
         for (const listener of [...listeners]) listener()
       }
@@ -207,14 +215,30 @@ window.__ModuleLoader__.load({
       }
 
       const call = async (method, request) => {
+        if (disposed) throw new Error('plugin disposed')
         const namespace = requireRemote()
-        abort = new AbortController()
+        const controller = new AbortController()
+        const panel = method !== 'renameSession'
+        if (panel) {
+          abort?.abort(new Error('title panel request superseded'))
+          abort = controller
+        }
+        requests.add(controller)
         try {
-          const result = await namespace[method](request, abort.signal)
+          const result = await namespace[method](request, controller.signal)
+          controller.signal.throwIfAborted()
           if (!result.ok) throw result.error
           return result.value
+        } catch (error) {
+          if (controller.signal.aborted) {
+            const cancelled = new Error('title request cancelled')
+            cancelled.name = 'AbortError'
+            throw cancelled
+          }
+          throw error
         } finally {
-          abort = null
+          requests.delete(controller)
+          if (abort === controller) abort = null
         }
       }
 
@@ -264,7 +288,7 @@ window.__ModuleLoader__.load({
           const selectable = value.rows.filter(row => row.status === 'ready').map(row => row.sessionId)
           publish({ phase: 'ready', previewId: value.previewId, rows: value.rows, selected: selectable })
         } catch (error) {
-          if (disposed) return
+          if (disposed || !snapshot.open || error?.name === 'AbortError') return
           publish({ phase: 'error', error: failMessage(error) })
         }
       }
@@ -293,7 +317,7 @@ window.__ModuleLoader__.load({
             notes: tr('panel.done', { ok: String(ok), failed: String(failed) }),
           })
         } catch (error) {
-          if (disposed) return
+          if (disposed || !snapshot.open || error?.name === 'AbortError') return
           publish({ phase: 'error', error: failMessage(error) })
         }
       }
@@ -310,39 +334,31 @@ window.__ModuleLoader__.load({
         close()
       }
 
-      /** Report a single-session outcome through the same overlay surface. */
-      const note = message => {
-        publish({
-          open: true,
-          phase: 'notice',
-          workspaceId: null,
-          projectTitle: '',
-          previewId: null,
-          rows: [],
-          results: null,
-          selected: [],
-          error: null,
-          notes: message,
-        })
-      }
-
       /** Non-blocking inline feedback helper: show lightweight toast for errors */
       const showToast = (message, type = 'info') => {
-        let container = document.getElementById('dsh-sst-toast-container')
+        if (disposed) return
+        let container = toastContainer
         if (!container) {
           container = document.createElement('div')
           container.id = 'dsh-sst-toast-container'
           container.className = 'dsh-sst-toast-container'
           document.body.appendChild(container)
+          toastContainer = container
         }
         const toast = document.createElement('div')
         toast.className = `dsh-sst-toast dsh-sst-toast-${type}`
         toast.setAttribute('role', type === 'error' ? 'alert' : 'status')
         toast.textContent = message
         container.appendChild(toast)
-        setTimeout(() => {
+        later(() => {
           toast.classList.add('dsh-sst-toast-fadeout')
-          setTimeout(() => toast.remove(), 300)
+          later(() => {
+            toast.remove()
+            if (!container.firstElementChild) {
+              container.remove()
+              if (toastContainer === container) toastContainer = null
+            }
+          }, 300)
         }, 3200)
       }
 
@@ -350,6 +366,15 @@ window.__ModuleLoader__.load({
       const renameOne = async sessionId => {
         let row = null
         let spinner = null
+        let check = null
+        const cleanup = () => {
+          spinner?.remove()
+          check?.remove()
+          row?.classList.remove('dsh-sst-session-renaming', 'dsh-sst-flash-green', 'dsh-sst-shake')
+          decorations.delete(cleanup)
+        }
+        if (disposed) return
+        decorations.add(cleanup)
         try {
           row = document.querySelector(`[data-row-key="session:${globalThis.CSS.escape(sessionId)}"]`)
           if (row) {
@@ -362,29 +387,28 @@ window.__ModuleLoader__.load({
             if (titleEl) titleEl.prepend(spinner)
             else row.prepend(spinner)
           }
-          const value = await call('renameSession', { sessionId })
+          await call('renameSession', { sessionId })
           if (row) {
             row.classList.remove('dsh-sst-session-renaming')
             spinner?.remove()
             row.classList.add('dsh-sst-flash-green')
-            const check = document.createElement('span')
+            check = document.createElement('span')
             check.className = 'dsh-sst-inline-check'
             check.innerHTML = '<svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg>'
             const titleEl = row.querySelector('[class*="title"], [class*="name"]') || row.firstElementChild
             if (titleEl) titleEl.prepend(check)
             else row.prepend(check)
-            setTimeout(() => {
-              check.remove()
-              row.classList.remove('dsh-sst-flash-green')
-            }, 1800)
-          }
+            later(cleanup, 1800)
+          } else cleanup()
         } catch (error) {
+          if (disposed) { cleanup(); return }
           if (row) {
             row.classList.remove('dsh-sst-session-renaming')
             spinner?.remove()
             row.classList.add('dsh-sst-shake')
-            setTimeout(() => row.classList.remove('dsh-sst-shake'), 600)
+            later(cleanup, 600)
           }
+          if (!row) cleanup()
           const code = typeof error?.code === 'string' ? error.code : undefined
           let msg = failMessage(error)
           if (code === 'USER_TITLE_LOCKED') msg = tr('single.locked')
@@ -423,8 +447,16 @@ window.__ModuleLoader__.load({
         renameOne,
         dispose: () => {
           disposed = true
-          abort?.abort(new Error('plugin disposed'))
+          for (const controller of requests) controller.abort(new Error('plugin disposed'))
+          requests.clear()
           abort = null
+          for (const timer of timers) clearTimeout(timer)
+          timers.clear()
+          for (const cleanup of [...decorations]) cleanup()
+          toastContainer?.remove()
+          toastContainer = null
+          remote = null
+          workspaces = null
           listeners.clear()
         },
       }
@@ -561,8 +593,7 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * The `shell.overlay` panel: batch preview/confirm and single-session
-     * outcome notices.
+     * The `shell.overlay` panel for batch preview and confirmation.
      * @param props - controller snapshot, actions, and translator.
      * @returns the dialog or null.
      */
@@ -595,7 +626,6 @@ window.__ModuleLoader__.load({
       }, [open, state.phase, props.actions])
 
       if (!open) return null
-      const batch = state.phase !== 'notice'
       const results = new Map((state.results ?? []).map(row => [row.sessionId, row]))
       const eligible = state.rows.filter(row => row.status === 'ready').length
       const busy = state.phase === 'applying'
@@ -623,8 +653,7 @@ window.__ModuleLoader__.load({
             },
           }, busy ? t('panel.busy') : t('panel.confirm')))
 
-      const foot = batch
-        ? h('div', { className: 'dsh-sst-foot' },
+      const foot = h('div', { className: 'dsh-sst-foot' },
           h('div', { className: 'dsh-sst-foot-left' },
             h('label', { className: 'dsh-sst-check' },
               h('input', {
@@ -636,14 +665,7 @@ window.__ModuleLoader__.load({
               t('panel.selectAll')),
             h('span', null, t('panel.selected', { count: String(state.selected.length) }))),
           footRight)
-        : h('div', { className: 'dsh-sst-foot' },
-          h('div', { className: 'dsh-sst-foot-left' }),
-          h('div', { className: 'dsh-sst-foot-right' },
-            h('button', {
-              type: 'button',
-              className: 'dsh-sst-btn dsh-sst-btn-primary',
-              onClick: () => props.actions.cancel(),
-            }, t('panel.close'))))
+
 
       return h(React.Fragment, null,
         h('div', { className: 'dsh-sst-mask', 'aria-hidden': 'true', onClick: () => { if (!busy) props.actions.cancel() } }),
@@ -655,8 +677,8 @@ window.__ModuleLoader__.load({
         },
         h('div', { className: 'dsh-sst-head' },
           h('div', null,
-            h('h2', { id: 'dsh-sst-title', className: 'dsh-sst-title' }, batch ? t('panel.title') : t('result.title')),
-            batch ? h('p', { className: 'dsh-sst-sub' }, t('panel.subtitle', { project: state.projectTitle || '—' })) : null),
+            h('h2', { id: 'dsh-sst-title', className: 'dsh-sst-title' }, t('panel.title')),
+            h('p', { className: 'dsh-sst-sub' }, t('panel.subtitle', { project: state.projectTitle || '—' }))),
           h('button', {
             type: 'button',
             ref: closeRef,
@@ -669,17 +691,17 @@ window.__ModuleLoader__.load({
           state.error === null ? null : h('p', { className: 'dsh-sst-error', role: 'alert' }, state.error),
           state.notes === null ? null : h('p', { className: 'dsh-sst-status', role: 'status' }, state.notes),
           state.phase === 'loading' ? h('p', { className: 'dsh-sst-status', role: 'status' }, t('panel.loading')) : null,
-          batch && state.phase !== 'loading' && state.rows.length === 0 && state.error === null
+          state.phase !== 'loading' && state.rows.length === 0 && state.error === null
             ? h('p', { className: 'dsh-sst-status' }, t('panel.empty'))
             : null,
-          batch ? state.rows.map(row => h(PreviewRow, {
+          state.rows.map(row => h(PreviewRow, {
             key: row.sessionId,
             row,
             selected: state.selected.includes(row.sessionId),
             result: results.get(row.sessionId),
             t,
             onToggle: props.actions.toggle,
-          })) : null),
+          }))),
         foot))
     }
     //#endregion
@@ -719,12 +741,24 @@ window.__ModuleLoader__.load({
       ctx.inject(['remote'], remoteCtx => {
         const remoteService = remoteCtx.remote
         if (remoteService === undefined || typeof remoteService.$mount !== 'function') return
+        let detached = false
+        let release = null
+        const cleanup = () => {
+          detached = true
+          controller.setRemote(null)
+          if (disposeRemote === cleanup) disposeRemote = null
+          const unmount = release
+          release = null
+          void unmount?.()
+        }
+        remoteCtx.effect(() => cleanup, 'dsh-smart-session-title: remote lifetime')
         void remoteService.$mount(remoteContribution()).then(unmount => {
-          if (unmounted) {
+          if (unmounted || detached) {
             void unmount()
             return
           }
-          disposeRemote = unmount
+          release = unmount
+          disposeRemote = cleanup
           controller.setRemote(remoteCtx.get(`remote.${NAMESPACE}`) ?? null)
         }).catch(error => {
           console.warn(`[${NS}] Remote mount failed:`, error)

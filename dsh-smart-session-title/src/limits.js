@@ -55,7 +55,7 @@ export class Semaphore {
     signal?.throwIfAborted()
     if (this.#active < this.#limit) {
       this.#active += 1
-      return () => this.#release()
+      return this.#releaseOnce()
     }
     const waiter = { resolve: undefined, reject: undefined, signal, onAbort: undefined }
     const pending = new Promise((resolve, reject) => {
@@ -65,7 +65,7 @@ export class Semaphore {
     waiter.onAbort = () => {
       const index = this.#waiters.indexOf(waiter)
       if (index >= 0) this.#waiters.splice(index, 1)
-      reject(new TitleCancelledError('title generation was cancelled while queued'))
+      waiter.reject(new TitleCancelledError('title generation was cancelled while queued'))
     }
     signal?.addEventListener('abort', waiter.onAbort, { once: true })
     this.#waiters.push(waiter)
@@ -74,7 +74,16 @@ export class Semaphore {
     } finally {
       signal?.removeEventListener('abort', waiter.onAbort)
     }
-    return () => this.#release()
+    return this.#releaseOnce()
+  }
+
+  #releaseOnce() {
+    let released = false
+    return () => {
+      if (released) return
+      released = true
+      this.#release()
+    }
   }
 
   #release() {
@@ -109,6 +118,7 @@ export class Semaphore {
  * @param signal - optional cancellation.
  */
 export function delay(ms, signal) {
+  signal?.throwIfAborted()
   if (ms <= 0) {
     signal?.throwIfAborted()
     return Promise.resolve()

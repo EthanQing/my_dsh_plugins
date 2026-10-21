@@ -44,10 +44,12 @@ export function createViews(React, ctx, open) {
     const value = state?.key === key ? state.value : cached.get(key)
     useEffect(() => subscribeGitRefresh(() => { cached.clear(); pending.clear(); setRevision(v => v + 1) }), [])
     useEffect(() => {
-      let disposed = false, timer
+      let disposed = false, timer, loading = false
       setState({ key, value: cached.get(key) }); setError('')
       if (mode === 'commits' && !commit) return
       const load = async () => {
+        if (disposed || loading) return
+        loading = true
         try {
           if (!pending.has(key)) {
             const task = read('summary', { sessionId, mode, base, taskId, commit, parent: String(parent) })
@@ -57,6 +59,7 @@ export function createViews(React, ctx, open) {
           cached.set(key, result); while (cached.size > 30) cached.delete(cached.keys().next().value)
           if (!disposed) { setState({ key, value: result }); setError('') }
         } catch (err) { if (!disposed) setError(err.message) }
+        finally { loading = false }
         if (!disposed && !document.hidden && mode !== 'commits') timer = setTimeout(load, mode === 'task' ? 4000 : 10000)
       }
       const visible = () => { if (!document.hidden) { clearTimeout(timer); void load() } }
@@ -133,21 +136,21 @@ export function createViews(React, ctx, open) {
     const triggerRef = useRef(null)
     const hoverTimer = useRef(null)
 
-    const loadCommits = useCallback(async (query = '') => {
+    useEffect(() => {
+      if (!open || !submenuOpen) return
+      const abort = new AbortController()
       setLoadingCommits(true)
-      try {
-        const result = await read('history', { sessionId, branch: 'HEAD', query, offset: '0', tip: '' })
-        setCommits(result.commits || [])
-      } catch {
-        // Ignored
-      } finally {
-        setLoadingCommits(false)
-      }
-    }, [sessionId])
+      void read('history', { sessionId, branch: 'HEAD', query: search, offset: '0', tip: '' }, abort.signal)
+        .then(result => { if (!abort.signal.aborted) setCommits(result.commits || []) })
+        .catch(() => { if (!abort.signal.aborted) setCommits([]) })
+        .finally(() => { if (!abort.signal.aborted) setLoadingCommits(false) })
+      return () => abort.abort()
+    }, [open, submenuOpen, search, historyRevision, sessionId])
 
     useEffect(() => {
-      if (submenuOpen) loadCommits(search)
-    }, [submenuOpen, search, historyRevision, loadCommits])
+      if (!open) setSubmenuOpen(false)
+      return () => clearTimeout(hoverTimer.current)
+    }, [open])
 
     useEffect(() => {
       if (!open) return

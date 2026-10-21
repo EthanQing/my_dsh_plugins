@@ -233,30 +233,7 @@ export function assistantTextAfter(events, afterSeq, throughSeq) {
     if (text.length > 0) chunks.push(text)
   }
   const joined = chunks.join('\n')
-  return joined.length > ASSISTANT_EXCERPT_LIMIT ? joined.slice(joined.length - ASSISTANT_EXCERPT_LIMIT) : joined
-}
-
-/**
- * Select the messages that fit one input budget: the first message plus the
- * most recent ones, never splitting a message.
- * @param messages - eligible human messages in log order.
- * @param budgetBytes - UTF-8 byte budget for the framed message list.
- * @returns the selected messages in log order.
- */
-export function pickMessages(messages, budgetBytes) {
-  if (messages.length === 0) return []
-  const selected = [messages[0]]
-  let bytes = Buffer.byteLength(JSON.stringify(selected), 'utf8')
-  for (let index = messages.length - 1; index > 0; index -= 1) {
-    const candidate = messages[index]
-    if (selected.some(item => item.seq === candidate.seq)) continue
-    const next = [...selected, candidate].sort((left, right) => left.seq - right.seq)
-    const nextBytes = Buffer.byteLength(JSON.stringify(next), 'utf8')
-    if (nextBytes > budgetBytes) break
-    selected.push(candidate)
-    bytes = nextBytes
-  }
-  return selected.sort((left, right) => left.seq - right.seq)
+  return Array.from(joined).slice(-ASSISTANT_EXCERPT_LIMIT).join('')
 }
 
 /**
@@ -265,17 +242,58 @@ export function pickMessages(messages, budgetBytes) {
  * @param options - messages, assistant excerpt, current title, budget.
  * @returns the JSON-framed input text.
  */
+const INPUT_PREFIX = '为下面的会话生成标题（JSON）：\n'
+
+/** Fit a Unicode prefix to its JSON string-content byte allowance. */
+function fitJsonText(text, bytes) {
+  let result = ''
+  for (const point of String(text ?? '')) {
+    const cost = Buffer.byteLength(JSON.stringify(point), 'utf8') - 2
+    if (cost > bytes) break
+    result += point
+    bytes -= cost
+  }
+  return result
+}
+
 export function buildProviderInput({ messages, assistantText, currentTitle, budgetBytes }) {
-  const selected = pickMessages(messages, budgetBytes)
+  if (!Number.isSafeInteger(budgetBytes) || budgetBytes < 0) throw new Error('smart-session-title: invalid input byte budget')
+  const selected = messages.length === 0 ? [] : [messages[0]]
+  const latest = messages.at(-1)
+  if (latest && latest.seq !== selected[0].seq) selected.push(latest)
   const payload = {
-    goal: selected.map(message => ({ seq: message.seq, text: message.text })),
-    assistant: assistantText ?? '',
-    currentTitle: typeof currentTitle === 'string' ? currentTitle : '',
+    goal: selected.map(message => ({ seq: message.seq, text: '' })),
+    assistant: '',
+    currentTitle: '',
   }
-  return {
-    input: `为下面的会话生成标题（JSON）：\n${JSON.stringify(payload)}`,
-    messageSeqs: selected.map(message => message.seq),
+  const serialize = () => `${INPUT_PREFIX}${JSON.stringify(payload)}`
+  const remaining = () => budgetBytes - Buffer.byteLength(serialize(), 'utf8')
+  if (remaining() < 0) throw new Error('smart-session-title: input byte budget cannot fit the JSON envelope')
+  // Keep a short reply excerpt and divide the remaining goal space fairly.
+  const available = remaining()
+  payload.assistant = fitJsonText(assistantText, Math.min(600, Math.floor(available * 0.2)))
+  payload.currentTitle = fitJsonText(typeof currentTitle === 'string' ? currentTitle : '', Math.min(192, Math.floor(available * 0.1)))
+  const share = Math.floor(remaining() / Math.max(1, selected.length))
+  for (let index = 0; index < selected.length; index += 1) {
+    payload.goal[index].text = fitJsonText(selected[index].text, share)
   }
+  for (let index = 0; index < selected.length; index += 1) {
+    const existingBytes = Buffer.byteLength(JSON.stringify(payload.goal[index].text), 'utf8') - 2
+    payload.goal[index].text = fitJsonText(selected[index].text, existingBytes + remaining())
+  }
+  for (let index = messages.length - 2; index > 0; index -= 1) {
+    const message = messages[index]
+    if (payload.goal.some(item => item.seq === message.seq)) continue
+    // UTF-16 length is a cheap lower bound for JSON UTF-8 bytes: do not
+    // serialize a huge intermediate message that cannot possibly fit.
+    if (message.text.length > remaining()) continue
+    const candidate = { seq: message.seq, text: message.text }
+    payload.goal.splice(1, 0, candidate)
+    if (remaining() < 0) payload.goal.splice(1, 1)
+  }
+  const input = serialize()
+  if (Buffer.byteLength(input, 'utf8') > budgetBytes) throw new Error('smart-session-title: input exceeds byte budget')
+  return { input, messageSeqs: payload.goal.map(message => message.seq) }
 }
 
 /**

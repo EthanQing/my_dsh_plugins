@@ -189,13 +189,18 @@ export class GitActions {
         const count = tip === state.head ? 0 : Number((await git(root, ['rev-list', '--count', tip ? `${tip}..${state.head}` : state.head], { signal: this.signal })).toString().trim())
         targets.push({ url, tip, count })
       }
-      if ((await this.identity(root)).head !== state.head) throw new Error('HEAD 已变化，请重新预览推送')
+      const current = await this.identity(root)
+      if (current.head !== state.head || current.branch !== state.branch) throw new Error('分支或 HEAD 已变化，请重新预览推送')
+      const currentRemote = (await this.remotes(root, state.branch)).remotes.find(item => item.name === remote.name)
+      if (JSON.stringify(currentRemote) !== JSON.stringify(remote)) throw new Error('Remote 配置已变化，请重新预览推送')
       return { ticket: this.issue('push', sessionId, { root, head: state.head, branch: state.branch, remote, targets }), remote: remote.name,
-        branch: remote.branch, targets: targets.map(target => ({ ...target, url: redact(target.url) })), count: Math.max(...targets.map(target => target.count)) }
+        branch: remote.branch, localBranch: state.branch, head: state.head, targets: targets.map(target => ({ ...target, url: redact(target.url) })), count: Math.max(...targets.map(target => target.count)) }
     })
   }
-  async push(cwd, sessionId, id) {
+  async push(cwd, sessionId, body) {
+    const { ticket: id } = body
     const preview = this.ticket('push', sessionId, id), root = await this.repository(cwd)
+    if (body.confirmed !== true || body.remote !== preview.remote.name || body.branch !== preview.remote.branch || body.head !== preview.head) throw new Error('推送目标与确认预览不一致，请重新确认')
     return this.locked(root, async () => {
       const state = await this.identity(root)
       if (root !== preview.root || state.head !== preview.head || state.branch !== preview.branch) throw new Error('当前分支或 HEAD 已变化，请重新确认推送')
@@ -203,6 +208,9 @@ export class GitActions {
       if (JSON.stringify(remote) !== JSON.stringify(preview.remote)) throw new Error('Remote 配置已变化，请重新确认')
       if (!preview.targets.some(target => target.count > 0)) throw new Error('没有需要推送的提交')
       for (const target of preview.targets) if (await this.remoteTip(root, target.url, remote.branch) !== target.tip) throw new Error('远端分支已变化，请重新预览')
+      const current = await this.identity(root)
+      const currentRemote = (await this.remotes(root, current.branch)).remotes.find(item => item.name === preview.remote.name)
+      if (current.head !== preview.head || current.branch !== preview.branch || JSON.stringify(currentRemote) !== JSON.stringify(preview.remote)) throw new Error('分支、HEAD 或 Remote 已变化，请重新确认推送')
       this.tickets.delete(id)
       // Explicit immutable source and single destination ref. Never force, mirror, tag, pull, or rewrite remote settings.
       try { await this.run(root, ['push', '--porcelain', '--no-force', '--no-mirror', '--no-follow-tags', '--recurse-submodules=no', '--', remote.name, `${preview.head}:refs/heads/${remote.branch}`]) }

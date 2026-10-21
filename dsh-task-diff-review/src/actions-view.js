@@ -18,7 +18,7 @@ export function createActionsPanel(React) {
 
   function Dialog({ title, close, busy, children }) {
     const ref = useRef()
-    useEffect(() => { ref.current.showModal(); return () => ref.current?.close() }, [])
+    useEffect(() => { const dialog = ref.current; dialog.showModal(); return () => dialog.close() }, [])
     return h('dialog', { ref, className: 'dtd-actions-dialog', 'aria-label': title, onCancel: event => { event.preventDefault(); if (!busy) close() } },
       h('div', { className: 'dtd-dialog-title' },
         h('strong', null, title),
@@ -43,30 +43,36 @@ export function createActionsPanel(React) {
     const mounted = useRef(true)
     const dialogMessage = useRef('')
     const popoverRef = useRef(null)
+    const acting = useRef(false)
 
     // Dynamic right-sidebar offset calculation
     useEffect(() => {
+      let sidebar, frame
       const updateOffset = () => {
-        const rightbar = document.querySelector('[data-sidebar-right-open]')
-        if (rightbar) {
-          const rect = rightbar.getBoundingClientRect()
-          if (rect.width > 0 && rect.right >= window.innerWidth - 10) {
-            setRightOffset(rect.width)
-            return
-          }
+        frame = undefined
+        const next = document.querySelector('[data-sidebar-right-open]')
+        if (next !== sidebar) {
+          if (sidebar) ro.unobserve(sidebar)
+          sidebar = next
+          if (sidebar) ro.observe(sidebar)
         }
-        setRightOffset(0)
+        const rect = sidebar?.getBoundingClientRect()
+        setRightOffset(rect && rect.width > 0 && rect.right >= window.innerWidth - 10 ? rect.width : 0)
       }
+      const schedule = () => { if (frame === undefined) frame = requestAnimationFrame(updateOffset) }
+      const ro = new ResizeObserver(schedule)
+      const mo = new MutationObserver(records => {
+        if (records.some(record => record.type === 'attributes' || [...record.addedNodes, ...record.removedNodes].some(node =>
+          node.nodeType === 1 && (node.matches('[data-sidebar-right-open]') || node.querySelector('[data-sidebar-right-open]'))))) schedule()
+      })
+      mo.observe(document.body, { attributes: true, childList: true, subtree: true, attributeFilter: ['data-sidebar-right-open'] })
       updateOffset()
-      const ro = new ResizeObserver(updateOffset)
-      ro.observe(document.body)
-      const mo = new MutationObserver(updateOffset)
-      mo.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['data-sidebar-right-open', 'style', 'class'] })
-      window.addEventListener('resize', updateOffset)
+      window.addEventListener('resize', schedule)
       return () => {
         ro.disconnect()
         mo.disconnect()
-        window.removeEventListener('resize', updateOffset)
+        cancelAnimationFrame(frame)
+        window.removeEventListener('resize', schedule)
       }
     }, [])
 
@@ -106,9 +112,14 @@ export function createActionsPanel(React) {
 
     useEffect(() => {
       mounted.current = true
-      let stopped = false, timer
+      let stopped = false, timer, polling = false
       setState(undefined); setSelected(new Set()); setModal(undefined); setError(''); setNotice('')
-      const tick = async () => { await load(); if (!stopped && !document.hidden) timer = setTimeout(tick, 5000) }
+      const tick = async () => {
+        if (stopped || polling) return
+        polling = true
+        try { await load() } finally { polling = false }
+        if (!stopped && !document.hidden) timer = setTimeout(tick, 5000)
+      }
       const visible = () => { if (!document.hidden) { clearTimeout(timer); void tick() } }
       const unsubscribe = subscribeGitRefresh(() => { void load() })
       document.addEventListener('visibilitychange', visible); void tick()
@@ -123,7 +134,8 @@ export function createActionsPanel(React) {
     }, [sessionId, load])
 
     const act = async (action, data = {}) => {
-      if (busy) return
+      if (acting.current || !mounted.current) return
+      acting.current = true
       setBusy(true); setError(''); setNotice('')
       try {
         const result = await request('action', sessionId, { action, ...data })
@@ -140,13 +152,14 @@ export function createActionsPanel(React) {
       } catch (error) {
         if (mounted.current) setError(error.message)
       } finally {
+        acting.current = false
         if (mounted.current) setBusy(false)
         if (['stage', 'unstage', 'commit', 'push'].includes(action)) refreshGitViews()
       }
     }
 
     const openPush = () => {
-      setRemote(state?.defaultRemote || (state?.remotes?.[0]?.name ?? ''))
+      setRemote(remotes.some(item => item.name === remote) ? remote : (state?.defaultRemote || remotes[0]?.name || ''))
       setModal({ kind: 'push' })
       setError('')
       setNotice('')
@@ -156,6 +169,11 @@ export function createActionsPanel(React) {
       setModal({ kind: 'push' })
       const result = await act('preparePush', { remote: name })
       if (result) setModal({ kind: 'push', ...result })
+    }
+
+    const changeRemote = name => {
+      setRemote(name); setError('')
+      setModal(previous => previous?.kind === 'push' ? { kind: 'push' } : previous)
     }
 
     const select = path => setSelected(previous => {
@@ -173,13 +191,10 @@ export function createActionsPanel(React) {
 
     // Quick AI Commit Message generation
     const generateAiMessage = async () => {
-      let ticket = modal?.ticket
-      if (!ticket) {
-        const prep = await act('prepareCommit')
-        if (!prep) return
-        ticket = prep.ticket
-      }
-      if (!ticket) return
+      if (!enabled || !staged.length) return
+      const prep = await act('prepareCommit')
+      if (!prep?.ticket) return
+      const ticket = prep.ticket
       const previous = dialogMessage.current
       const result = await act('generate', { ticket })
       if (result && dialogMessage.current === previous) {
@@ -188,18 +203,20 @@ export function createActionsPanel(React) {
     }
 
     const handleCommit = async () => {
-      if (!message.trim() || busy) return
-      let ticket = modal?.ticket
-      if (!ticket) {
-        if (staged.length === 0 && unstaged.length > 0) {
-          const stagedRes = await act('stage', { all: true, paths: [], version: state.version })
-          if (!stagedRes) return
-        }
-        const prep = await act('prepareCommit')
-        if (!prep) return
-        ticket = prep.ticket
+      if (!enabled || !message.trim()) return
+      if (!staged.length) {
+        if (unstaged.length) setModal({ kind: 'stageCommit', version: state.version, files: unstaged.length })
+        return
       }
-      await act('commit', { ticket, message: message.trim(), confirmed: true })
+      const prep = await act('prepareCommit')
+      if (prep) setModal({ kind: 'commit', ...prep, message: message.trim() })
+    }
+
+    const confirmStageCommit = async () => {
+      const result = await act('stage', { all: true, paths: [], version: modal.version })
+      if (!result) return
+      const prep = await act('prepareCommit')
+      if (prep) setModal({ kind: 'commit', ...prep, message: message.trim() })
     }
 
     if (!state) return null
@@ -267,7 +284,8 @@ export function createActionsPanel(React) {
               remotes.length > 1 && h('select', {
                 className: 'dtd-popover-remote-select',
                 value: remote || state.defaultRemote,
-                onChange: e => setRemote(e.target.value),
+                disabled: busy,
+                onChange: e => changeRemote(e.target.value),
                 title: '选择远端',
               }, remotes.map(r => h('option', { key: r.name, value: r.name }, r.name))),
               remotes.length > 0 && h('button', {
@@ -371,25 +389,38 @@ export function createActionsPanel(React) {
                   type: 'button',
                   className: 'dtd-ai-generate-btn',
                   title: '使用本会话 AI 根据暂存改动生成提交说明',
-                  disabled: busy || (staged.length === 0 && unstaged.length === 0),
+                  disabled: !enabled || !staged.length,
                   onClick: generateAiMessage,
                 }, h(IconSparkles, { size: 12 }), h('span', null, 'AI 生成'))),
               h('button', {
                 type: 'button',
                 className: 'dtd-btn-primary dtd-btn-commit-main',
-                disabled: busy || (!message.trim() && staged.length === 0 && unstaged.length === 0),
+                disabled: !enabled || !message.trim() || (!staged.length && !unstaged.length),
                 onClick: handleCommit,
               }, busy ? '处理中…' : (staged.length > 0 ? `提交更改 (Commit ${staged.length} 个暂存文件)` : (unstaged.length > 0 ? '暂存全部并提交' : '提交更改')))))),
 
+        modal?.kind === 'stageCommit' && h(Dialog, { title: '暂存全部并提交', busy, close: () => setModal(undefined) },
+          h('p', null, `将全部 ${modal.files} 个未暂存文件加入暂存区，然后预览并确认提交。`),
+          errors,
+          h('button', { type: 'button', className: 'dtd-btn-primary', disabled: busy, onClick: confirmStageCommit }, busy ? '正在暂存…' : '确认暂存全部')),
+
+        modal?.kind === 'commit' && h(Dialog, { title: '确认 Git 提交', busy, close: () => setModal(undefined) },
+          h('p', null, `分支：${modal.branch} · ${modal.files} 个暂存文件 · +${modal.added} / −${modal.deleted}`),
+          h('p', { className: 'dtd-commit-preview' }, modal.message),
+          errors,
+          h('button', { type: 'button', className: 'dtd-btn-primary', disabled: busy, onClick: () => act('commit', { ticket: modal.ticket, message: modal.message, confirmed: true }) }, busy ? '正在提交…' : '确认提交')),
+
         // Push Dialog Modal
         modal && modal.kind === 'push' && h(Dialog, { title: '确认 Git 推送', busy, close: () => setModal(undefined) },
-          h('label', { className: 'dtd-dialog-row' }, '推送 Remote ', remotes.length === 1 ? h('strong', null, remote) : h('select', { value: remote, disabled: busy, onChange: event => { setRemote(event.target.value); setError('') } }, remotes.map(item => h('option', { key: item.name, value: item.name }, `${item.name} · ${item.urls.join(' ; ')}`)))),
+          h('label', { className: 'dtd-dialog-row' }, '推送 Remote ', remotes.length === 1 ? h('strong', null, remote) : h('select', { value: remote, disabled: busy, onChange: event => changeRemote(event.target.value) }, remotes.map(item => h('option', { key: item.name, value: item.name }, `${item.name} · ${item.urls.join(' ; ')}`)))),
           h('div', { className: 'dtd-push-urls' }, remotes.find(item => item.name === remote)?.urls.map(url => h('div', { key: url }, url))),
+          errors,
           !modal.ticket ? h('button', { type: 'button', className: 'dtd-btn-primary', disabled: busy || !remotes.some(item => item.name === remote), onClick: () => previewPush(remote) }, busy ? '正在核对…' : '检查推送目标') : h(React.Fragment, null,
             h('p', null, `目标：${modal.remote} / ${modal.branch} · ${modal.targets.length === 1 ? `待推送 ${modal.count} 个提交` : '各推送地址分别统计如下'}`),
+            h('p', null, '提交：', h('code', null, modal.head)),
             modal.targets.map(target => h('p', { key: target.url, className: 'dtd-muted' }, `${target.url} · ${target.count} 个提交`)),
             modal.count === 0 && h('p', null, '没有需要推送的提交'),
-            h('button', { type: 'button', className: 'dtd-btn-primary', disabled: busy || modal.count === 0, onClick: () => act('push', { ticket: modal.ticket, confirmed: true }) }, busy ? '正在推送…' : '确认推送')))
+            h('button', { type: 'button', className: 'dtd-btn-primary', disabled: busy || modal.count === 0 || remote !== modal.remote || state.head !== modal.head || state.branch !== modal.localBranch, onClick: () => act('push', { ticket: modal.ticket, remote, branch: modal.branch, head: modal.head, confirmed: true }) }, busy ? '正在推送…' : '确认推送')))
       ))
   }
 

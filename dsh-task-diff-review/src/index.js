@@ -114,7 +114,7 @@ export function apply(ctx) {
           case 'preparePush': result = await actions.preparePush(cwd, sessionId, body.remote); break
           case 'push':
             if (body.confirmed !== true) throw new Error('推送需要用户明确确认')
-            result = await actions.push(cwd, sessionId, body.ticket); break
+            result = await actions.push(cwd, sessionId, body); break
           case 'generate': {
             const modelContext = { agents: ctx.agents, sessionQuery: ctx.sessionQuery, llm: ctx.get('llm') }
             result = await generateCommitMessage(modelContext, actions, cwd, sessionId, body.ticket, lifetime.signal); break
