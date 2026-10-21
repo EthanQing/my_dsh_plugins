@@ -180,6 +180,15 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-fixed-w
 /* Dialog */
 .dtd-actions-dialog{box-sizing:border-box;position:fixed;inset:0;margin:auto;font:inherit;line-height:1.5;background:#fff;background:linear-gradient(var(--dtd-surface-overlay,#fff),var(--dtd-surface-overlay,#fff)),#fff;color:var(--dsw-alias-label-primary,#18181b);border:1px solid var(--dtd-border,rgba(128,128,128,.18));border-radius:10px;width:min(420px,calc(100vw - 40px));max-height:calc(100dvh - 40px);overflow:auto;padding:20px;box-shadow:var(--dtd-shadow,0 12px 36px rgba(0,0,0,.25));user-select:text;pointer-events:auto;overflow-wrap:anywhere}
 body[data-ds-dark-theme] .dtd-actions-dialog{background:#1e1e20;background:linear-gradient(var(--dtd-surface-overlay,#1e1e20),var(--dtd-surface-overlay,#1e1e20)),#1e1e20;color:var(--dsw-alias-label-primary,#fafafa)}
+.dtd-actions-dialog[open]{display:flex;flex-direction:column;height:fit-content;overflow:hidden}
+.dtd-actions-dialog .dtd-dialog-title{flex:none}
+.dtd-dialog-body{min-height:0;min-width:0;overflow:auto;overflow-wrap:anywhere}
+.dtd-dialog-footer{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px;flex:none;min-width:0;margin-top:16px;padding-top:12px;border-top:1px solid var(--dtd-border)}
+.dtd-dialog-footer button{flex:none;min-height:32px;padding:6px 12px;border-radius:6px;font:inherit;white-space:nowrap;cursor:pointer}
+.dtd-dialog-footer .dtd-btn-secondary{background:var(--dtd-surface-subtle);color:inherit;border:1px solid var(--dtd-border)}
+.dtd-dialog-footer .dtd-btn-secondary:hover:not(:disabled){border-color:var(--dtd-border-hover)}
+.dtd-actions-dialog .dtd-dialog-recheck{display:inline-block;border:0;background:transparent;color:#3b82f6;font:inherit;padding:4px 0;text-decoration:underline;cursor:pointer}
+@media(max-width:480px){.dtd-actions-dialog{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:16px}.dtd-dialog-footer{gap:8px;margin-top:12px}}
 .dtd-actions-dialog::backdrop{background:rgba(0,0,0,0.4)}
 .dtd-dialog-title{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;font-size:14px}
 .dtd-actions-dialog .dtd-dialog-close-btn{flex:none;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;color:inherit;border-radius:6px;cursor:pointer;padding:0}

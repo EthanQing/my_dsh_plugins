@@ -32,14 +32,17 @@ export function createActionsPanel(React) {
     return result
   }
 
-  function Dialog({ title, close, busy, children }) {
+  function Dialog({ title, close, busy, children, actions }) {
     const ref = useRef()
     useEffect(() => { const dialog = ref.current; dialog.showModal(); return () => dialog.close() }, [])
     return h('dialog', { ref, className: 'dtd-actions-dialog', 'aria-label': title, onCancel: event => { event.preventDefault(); if (!busy) close() } },
       h('div', { className: 'dtd-dialog-title' },
         h('strong', null, title),
         h('button', { type: 'button', className: 'dtd-dialog-close-btn', disabled: busy, onClick: close, 'aria-label': '关闭窗口' }, h(IconClose, { size: 12 }))),
-      children)
+      h('div', { className: 'dtd-dialog-body' }, children),
+      h('div', { className: 'dtd-dialog-footer' },
+        h('button', { type: 'button', className: 'dtd-btn-secondary', disabled: busy, onClick: close }, '取消'),
+        actions))
   }
 
   function ActionsPanel({ sessionId }) {
@@ -60,6 +63,7 @@ export function createActionsPanel(React) {
     const dialogMessage = useRef('')
     const popoverRef = useRef(null)
     const acting = useRef(false)
+    const previewing = useRef(false)
 
     // Dynamic right-sidebar offset calculation
     useEffect(() => {
@@ -166,7 +170,10 @@ export function createActionsPanel(React) {
         }
         return result
       } catch (error) {
-        if (mounted.current) setError(error.message)
+        if (mounted.current) {
+          setError(error.message)
+          if (action === 'push') setModal(previous => previous?.kind === 'push' ? { ...previous, ticket: undefined, failed: true } : previous)
+        }
       } finally {
         acting.current = false
         if (mounted.current) setBusy(false)
@@ -175,25 +182,32 @@ export function createActionsPanel(React) {
     }
 
     const openPush = () => {
-      setRemote(remotes.some(item => item.name === remote) ? remote : (state?.defaultRemote || remotes[0]?.name || ''))
-      setModal({ kind: 'push' })
-      setError('')
-      setNotice('')
+      const name = remotes.some(item => item.name === remote) ? remote : (state?.defaultRemote || remotes[0]?.name || '')
+      setRemote(name)
+      return previewPush(name)
     }
 
     const previewPush = async name => {
+      if (acting.current || previewing.current || !mounted.current) return
+      previewing.current = true
       generation.current++ // Ignore status reads started before this preview.
-      setModal({ kind: 'push' })
-      const result = await act('preparePush', { remote: name })
-      if (!result || !mounted.current) return
-      setModal({ kind: 'push', ...result, checkingStatus: true })
-      await load()
-      if (mounted.current) setModal(previous => previous?.ticket === result.ticket ? { ...previous, checkingStatus: false } : previous)
+      setModal({ kind: 'push', checkingStatus: true })
+      try {
+        const result = await act('preparePush', { remote: name })
+        if (!mounted.current) return
+        if (!result) { setModal({ kind: 'push', failed: true }); return }
+        setModal({ kind: 'push', ...result, checkingStatus: true })
+        await load()
+        if (mounted.current) setModal(previous => previous?.ticket === result.ticket ? { ...previous, checkingStatus: false } : previous)
+      } finally {
+        previewing.current = false
+      }
     }
 
     const changeRemote = name => {
+      if (acting.current || previewing.current) return
       setRemote(name); setError('')
-      setModal(previous => previous?.kind === 'push' ? { kind: 'push' } : previous)
+      if (modal?.kind === 'push') return previewPush(name)
     }
 
     const select = path => setSelected(previous => {
@@ -251,7 +265,7 @@ export function createActionsPanel(React) {
     const pushIssue = modal?.kind === 'push' ? pushPreviewIssue(modal, remote, state, statusError) : ''
     const pushChecking = busy || modal?.checkingStatus
     const confirmPush = () => {
-      if (pushChecking || pushIssue || !modal?.ticket) return
+      if (pushChecking || previewing.current || pushIssue || !modal?.ticket) return
       return act('push', { ticket: modal.ticket, remote, branch: modal.branch, head: modal.head, confirmed: true })
     }
 
@@ -425,29 +439,30 @@ export function createActionsPanel(React) {
                 onClick: handleCommit,
               }, busy ? '处理中…' : (staged.length > 0 ? `提交更改 (Commit ${staged.length} 个暂存文件)` : (unstaged.length > 0 ? '暂存全部并提交' : '提交更改')))))),
 
-        modal?.kind === 'stageCommit' && h(Dialog, { title: '暂存全部并提交', busy, close: () => setModal(undefined) },
+        modal?.kind === 'stageCommit' && h(Dialog, { title: '暂存全部并提交', busy, close: () => setModal(undefined),
+          actions: h('button', { type: 'button', className: 'dtd-btn-primary', disabled: busy, onClick: confirmStageCommit }, busy ? '正在暂存…' : '确认暂存全部') },
           h('p', null, `将全部 ${modal.files} 个未暂存文件加入暂存区，然后预览并确认提交。`),
-          errors,
-          h('button', { type: 'button', className: 'dtd-btn-primary', disabled: busy, onClick: confirmStageCommit }, busy ? '正在暂存…' : '确认暂存全部')),
+          errors),
 
-        modal?.kind === 'commit' && h(Dialog, { title: '确认 Git 提交', busy, close: () => setModal(undefined) },
+        modal?.kind === 'commit' && h(Dialog, { title: '确认 Git 提交', busy, close: () => setModal(undefined),
+          actions: h('button', { type: 'button', className: 'dtd-btn-primary', disabled: busy, onClick: () => act('commit', { ticket: modal.ticket, message: modal.message, confirmed: true }) }, busy ? '正在提交…' : '确认提交') },
           h('p', null, `分支：${modal.branch} · ${modal.files} 个暂存文件 · +${modal.added} / −${modal.deleted}`),
           h('p', { className: 'dtd-commit-preview' }, modal.message),
-          errors,
-          h('button', { type: 'button', className: 'dtd-btn-primary', disabled: busy, onClick: () => act('commit', { ticket: modal.ticket, message: modal.message, confirmed: true }) }, busy ? '正在提交…' : '确认提交')),
+          errors),
 
         // Push Dialog Modal
-        modal && modal.kind === 'push' && h(Dialog, { title: '确认 Git 推送', busy, close: () => setModal(undefined) },
-          h('label', { className: 'dtd-dialog-row' }, '推送 Remote ', remotes.length === 1 ? h('strong', null, remote) : h('select', { value: remote, disabled: busy, onChange: event => changeRemote(event.target.value) }, remotes.map(item => h('option', { key: item.name, value: item.name }, `${item.name} · ${item.urls.join(' ; ')}`)))),
+        modal && modal.kind === 'push' && h(Dialog, { title: '确认 Git 推送', busy: pushChecking, close: () => setModal(undefined),
+          actions: h('button', { type: 'button', className: 'dtd-btn-primary', disabled: Boolean(pushChecking || pushIssue || !modal.ticket), onClick: confirmPush }, modal.checkingStatus ? '确认推送' : busy ? '正在推送…' : '确认推送') },
+          h('label', { className: 'dtd-dialog-row' }, '推送 Remote ', remotes.length === 1 ? h('strong', null, remote) : h('select', { value: remote, disabled: pushChecking, onChange: event => changeRemote(event.target.value) }, remotes.map(item => h('option', { key: item.name, value: item.name }, `${item.name} · ${item.urls.join(' ; ')}`)))),
           h('div', { className: 'dtd-push-urls' }, remotes.find(item => item.name === remote)?.urls.map(url => h('div', { key: url }, url))),
           errors,
-          h('button', { type: 'button', className: 'dtd-btn-primary', disabled: pushChecking || !remotes.some(item => item.name === remote), onClick: () => previewPush(remote) }, pushChecking ? '正在核对…' : modal.ticket ? '重新检查推送目标' : '检查推送目标'),
-          modal.ticket && h(React.Fragment, null,
+          modal.checkingStatus && h('p', { role: 'status', className: 'dtd-muted' }, '正在检查推送目标…'),
+          !modal.checkingStatus && modal.ticket && h(React.Fragment, null,
             h('p', null, `目标：${modal.remote || '未返回'} / ${modal.branch || '未返回'} · ${modal.targets?.length === 1 ? `待推送 ${modal.count} 个提交` : '各推送地址分别统计如下'}`),
             h('p', null, '提交：', h('code', null, modal.head || 'Host 未返回 HEAD')),
             Array.isArray(modal.targets) && modal.targets.filter(target => target && typeof target.url === 'string').map(target => h('p', { key: target.url, className: 'dtd-muted' }, `${target.url} · ${target.count} 个提交`)),
-            pushIssue && h('p', { className: 'dtd-action-error', role: 'alert' }, pushIssue),
-            h('button', { type: 'button', className: 'dtd-btn-primary', disabled: Boolean(pushChecking || pushIssue), onClick: confirmPush }, modal.checkingStatus ? '正在刷新状态…' : busy ? '处理中…' : '确认推送')))
+            pushIssue && h('p', { className: 'dtd-action-error', role: 'alert' }, pushIssue)),
+          !pushChecking && (pushIssue || modal.failed) && h('button', { type: 'button', className: 'dtd-dialog-recheck', disabled: !remotes.some(item => item.name === remote), onClick: () => previewPush(remote) }, '重新检查'))
       ))
   }
 

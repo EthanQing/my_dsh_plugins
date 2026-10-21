@@ -660,7 +660,7 @@
       if (!response.ok) throw new Error(result.error || `Git 请求失败 (${response.status})`);
       return result;
     };
-    function Dialog({ title, close, busy, children }) {
+    function Dialog({ title, close, busy, children, actions }) {
       const ref = useRef();
       useEffect(() => {
         const dialog = ref.current;
@@ -679,7 +679,13 @@
           h("strong", null, title),
           h("button", { type: "button", className: "dtd-dialog-close-btn", disabled: busy, onClick: close, "aria-label": "关闭窗口" }, h(IconClose, { size: 12 }))
         ),
-        children
+        h("div", { className: "dtd-dialog-body" }, children),
+        h(
+          "div",
+          { className: "dtd-dialog-footer" },
+          h("button", { type: "button", className: "dtd-btn-secondary", disabled: busy, onClick: close }, "取消"),
+          actions
+        )
       );
     }
     function ActionsPanel({ sessionId }) {
@@ -699,6 +705,7 @@
       const dialogMessage = useRef("");
       const popoverRef = useRef(null);
       const acting = useRef(false);
+      const previewing = useRef(false);
       useEffect(() => {
         let sidebar, frame;
         const updateOffset = () => {
@@ -819,7 +826,10 @@
           }
           return result;
         } catch (error2) {
-          if (mounted.current) setError(error2.message);
+          if (mounted.current) {
+            setError(error2.message);
+            if (action === "push") setModal((previous) => previous?.kind === "push" ? { ...previous, ticket: void 0, failed: true } : previous);
+          }
         } finally {
           acting.current = false;
           if (mounted.current) setBusy(false);
@@ -827,24 +837,34 @@
         }
       };
       const openPush = () => {
-        setRemote(remotes.some((item) => item.name === remote) ? remote : state?.defaultRemote || remotes[0]?.name || "");
-        setModal({ kind: "push" });
-        setError("");
-        setNotice("");
+        const name = remotes.some((item) => item.name === remote) ? remote : state?.defaultRemote || remotes[0]?.name || "";
+        setRemote(name);
+        return previewPush(name);
       };
       const previewPush = async (name) => {
+        if (acting.current || previewing.current || !mounted.current) return;
+        previewing.current = true;
         generation.current++;
-        setModal({ kind: "push" });
-        const result = await act("preparePush", { remote: name });
-        if (!result || !mounted.current) return;
-        setModal({ kind: "push", ...result, checkingStatus: true });
-        await load();
-        if (mounted.current) setModal((previous) => previous?.ticket === result.ticket ? { ...previous, checkingStatus: false } : previous);
+        setModal({ kind: "push", checkingStatus: true });
+        try {
+          const result = await act("preparePush", { remote: name });
+          if (!mounted.current) return;
+          if (!result) {
+            setModal({ kind: "push", failed: true });
+            return;
+          }
+          setModal({ kind: "push", ...result, checkingStatus: true });
+          await load();
+          if (mounted.current) setModal((previous) => previous?.ticket === result.ticket ? { ...previous, checkingStatus: false } : previous);
+        } finally {
+          previewing.current = false;
+        }
       };
       const changeRemote = (name) => {
+        if (acting.current || previewing.current) return;
         setRemote(name);
         setError("");
-        setModal((previous) => previous?.kind === "push" ? { kind: "push" } : previous);
+        if (modal?.kind === "push") return previewPush(name);
       };
       const select = (path) => setSelected((previous) => {
         const next = new Set(previous);
@@ -896,7 +916,7 @@
       const pushIssue = modal?.kind === "push" ? pushPreviewIssue(modal, remote, state, statusError) : "";
       const pushChecking = busy || modal?.checkingStatus;
       const confirmPush = () => {
-        if (pushChecking || pushIssue || !modal?.ticket) return;
+        if (pushChecking || previewing.current || pushIssue || !modal?.ticket) return;
         return act("push", { ticket: modal.ticket, remote, branch: modal.branch, head: modal.head, confirmed: true });
       };
       const stagedCount = staged.length;
@@ -1114,36 +1134,49 @@
           ),
           modal?.kind === "stageCommit" && h(
             Dialog,
-            { title: "暂存全部并提交", busy, close: () => setModal(void 0) },
+            {
+              title: "暂存全部并提交",
+              busy,
+              close: () => setModal(void 0),
+              actions: h("button", { type: "button", className: "dtd-btn-primary", disabled: busy, onClick: confirmStageCommit }, busy ? "正在暂存…" : "确认暂存全部")
+            },
             h("p", null, `将全部 ${modal.files} 个未暂存文件加入暂存区，然后预览并确认提交。`),
-            errors,
-            h("button", { type: "button", className: "dtd-btn-primary", disabled: busy, onClick: confirmStageCommit }, busy ? "正在暂存…" : "确认暂存全部")
+            errors
           ),
           modal?.kind === "commit" && h(
             Dialog,
-            { title: "确认 Git 提交", busy, close: () => setModal(void 0) },
+            {
+              title: "确认 Git 提交",
+              busy,
+              close: () => setModal(void 0),
+              actions: h("button", { type: "button", className: "dtd-btn-primary", disabled: busy, onClick: () => act("commit", { ticket: modal.ticket, message: modal.message, confirmed: true }) }, busy ? "正在提交…" : "确认提交")
+            },
             h("p", null, `分支：${modal.branch} · ${modal.files} 个暂存文件 · +${modal.added} / −${modal.deleted}`),
             h("p", { className: "dtd-commit-preview" }, modal.message),
-            errors,
-            h("button", { type: "button", className: "dtd-btn-primary", disabled: busy, onClick: () => act("commit", { ticket: modal.ticket, message: modal.message, confirmed: true }) }, busy ? "正在提交…" : "确认提交")
+            errors
           ),
           // Push Dialog Modal
           modal && modal.kind === "push" && h(
             Dialog,
-            { title: "确认 Git 推送", busy, close: () => setModal(void 0) },
-            h("label", { className: "dtd-dialog-row" }, "推送 Remote ", remotes.length === 1 ? h("strong", null, remote) : h("select", { value: remote, disabled: busy, onChange: (event) => changeRemote(event.target.value) }, remotes.map((item) => h("option", { key: item.name, value: item.name }, `${item.name} · ${item.urls.join(" ; ")}`)))),
+            {
+              title: "确认 Git 推送",
+              busy: pushChecking,
+              close: () => setModal(void 0),
+              actions: h("button", { type: "button", className: "dtd-btn-primary", disabled: Boolean(pushChecking || pushIssue || !modal.ticket), onClick: confirmPush }, modal.checkingStatus ? "确认推送" : busy ? "正在推送…" : "确认推送")
+            },
+            h("label", { className: "dtd-dialog-row" }, "推送 Remote ", remotes.length === 1 ? h("strong", null, remote) : h("select", { value: remote, disabled: pushChecking, onChange: (event) => changeRemote(event.target.value) }, remotes.map((item) => h("option", { key: item.name, value: item.name }, `${item.name} · ${item.urls.join(" ; ")}`)))),
             h("div", { className: "dtd-push-urls" }, remotes.find((item) => item.name === remote)?.urls.map((url) => h("div", { key: url }, url))),
             errors,
-            h("button", { type: "button", className: "dtd-btn-primary", disabled: pushChecking || !remotes.some((item) => item.name === remote), onClick: () => previewPush(remote) }, pushChecking ? "正在核对…" : modal.ticket ? "重新检查推送目标" : "检查推送目标"),
-            modal.ticket && h(
+            modal.checkingStatus && h("p", { role: "status", className: "dtd-muted" }, "正在检查推送目标…"),
+            !modal.checkingStatus && modal.ticket && h(
               React.Fragment,
               null,
               h("p", null, `目标：${modal.remote || "未返回"} / ${modal.branch || "未返回"} · ${modal.targets?.length === 1 ? `待推送 ${modal.count} 个提交` : "各推送地址分别统计如下"}`),
               h("p", null, "提交：", h("code", null, modal.head || "Host 未返回 HEAD")),
               Array.isArray(modal.targets) && modal.targets.filter((target) => target && typeof target.url === "string").map((target) => h("p", { key: target.url, className: "dtd-muted" }, `${target.url} · ${target.count} 个提交`)),
-              pushIssue && h("p", { className: "dtd-action-error", role: "alert" }, pushIssue),
-              h("button", { type: "button", className: "dtd-btn-primary", disabled: Boolean(pushChecking || pushIssue), onClick: confirmPush }, modal.checkingStatus ? "正在刷新状态…" : busy ? "处理中…" : "确认推送")
-            )
+              pushIssue && h("p", { className: "dtd-action-error", role: "alert" }, pushIssue)
+            ),
+            !pushChecking && (pushIssue || modal.failed) && h("button", { type: "button", className: "dtd-dialog-recheck", disabled: !remotes.some((item) => item.name === remote), onClick: () => previewPush(remote) }, "重新检查")
           )
         )
       );
@@ -1334,6 +1367,15 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-fixed-w
 /* Dialog */
 .dtd-actions-dialog{box-sizing:border-box;position:fixed;inset:0;margin:auto;font:inherit;line-height:1.5;background:#fff;background:linear-gradient(var(--dtd-surface-overlay,#fff),var(--dtd-surface-overlay,#fff)),#fff;color:var(--dsw-alias-label-primary,#18181b);border:1px solid var(--dtd-border,rgba(128,128,128,.18));border-radius:10px;width:min(420px,calc(100vw - 40px));max-height:calc(100dvh - 40px);overflow:auto;padding:20px;box-shadow:var(--dtd-shadow,0 12px 36px rgba(0,0,0,.25));user-select:text;pointer-events:auto;overflow-wrap:anywhere}
 body[data-ds-dark-theme] .dtd-actions-dialog{background:#1e1e20;background:linear-gradient(var(--dtd-surface-overlay,#1e1e20),var(--dtd-surface-overlay,#1e1e20)),#1e1e20;color:var(--dsw-alias-label-primary,#fafafa)}
+.dtd-actions-dialog[open]{display:flex;flex-direction:column;height:fit-content;overflow:hidden}
+.dtd-actions-dialog .dtd-dialog-title{flex:none}
+.dtd-dialog-body{min-height:0;min-width:0;overflow:auto;overflow-wrap:anywhere}
+.dtd-dialog-footer{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px;flex:none;min-width:0;margin-top:16px;padding-top:12px;border-top:1px solid var(--dtd-border)}
+.dtd-dialog-footer button{flex:none;min-height:32px;padding:6px 12px;border-radius:6px;font:inherit;white-space:nowrap;cursor:pointer}
+.dtd-dialog-footer .dtd-btn-secondary{background:var(--dtd-surface-subtle);color:inherit;border:1px solid var(--dtd-border)}
+.dtd-dialog-footer .dtd-btn-secondary:hover:not(:disabled){border-color:var(--dtd-border-hover)}
+.dtd-actions-dialog .dtd-dialog-recheck{display:inline-block;border:0;background:transparent;color:#3b82f6;font:inherit;padding:4px 0;text-decoration:underline;cursor:pointer}
+@media(max-width:480px){.dtd-actions-dialog{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:16px}.dtd-dialog-footer{gap:8px;margin-top:12px}}
 .dtd-actions-dialog::backdrop{background:rgba(0,0,0,0.4)}
 .dtd-dialog-title{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;font-size:14px}
 .dtd-actions-dialog .dtd-dialog-close-btn{flex:none;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;color:inherit;border-radius:6px;cursor:pointer;padding:0}
