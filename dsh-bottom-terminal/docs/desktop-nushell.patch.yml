@@ -1,0 +1,17 @@
+# Reviewed local configuration proposal; apply only after user confirmation.
+# Merge this into the EXISTING terminal-controller row; keep its shell unchanged.
+- id: terminal-controller
+  name: '@deepseek-ai/dsh-api-terminal-controller'
+  config:
+    shellCandidates:
+      - zsh
+      - bash
+      - fish
+      - pwsh
+      - powershell
+      - cmd
+      - C:/Users/qc/AppData/Local/Programs/nu/bin/nu.exe
+
+# Enable after the standalone package or collection component is installed.
+- id: dsh-bottom-terminal
+  disabled: false

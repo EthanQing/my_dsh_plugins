@@ -1,7 +1,36 @@
-/.scratch/
+# Local dependencies and caches
 node_modules/
+.pnpm-store/
+.npm/
+.cache/
+
+# Research extracts, browser fixtures, test reports and local Profile backups
+.scratch/
+.test-output/
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Locally packed releases (root and individual plugin directories)
+/dist/
+/*/dist/
+*.tgz
+
+# Local environment configuration; keep shareable examples
 .env
 .env.*
 !.env.example
+!.env.*.example
+
+# Logs, temporary editor files and OS metadata
 *.log
-/dist/
+*.tmp
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Intentionally keep plugin lib/, vendor/, package manifests, lockfiles,
+# locales, icons and Cordis patches: GitHub installs use prebuilt runtimes.

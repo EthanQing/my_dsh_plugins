@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugins",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "description": "DSH plugins and the Aegis engineering workflow. Enable the components you need.",
@@ -84,7 +84,18 @@
     "dsh-task-diff-review/cordis.patch.yml",
     "dsh-task-diff-review/README.md",
     "dsh-task-diff-review/docs/",
-    "dsh-task-diff-review/LICENSE"
+    "dsh-task-diff-review/LICENSE",
+    "dsh-bottom-terminal/package.json",
+    "dsh-bottom-terminal/lib/",
+    "dsh-bottom-terminal/locale/",
+    "dsh-bottom-terminal/icon.svg",
+    "dsh-bottom-terminal/cordis.patch.yml",
+    "dsh-bottom-terminal/README.md",
+    "dsh-bottom-terminal/docs/",
+    "dsh-bottom-terminal/LICENSE",
+    "dsh-bottom-terminal/THIRD_PARTY_NOTICES.md",
+    "dsh-bottom-terminal/vendor/xterm/LICENSE",
+    "dsh-bottom-terminal/vendor/addon-fit/LICENSE"
   ],
   "scripts": {
     "check": "node scripts/check-package.mjs",
@@ -107,6 +118,7 @@
     "dsh-codex-collapse": "file:./dsh-codex-collapse",
     "dsh-subagent-sidebar-default": "file:./dsh-subagent-sidebar-default",
     "dsh-aegis-workflow": "file:./dsh-aegis-workflow",
-    "dsh-task-diff-review": "file:./dsh-task-diff-review"
+    "dsh-task-diff-review": "file:./dsh-task-diff-review",
+    "dsh-bottom-terminal": "file:./dsh-bottom-terminal"
   }
 }

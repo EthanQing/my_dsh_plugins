@@ -24,3 +24,6 @@
     - id: dsh-task-diff-review
       name: dsh-task-diff-review
       disabled: true
+    - id: dsh-bottom-terminal
+      name: dsh-bottom-terminal
+      disabled: true

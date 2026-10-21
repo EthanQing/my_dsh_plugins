@@ -1,0 +1,18 @@
+# Enable the component after installing the collection or standalone package.
+- id: dsh-bottom-terminal
+  disabled: false
+
+# Optional: merge into the EXISTING terminal-controller config after confirmation.
+# Preserve the existing shell default and any custom candidates.
+# - id: terminal-controller
+#   config:
+#     shellCandidates:
+#       - zsh
+#       - bash
+#       - fish
+#       - pwsh
+#       - powershell
+#       - cmd
+#       - nu
+# If Desktop's PATH cannot find NuShell, replace nu with the local nu.exe path.
+# The Host supplies the interactive -i argument for NuShell automatically.

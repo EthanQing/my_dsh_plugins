@@ -1,0 +1,4 @@
+- insert:
+    - id: dsh-bottom-terminal
+      name: dsh-bottom-terminal
+      disabled: true

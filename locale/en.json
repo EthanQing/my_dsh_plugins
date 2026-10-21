@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "DSH Plugins",
-    "description": "Markdown editing, message edit/retry, session deletion, smart titles, execution folding and a subagent sidebar manager. Enable components as needed. Includes the optional Aegis engineering workflow."
+    "description": "Markdown editing, message edit/retry, session deletion, smart titles, execution folding, subagent sidebar management, Aegis engineering workflow, code review and Git operations, and an integrated bottom terminal. Enable components as needed."
   }
 }

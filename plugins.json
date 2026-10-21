@@ -38,5 +38,10 @@
     "name": "dsh-task-diff-review",
     "directory": "dsh-task-diff-review",
     "title": "代码审查与 Git 操作"
+  },
+  {
+    "name": "dsh-bottom-terminal",
+    "directory": "dsh-bottom-terminal",
+    "title": "底部集成终端"
   }
 ]
