@@ -19,7 +19,7 @@ export function pushPreviewIssue(preview, remote, state, statusError = '') {
 
 export function observeGitPopoverSpace(row, onHeight) {
   const scroller = row.closest('[data-conversation-scroll]')
-  const tools = row.closest('[data-dsh-composer-tools]')
+  const tools = row.closest('[data-composer-dock]') || row.closest('[data-dsh-composer-tools]')
   let frame
   const measure = () => {
     frame = undefined

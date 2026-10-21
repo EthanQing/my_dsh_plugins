@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugins",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "private": true,
   "type": "module",
   "description": "DSH plugins and the Aegis engineering workflow. Enable the components you need.",

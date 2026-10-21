@@ -644,7 +644,7 @@
   }
   function observeGitPopoverSpace(row, onHeight) {
     const scroller = row.closest("[data-conversation-scroll]");
-    const tools = row.closest("[data-dsh-composer-tools]");
+    const tools = row.closest("[data-composer-dock]") || row.closest("[data-dsh-composer-tools]");
     let frame;
     const measure = () => {
       frame = void 0;
@@ -1181,26 +1181,71 @@
     if (!anchor || anchor.closest("[data-sidebar-right-session], [data-rightbar-col]")) return null;
     const seat = anchor.closest("[data-composer-seat]");
     const content = seat?.closest("[data-conversation-content]");
-    if (!seat || !content || !seat.closest("[data-conversation-scroll]")) return null;
-    let row = Array.from(seat.children).find((node) => node.hasAttribute("data-dsh-composer-tools"));
+    const footer = anchor.closest("[data-composer-dock]");
+    if (!seat || !content || !footer || !seat.closest("[data-conversation-scroll]")) return null;
+    let row = Array.from(footer.children).find((node) => node.hasAttribute("data-dsh-composer-tools"));
     if (!row) {
       row = seat.ownerDocument.createElement("div");
       row.setAttribute("data-dsh-composer-tools", "");
+      const saved = /* @__PURE__ */ new Map();
+      const set = (node, values) => {
+        if (!saved.has(node)) saved.set(node, {});
+        const original = saved.get(node);
+        for (const [key, value] of Object.entries(values)) {
+          if (!(key in original)) original[key] = node.style[key];
+          node.style[key] = value;
+        }
+      };
+      set(footer, { position: "relative", width: "100%", maxWidth: "var(--dsh-composer-card-max-width,100%)", boxSizing: "border-box" });
       Object.assign(row.style, {
-        position: "relative",
+        position: "absolute",
+        right: "0",
+        top: "calc(50% + 2px)",
+        transform: "translateY(-50%)",
         display: "flex",
-        flex: "none",
-        justifyContent: "flex-end",
         alignItems: "center",
-        gap: "8px",
-        minWidth: "0",
-        maxWidth: "100%",
-        boxSizing: "border-box",
-        width: "min(var(--dsh-composer-card-max-width,100%),calc(100% - 2 * var(--dsh-composer-side-clearance,16px)))",
-        margin: "0 auto",
-        padding: "4px 0"
+        justifyContent: "flex-end",
+        gap: "6px",
+        minWidth: "0"
       });
-      seat.appendChild(row);
+      footer.appendChild(row);
+      const nativeItems = (node) => Array.from(node.children).flatMap((child) => {
+        if (child === row || child.hidden) return [];
+        const display = getComputedStyle(child).display;
+        return display === "contents" ? nativeItems(child) : display === "none" ? [] : [child];
+      });
+      let frame;
+      const measure = () => {
+        frame = void 0;
+        const items = nativeItems(footer);
+        for (const item of items) set(item, { minWidth: "0", flexShrink: "1" });
+        const nativeWidth = items.reduce((sum, item) => sum + Math.max(item.scrollWidth, item.getBoundingClientRect().width), 0) + Math.max(0, items.length - 1) * 12;
+        const available = Math.max(0, (footer.clientWidth - nativeWidth) / 2 - 8);
+        const compact = available < 130;
+        row.toggleAttribute("data-tools-compact", compact);
+        const reserve = compact ? row.children.length > 1 ? 58 : 28 : Math.min(220, available);
+        row.style.maxWidth = `${reserve}px`;
+        set(footer, { paddingInline: `${reserve + 8}px` });
+        const room = Math.max(0, footer.clientWidth - 2 * (reserve + 8) - Math.max(0, items.length - 1) * 12);
+        for (const item of items) {
+          set(item, { maxWidth: compact ? `${room * Math.max(item.scrollWidth, item.getBoundingClientRect().width) / Math.max(1, nativeWidth - Math.max(0, items.length - 1) * 12)}px` : "" });
+          for (const button of [item, ...item.querySelectorAll("button")].filter((node) => node.tagName === "BUTTON")) set(button, { maxWidth: "100%", minWidth: "0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" });
+        }
+      };
+      const schedule = () => {
+        if (frame === void 0) frame = requestAnimationFrame(measure);
+      };
+      const resize = new ResizeObserver(schedule);
+      resize.observe(footer);
+      const mutation = new MutationObserver(schedule);
+      mutation.observe(footer, { childList: true, subtree: true, characterData: true });
+      row.__dshToolsCleanup = () => {
+        resize.disconnect();
+        mutation.disconnect();
+        if (frame !== void 0) cancelAnimationFrame(frame);
+        for (const [node, values] of saved) Object.assign(node.style, values);
+      };
+      schedule();
     }
     if (Array.from(row.children).some((node) => node.getAttribute("data-dsh-composer-tool") === id)) return null;
     const member = seat.ownerDocument.createElement("div");
@@ -1214,7 +1259,10 @@
       if (disposed) return;
       disposed = true;
       member.remove();
-      if (!row.children.length) row.remove();
+      if (!row.children.length) {
+        row.__dshToolsCleanup?.();
+        row.remove();
+      }
     } };
   }
   function createComposerTool(React, createPortal, options, Component) {
@@ -1351,7 +1399,12 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-row,bod
 .dtd-native>div{height:100%;min-height:150px}
 .dtd-message{padding:14px;font-size:12px;opacity:.7}
 
-/* Git tool at the right of the independent composer tools row. */
+/* Git shares the native centered information footer. */
+[data-dsh-composer-tools] .dtd-actions-row{min-height:22px}
+[data-dsh-composer-tools] .dtd-status-pill{height:22px;padding:0 7px;border-radius:4px;box-shadow:none}
+[data-tools-compact] .dtd-status-pill{width:22px;padding:0;justify-content:center}
+[data-tools-compact] .dtd-status-pill>:not(:first-child){display:none}
+[data-dsh-composer-tools] .dtd-actions-space-hint{position:absolute;bottom:calc(100% + 8px);right:0;width:var(--dtd-popover-width,220px);background:var(--dtd-surface-overlay)}
 .dtd-actions-row{position:relative;box-sizing:border-box;display:inline-flex;flex:none;max-width:100%;min-width:0;min-height:32px;user-select:none;z-index:1}
 .dtd-actions-container{display:flex;justify-content:flex-end;align-items:center;gap:8px;max-width:100%;min-width:0}
 .dtd-actions-space-hint{flex:1;min-width:0;max-height:32px;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;font-size:11px;line-height:16px;overflow-wrap:anywhere;color:var(--dsw-alias-label-secondary,inherit)}

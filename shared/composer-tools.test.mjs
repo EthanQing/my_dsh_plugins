@@ -1,6 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { attachComposerTool } from './composer-tools.js'
+const globals = {ResizeObserver:globalThis.ResizeObserver,MutationObserver:globalThis.MutationObserver,requestAnimationFrame:globalThis.requestAnimationFrame,cancelAnimationFrame:globalThis.cancelAnimationFrame}
+globalThis.ResizeObserver = globalThis.MutationObserver = class { observe() {} disconnect() {} }
+globalThis.requestAnimationFrame = () => 1
+globalThis.cancelAnimationFrame = () => {}
+test.after(() => Object.assign(globalThis, globals))
 
 class Element {
   constructor() { this.children = []; this.attrs = new Map(); this.style = {}; this.ownerDocument = { createElement: () => new Element() } }
@@ -17,7 +22,7 @@ function fixture(right = false) {
   if (right) content.setAttribute('data-sidebar-right-session', 'same-session')
   const scroll = content.appendChild(new Element()); scroll.setAttribute('data-conversation-scroll', '')
   const seat = scroll.appendChild(new Element()); seat.setAttribute('data-composer-seat', '')
-  const native = seat.appendChild(new Element())
+  const native = seat.appendChild(new Element()); native.setAttribute('data-composer-dock', '')
   const anchor = native.appendChild(new Element())
   return { seat, native, anchor }
 }
@@ -29,14 +34,14 @@ for (const first of ['terminal', 'git']) test(`independent member ownership and 
   assert.equal(git.row, terminal.row)
   assert.equal(terminal.member.style.flex, 'none')
   assert.equal(git.member.style.flex, '0 1 auto')
-  assert.deepEqual(seat.children, [native, git.row])
+  assert.deepEqual(seat.children, [native]); assert.equal(git.row.parentElement, native)
   assert.deepEqual(git.row.children, [terminal.member, git.member])
-  assert.deepEqual(native.children, original)
+  assert.deepEqual(native.children, [...original, git.row])
   assert.equal(attachComposerTool(anchor, { id: 'git', order: 20 }), null)
   const mounts = { git, terminal }
   mounts[first].dispose(); mounts[first].dispose()
   const remaining = first === 'git' ? terminal : git
-  assert.deepEqual(seat.children, [native, remaining.row])
+  assert.deepEqual(seat.children, [native]); assert.equal(remaining.row.parentElement, native)
   assert.deepEqual(remaining.row.children, [remaining.member])
   remaining.dispose()
   assert.deepEqual(seat.children, [native])
@@ -53,6 +58,6 @@ test('members reattach after full cleanup without retaining stale hosts', () => 
   const one = attachComposerTool(anchor, { id: 'terminal', order: 10, shrink: false }); one.dispose()
   const two = attachComposerTool(anchor, { id: 'terminal', order: 10, shrink: false })
   assert.notEqual(one.row, two.row)
-  assert.equal(seat.children.length, 2)
+  assert.equal(seat.children.length, 1)
   two.dispose(); assert.equal(seat.children.length, 1)
 })

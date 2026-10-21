@@ -112,7 +112,12 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-row,bod
 .dtd-native>div{height:100%;min-height:150px}
 .dtd-message{padding:14px;font-size:12px;opacity:.7}
 
-/* Git tool at the right of the independent composer tools row. */
+/* Git shares the native centered information footer. */
+[data-dsh-composer-tools] .dtd-actions-row{min-height:22px}
+[data-dsh-composer-tools] .dtd-status-pill{height:22px;padding:0 7px;border-radius:4px;box-shadow:none}
+[data-tools-compact] .dtd-status-pill{width:22px;padding:0;justify-content:center}
+[data-tools-compact] .dtd-status-pill>:not(:first-child){display:none}
+[data-dsh-composer-tools] .dtd-actions-space-hint{position:absolute;bottom:calc(100% + 8px);right:0;width:var(--dtd-popover-width,220px);background:var(--dtd-surface-overlay)}
 .dtd-actions-row{position:relative;box-sizing:border-box;display:inline-flex;flex:none;max-width:100%;min-width:0;min-height:32px;user-select:none;z-index:1}
 .dtd-actions-container{display:flex;justify-content:flex-end;align-items:center;gap:8px;max-width:100%;min-width:0}
 .dtd-actions-space-hint{flex:1;min-width:0;max-height:32px;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;font-size:11px;line-height:16px;overflow-wrap:anywhere;color:var(--dsw-alias-label-secondary,inherit)}
