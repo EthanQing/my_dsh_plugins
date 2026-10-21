@@ -30,13 +30,16 @@ function logWarn(ctx, scope, errorOrCode) {
   const code = typeof errorOrCode === "string" ? errorOrCode : String(errorOrCode?.code || errorOrCode?.name || "internal");
   try {
     const message = `[dsh-subagent-sidebar-default] ${scope}: ${code}`;
-    if (ctx?.logger?.warn) ctx.logger.warn(message);
-    else console.warn(message);
+    if (ctx?.logger?.warn)
+      ctx.logger.warn(message);
+    else
+      console.warn(message);
   } catch {
   }
 }
 function injectTokenMeta(html) {
-  if (typeof html !== "string") return html;
+  if (typeof html !== "string")
+    return html;
   const existing = TOKEN_META_PATTERN.exec(html);
   if (existing !== null) {
     const original = existing[0];
@@ -46,15 +49,18 @@ function injectTokenMeta(html) {
   }
   const tag = `<meta name="${TOKEN_META}" content="${token}">`;
   const closing = /<\/head\s*>/i.exec(html);
-  if (closing === null) return tag + html;
+  if (closing === null)
+    return tag + html;
   return html.slice(0, closing.index) + tag + html.slice(closing.index);
 }
 function hasValidToken(req) {
   const raw = req.headers[TOKEN_HEADER];
-  if (typeof raw !== "string") return false;
+  if (typeof raw !== "string")
+    return false;
   const given = Buffer.from(raw, "utf8");
   const expected = Buffer.from(token, "utf8");
-  if (given.length !== expected.length) return false;
+  if (given.length !== expected.length)
+    return false;
   try {
     return timingSafeEqual(given, expected);
   } catch {
@@ -62,7 +68,8 @@ function hasValidToken(req) {
   }
 }
 function sendJson(res, status, payload) {
-  if (res.headersSent || res.writableEnded || res.destroyed) return;
+  if (res.headersSent || res.writableEnded || res.destroyed)
+    return;
   const body = JSON.stringify(payload);
   try {
     res.writeHead(status, {
@@ -77,23 +84,29 @@ function sendJson(res, status, payload) {
 }
 function sameOriginRequest(req) {
   const secFetchSite = req.headers["sec-fetch-site"];
-  if (secFetchSite === "same-origin") return true;
-  if (secFetchSite === "cross-site" || secFetchSite === "same-site") return false;
+  if (secFetchSite === "same-origin")
+    return true;
+  if (secFetchSite === "cross-site" || secFetchSite === "same-site")
+    return false;
   const origin = req.headers.origin;
   const referer = req.headers.referer;
   const host = req.headers.host;
   if (typeof host === "string" && host !== "") {
     for (const value of [origin, referer]) {
-      if (typeof value !== "string" || value === "") continue;
+      if (typeof value !== "string" || value === "")
+        continue;
       try {
         const url = new URL(value);
-        if ((url.protocol === "http:" || url.protocol === "https:") && url.host === host) return true;
+        if ((url.protocol === "http:" || url.protocol === "https:") && url.host === host)
+          return true;
       } catch {
       }
     }
   }
-  if (secFetchSite !== void 0) return false;
-  if (origin !== void 0) return false;
+  if (secFetchSite !== void 0)
+    return false;
+  if (origin !== void 0)
+    return false;
   const cookie = req.headers.cookie;
   return typeof cookie === "string" && cookie !== "";
 }
@@ -119,16 +132,19 @@ function readRequestBody(req) {
     let size = 0;
     const chunks = [];
     const finish = (callback, value) => {
-      if (settled) return;
+      if (settled)
+        return;
       settled = true;
       callback(value);
     };
     req.on("data", (chunk) => {
-      if (settled) return;
+      if (settled)
+        return;
       size += chunk.length;
       if (size > MAX_BODY) {
         finish(reject, codedError("too-large", "request body exceeds the limit"));
-        if (typeof req.resume === "function") req.resume();
+        if (typeof req.resume === "function")
+          req.resume();
         return;
       }
       chunks.push(chunk);
@@ -139,21 +155,29 @@ function readRequestBody(req) {
   });
 }
 function isValidSessionId(value) {
-  if (typeof value !== "string") return false;
-  if (value.length < 1 || value.length > 200) return false;
-  if (value === "." || value === "..") return false;
+  if (typeof value !== "string")
+    return false;
+  if (value.length < 1 || value.length > 200)
+    return false;
+  if (value === "." || value === "..")
+    return false;
   return !INVALID_ID_CHAR.test(value);
 }
 function encodeSegment(raw) {
-  if (raw.length === 0) throw new Error("cannot encode an empty path segment");
-  if (raw === ".") return "~002E";
-  if (raw === "..") return "~002E~002E";
+  if (raw.length === 0)
+    throw new Error("cannot encode an empty path segment");
+  if (raw === ".")
+    return "~002E";
+  if (raw === "..")
+    return "~002E~002E";
   let out = "";
   for (let index = 0; index < raw.length; index += 1) {
     const code = raw.charCodeAt(index);
     const character = String.fromCharCode(code);
-    if (character !== "~" && /^[A-Za-z0-9._-]$/.test(character)) out += character;
-    else out += `~${code.toString(16).toUpperCase().padStart(4, "0")}`;
+    if (character !== "~" && /^[A-Za-z0-9._-]$/.test(character))
+      out += character;
+    else
+      out += `~${code.toString(16).toUpperCase().padStart(4, "0")}`;
   }
   return out;
 }
@@ -167,45 +191,54 @@ async function retryIo(operation) {
     try {
       return await operation();
     } catch (error) {
-      if (!RETRY_CODES.has(error?.code) || attempt >= RETRY_DELAYS.length) throw error;
+      if (!RETRY_CODES.has(error?.code) || attempt >= RETRY_DELAYS.length)
+        throw error;
       await sleep(RETRY_DELAYS[attempt]);
       attempt += 1;
     }
   }
 }
 async function removeEntry(target, depth, budget) {
-  if (depth > MAX_TREE_DEPTH) throw codedError("unsafe", "session log directory is nested too deeply");
+  if (depth > MAX_TREE_DEPTH)
+    throw codedError("unsafe", "session log directory is nested too deeply");
   budget.entries += 1;
-  if (budget.entries > MAX_TREE_ENTRIES) throw codedError("unsafe", "session log directory has too many entries");
+  if (budget.entries > MAX_TREE_ENTRIES)
+    throw codedError("unsafe", "session log directory has too many entries");
   let stat;
   try {
     stat = await retryIo(() => fs.lstat(target));
   } catch (error) {
-    if (error?.code === "ENOENT") return;
+    if (error?.code === "ENOENT")
+      return;
     throw error;
   }
   if (stat.isSymbolicLink() || stat.isFile()) {
     try {
       await retryIo(() => fs.unlink(target));
     } catch (error) {
-      if (error?.code === "ENOENT") return;
+      if (error?.code === "ENOENT")
+        return;
       throw error;
     }
     return;
   }
-  if (!stat.isDirectory()) throw codedError("unsafe", "session log directory contains an unsupported entry");
+  if (!stat.isDirectory())
+    throw codedError("unsafe", "session log directory contains an unsupported entry");
   let children;
   try {
     children = await retryIo(() => fs.readdir(target));
   } catch (error) {
-    if (error?.code === "ENOENT") return;
+    if (error?.code === "ENOENT")
+      return;
     throw error;
   }
-  for (const child of children) await removeEntry(path.join(target, child), depth + 1, budget);
+  for (const child of children)
+    await removeEntry(path.join(target, child), depth + 1, budget);
   try {
     await retryIo(() => fs.rmdir(target));
   } catch (error) {
-    if (error?.code === "ENOENT") return;
+    if (error?.code === "ENOENT")
+      return;
     throw error;
   }
 }
@@ -214,12 +247,14 @@ async function removeLogTree(target) {
   try {
     await removeEntry(target, 0, budget);
   } catch (error) {
-    if (error?.code !== "ENOENT") throw error;
+    if (error?.code !== "ENOENT")
+      throw error;
   }
   try {
     await fs.lstat(target);
   } catch (error) {
-    if (error?.code === "ENOENT") return;
+    if (error?.code === "ENOENT")
+      return;
     throw error;
   }
   throw codedError("log-locked", "session log directory still exists after removal");
@@ -229,42 +264,51 @@ async function removeCacheFile(target) {
   try {
     stat = await fs.lstat(target);
   } catch (error) {
-    if (error?.code === "ENOENT") return;
+    if (error?.code === "ENOENT")
+      return;
     throw error;
   }
-  if (stat.isSymbolicLink() || !stat.isFile()) throw codedError("unsafe", "projection cache entry is not a regular file");
+  if (stat.isSymbolicLink() || !stat.isFile())
+    throw codedError("unsafe", "projection cache entry is not a regular file");
   try {
     await fs.unlink(target);
   } catch (error) {
-    if (error?.code === "ENOENT") return;
+    if (error?.code === "ENOENT")
+      return;
     throw error;
   }
   try {
     await fs.lstat(target);
   } catch (error) {
-    if (error?.code === "ENOENT") return;
+    if (error?.code === "ENOENT")
+      return;
     throw error;
   }
   throw codedError("cache-locked", "projection cache file still exists after removal");
 }
 function addIndexEntry(map, key, entry) {
   const entries = map.get(key);
-  if (entries === void 0) map.set(key, [entry]);
-  else entries.push(entry);
+  if (entries === void 0)
+    map.set(key, [entry]);
+  else
+    entries.push(entry);
 }
 async function readSessionsRoot(root) {
   let stat;
   try {
     stat = await fs.stat(root);
   } catch (error) {
-    if (error?.code === "ENOENT") return null;
+    if (error?.code === "ENOENT")
+      return null;
     throw error;
   }
-  if (!stat.isDirectory()) return null;
+  if (!stat.isDirectory())
+    return null;
   try {
     return await fs.realpath(root);
   } catch (error) {
-    if (error?.code === "ENOENT") return null;
+    if (error?.code === "ENOENT")
+      return null;
     throw error;
   }
 }
@@ -274,17 +318,20 @@ async function indexLogs(root, rootReal) {
   try {
     projects = await fs.readdir(root, { withFileTypes: true });
   } catch (error) {
-    if (error?.code === "ENOENT") throw codedError("root-missing", "session storage root disappeared during the scan");
+    if (error?.code === "ENOENT")
+      throw codedError("root-missing", "session storage root disappeared during the scan");
     throw error;
   }
   for (const project of projects) {
-    if (!project.isDirectory() || project.isSymbolicLink()) continue;
+    if (!project.isDirectory() || project.isSymbolicLink())
+      continue;
     const projectPath = path.join(root, project.name);
     let children;
     try {
       children = await fs.readdir(projectPath, { withFileTypes: true });
     } catch (error) {
-      if (error?.code === "ENOENT") continue;
+      if (error?.code === "ENOENT")
+        continue;
       throw error;
     }
     for (const child of children) {
@@ -302,7 +349,8 @@ async function indexCache(root) {
   try {
     entries = await fs.readdir(root, { withFileTypes: true });
   } catch (error) {
-    if (error?.code === "ENOENT") return { byName: /* @__PURE__ */ new Map() };
+    if (error?.code === "ENOENT")
+      return { byName: /* @__PURE__ */ new Map() };
     throw error;
   }
   const byName = /* @__PURE__ */ new Map();
@@ -318,10 +366,13 @@ async function indexCache(root) {
 }
 function logCandidate(index, sessionId) {
   const matches = index.byName.get(encodeSegment(sessionId)) || [];
-  if (matches.length === 0) return { kind: "none" };
-  if (matches.length > 1) return { kind: "ambiguous" };
+  if (matches.length === 0)
+    return { kind: "none" };
+  if (matches.length > 1)
+    return { kind: "ambiguous" };
   const match = matches[0];
-  if (!match.isDirectory || match.isSymbolicLink) return { kind: "unsafe" };
+  if (!match.isDirectory || match.isSymbolicLink)
+    return { kind: "unsafe" };
   return { kind: "entry", path: match.path };
 }
 function cacheCandidate(index, sessionId) {
@@ -329,56 +380,71 @@ function cacheCandidate(index, sessionId) {
   const matches = [];
   for (const key of names) {
     for (const entry of index.byName.get(key) || []) {
-      if (!matches.some((candidate) => candidate.path === entry.path)) matches.push(entry);
+      if (!matches.some((candidate) => candidate.path === entry.path))
+        matches.push(entry);
     }
   }
-  if (matches.length === 0) return { kind: "none" };
-  if (matches.length > 1) return { kind: "ambiguous" };
+  if (matches.length === 0)
+    return { kind: "none" };
+  if (matches.length > 1)
+    return { kind: "ambiguous" };
   const match = matches[0];
-  if (!match.isFile || match.isDirectory || match.isSymbolicLink) return { kind: "unsafe" };
+  if (!match.isFile || match.isDirectory || match.isSymbolicLink)
+    return { kind: "unsafe" };
   return { kind: "entry", path: match.path };
 }
 async function validateLogCandidate(index, candidate) {
-  if (candidate.kind !== "entry") return candidate;
+  if (candidate.kind !== "entry")
+    return candidate;
   let stat;
   try {
     stat = await fs.lstat(candidate.path);
   } catch (error) {
-    if (error?.code === "ENOENT") return { kind: "none" };
+    if (error?.code === "ENOENT")
+      return { kind: "none" };
     throw error;
   }
-  if (stat.isSymbolicLink() || !stat.isDirectory()) return { kind: "unsafe" };
+  if (stat.isSymbolicLink() || !stat.isDirectory())
+    return { kind: "unsafe" };
   let real;
   try {
     real = await fs.realpath(candidate.path);
   } catch (error) {
-    if (error?.code === "ENOENT") return { kind: "none" };
+    if (error?.code === "ENOENT")
+      return { kind: "none" };
     throw error;
   }
-  if (!isContained(index.rootReal, real)) return { kind: "unsafe" };
+  if (!isContained(index.rootReal, real))
+    return { kind: "unsafe" };
   return { kind: "entry", path: real };
 }
 async function validateCacheCandidate(candidate) {
-  if (candidate.kind !== "entry") return candidate;
+  if (candidate.kind !== "entry")
+    return candidate;
   let stat;
   try {
     stat = await fs.lstat(candidate.path);
   } catch (error) {
-    if (error?.code === "ENOENT") return { kind: "none" };
+    if (error?.code === "ENOENT")
+      return { kind: "none" };
     throw error;
   }
-  if (stat.isSymbolicLink() || !stat.isFile()) return { kind: "unsafe" };
+  if (stat.isSymbolicLink() || !stat.isFile())
+    return { kind: "unsafe" };
   return { kind: "entry", path: candidate.path };
 }
 async function inspectArtifacts(env, sessionId) {
   const rootReal = await readSessionsRoot(env.sessionsRoot);
-  if (rootReal === null) return { status: "root-missing" };
+  if (rootReal === null)
+    return { status: "root-missing" };
   const logs = await indexLogs(env.sessionsRoot, rootReal);
   const cache = await indexCache(env.cacheRoot);
   const log = await validateLogCandidate(logs, logCandidate(logs, sessionId));
   const cached = await validateCacheCandidate(cacheCandidate(cache, sessionId));
-  if (log.kind === "ambiguous" || cached.kind === "ambiguous") return { status: "ambiguous" };
-  if (log.kind === "unsafe" || cached.kind === "unsafe") return { status: "unsafe" };
+  if (log.kind === "ambiguous" || cached.kind === "ambiguous")
+    return { status: "ambiguous" };
+  if (log.kind === "unsafe" || cached.kind === "unsafe")
+    return { status: "unsafe" };
   return {
     status: "ok",
     logPath: log.kind === "entry" ? log.path : null,
@@ -390,14 +456,16 @@ async function isRunning(ctx, sessionId) {
     const agents = typeof ctx.get === "function" ? ctx.get("agents") : void 0;
     const get = agents?.get;
     const agent = typeof get === "function" ? await get.call(agents, sessionId) : void 0;
-    if (agent === void 0 || agent === null) return { running: false };
+    if (agent === void 0 || agent === null)
+      return { running: false };
     return { running: agent.status === "running" || agent.running === true };
   } catch (error) {
     return { error };
   }
 }
 function activityKinds(error) {
-  if (!Array.isArray(error?.activity)) return [];
+  if (!Array.isArray(error?.activity))
+    return [];
   return error.activity.map((entry) => entry && typeof entry.kind === "string" ? entry.kind : void 0).filter((kind) => typeof kind === "string");
 }
 function failed(sessionId, code, extra) {
@@ -416,22 +484,26 @@ async function unarchive(ctx, sessionId) {
   }
 }
 async function deleteOne(ctx, env, sessionId) {
-  if (!isValidSessionId(sessionId)) return failed(sessionId, "invalid-id");
+  if (!isValidSessionId(sessionId))
+    return failed(sessionId, "invalid-id");
   let running = await isRunning(ctx, sessionId);
   if (running.error) {
     logWarn(ctx, "running-check", running.error);
     return failed(sessionId, "internal");
   }
-  if (running.running) return failed(sessionId, "running");
+  if (running.running)
+    return failed(sessionId, "running");
   let artifacts;
   try {
     artifacts = await inspectArtifacts(env, sessionId);
   } catch (error) {
-    if (error?.code === "root-missing") return failed(sessionId, "root-missing");
+    if (error?.code === "root-missing")
+      return failed(sessionId, "root-missing");
     logWarn(ctx, "scan", error);
     return failed(sessionId, "internal");
   }
-  if (artifacts.status !== "ok") return failed(sessionId, artifacts.status);
+  if (artifacts.status !== "ok")
+    return failed(sessionId, artifacts.status);
   let archived;
   try {
     const ids = ctx.workspaceRegistry.archivedSessionIds;
@@ -441,7 +513,8 @@ async function deleteOne(ctx, env, sessionId) {
     return failed(sessionId, "internal");
   }
   const hasArtifacts = artifacts.logPath !== null || artifacts.cachePath !== null;
-  if (archived) return hasArtifacts ? failed(sessionId, "archived") : gone(sessionId);
+  if (archived)
+    return hasArtifacts ? failed(sessionId, "archived") : gone(sessionId);
   if (!hasArtifacts) {
     try {
       await ctx.workspaceRegistry.archiveSession(sessionId);
@@ -458,7 +531,8 @@ async function deleteOne(ctx, env, sessionId) {
     if (error?.name === "WorkspaceActiveSessionError") {
       return failed(sessionId, "active", { activity: activityKinds(error) });
     }
-    if (error?.name === "WorkspaceUnknownSessionError") return failed(sessionId, "unknown");
+    if (error?.name === "WorkspaceUnknownSessionError")
+      return failed(sessionId, "unknown");
     logWarn(ctx, "archive", error);
     return failed(sessionId, "archive-failed");
   }
@@ -521,7 +595,8 @@ async function handleRequest(ctx, env, req, res) {
     }
     const declaredLength = req.headers["content-length"];
     if (typeof declaredLength === "string" && Number(declaredLength) > MAX_BODY) {
-      if (typeof req.resume === "function") req.resume();
+      if (typeof req.resume === "function")
+        req.resume();
       sendJson(res, 413, { ok: false, code: "too-large" });
       return;
     }
@@ -533,7 +608,8 @@ async function handleRequest(ctx, env, req, res) {
         sendJson(res, 413, { ok: false, code: "too-large" });
         return;
       }
-      if (error?.code === "aborted") return;
+      if (error?.code === "aborted")
+        return;
       throw error;
     }
     let parsed;
@@ -558,10 +634,12 @@ async function handleRequest(ctx, env, req, res) {
     const seen = /* @__PURE__ */ new Set();
     const sessionIds = [];
     for (const value of parsed.sessionIds) {
-      if (seen.has(value)) continue;
+      if (seen.has(value))
+        continue;
       seen.add(value);
       sessionIds.push(value);
-      if (sessionIds.length >= MAX_IDS) break;
+      if (sessionIds.length >= MAX_IDS)
+        break;
     }
     const results = [];
     for (const raw of sessionIds) {

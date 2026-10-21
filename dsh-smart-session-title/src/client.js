@@ -326,17 +326,69 @@ window.__ModuleLoader__.load({
         })
       }
 
+      /** Non-blocking inline feedback helper: show lightweight toast for errors */
+      const showToast = (message, type = 'info') => {
+        let container = document.getElementById('dsh-sst-toast-container')
+        if (!container) {
+          container = document.createElement('div')
+          container.id = 'dsh-sst-toast-container'
+          container.className = 'dsh-sst-toast-container'
+          document.body.appendChild(container)
+        }
+        const toast = document.createElement('div')
+        toast.className = `dsh-sst-toast dsh-sst-toast-${type}`
+        toast.innerHTML = `<span class="dsh-sst-toast-icon">${type === 'error' ? '⚠️' : 'ℹ️'}</span><span class="dsh-sst-toast-msg">${message}</span>`
+        container.appendChild(toast)
+        setTimeout(() => {
+          toast.classList.add('dsh-sst-toast-fadeout')
+          setTimeout(() => toast.remove(), 300)
+        }, 3200)
+      }
+
+      /** Non-blocking inline single session rename */
       const renameOne = async sessionId => {
-        note(tr('single.busy'))
+        const row = document.querySelector(`[data-row-key="session:${CSS.escape(sessionId)}"]`)
+        let spinner = null
+        if (row) {
+          row.classList.add('dsh-sst-session-renaming')
+          spinner = document.createElement('span')
+          spinner.className = 'dsh-sst-inline-spinner'
+          spinner.title = tr('single.busy')
+          spinner.innerHTML = '<svg class="dsh-sst-inline-spinner" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6" stroke-opacity="0.25"/><path d="M14 8a6 6 0 0 0-6-6"/></svg>'
+          const titleEl = row.querySelector('[class*="title"], [class*="name"]') || row.firstElementChild
+          if (titleEl) titleEl.prepend(spinner)
+          else row.prepend(spinner)
+        }
         try {
           const value = await call('renameSession', { sessionId })
-          note(tr('single.done', { title: value.title }))
+          if (row) {
+            row.classList.remove('dsh-sst-session-renaming')
+            spinner?.remove()
+            row.classList.add('dsh-sst-flash-green')
+            const check = document.createElement('span')
+            check.className = 'dsh-sst-inline-check'
+            check.innerHTML = '<svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg>'
+            const titleEl = row.querySelector('[class*="title"], [class*="name"]') || row.firstElementChild
+            if (titleEl) titleEl.prepend(check)
+            else row.prepend(check)
+            setTimeout(() => {
+              check.remove()
+              row.classList.remove('dsh-sst-flash-green')
+            }, 1800)
+          }
         } catch (error) {
+          if (row) {
+            row.classList.remove('dsh-sst-session-renaming')
+            spinner?.remove()
+            row.classList.add('dsh-sst-shake')
+            setTimeout(() => row.classList.remove('dsh-sst-shake'), 600)
+          }
           const code = typeof error?.code === 'string' ? error.code : undefined
-          if (code === 'USER_TITLE_LOCKED') note(tr('single.locked'))
-          else if (code === 'SESSION_RUNNING') note(tr('single.running'))
-          else if (code === 'INSUFFICIENT_CONTENT') note(tr('single.insufficient'))
-          else note(failMessage(error))
+          let msg = failMessage(error)
+          if (code === 'USER_TITLE_LOCKED') msg = tr('single.locked')
+          else if (code === 'SESSION_RUNNING') msg = tr('single.running')
+          else if (code === 'INSUFFICIENT_CONTENT') msg = tr('single.insufficient')
+          showToast(msg, 'error')
         }
       }
 
@@ -413,6 +465,20 @@ window.__ModuleLoader__.load({
 .dsh-sst-btn-primary{border-color:transparent;background:var(--dsw-alias-state-business-primary);color:var(--dsw-alias-label-inverse, #fff)}
 .dsh-sst-btn-primary:hover:not(:disabled){opacity:.9;background:var(--dsw-alias-state-business-primary)}
 .dsh-sst-check{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--dsw-alias-label-secondary)}
+.dsh-sst-session-renaming{opacity:.65;transition:opacity .2s ease}
+.dsh-sst-inline-spinner{display:inline-flex;align-items:center;justify-content:center;margin-right:6px;color:#3b82f6;animation:dsh-sst-spin .8s linear infinite;vertical-align:middle}
+@keyframes dsh-sst-spin{to{transform:rotate(360deg)}}
+.dsh-sst-inline-check{display:inline-flex;align-items:center;justify-content:center;margin-right:6px;color:#16a34a;font-weight:bold;animation:dsh-sst-pop .3s cubic-bezier(0.175,0.885,0.32,1.275);vertical-align:middle}
+@keyframes dsh-sst-pop{0%{transform:scale(0.5);opacity:0}100%{transform:scale(1);opacity:1}}
+.dsh-sst-flash-green{animation:dsh-sst-green-pulse .8s ease-out}
+@keyframes dsh-sst-green-pulse{0%{background-color:rgba(22,163,74,0.22)}100%{background-color:transparent}}
+.dsh-sst-shake{animation:dsh-sst-shake-anim .4s ease-in-out}
+@keyframes dsh-sst-shake-anim{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+.dsh-sst-toast-container{position:fixed;top:48px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.dsh-sst-toast{pointer-events:auto;box-sizing:border-box;max-width:340px;padding:8px 12px;border-radius:8px;background:var(--dsw-alias-bg-layer-2,#1e1e20);border:1px solid var(--dsw-alias-border-l2,rgba(128,128,128,0.2));box-shadow:0 8px 24px -4px rgba(0,0,0,0.18),0 2px 6px -1px rgba(0,0,0,0.08);color:var(--dsw-alias-label-primary,#ffffff);font-size:12.5px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(14px);animation:dsh-sst-toast-in .25s cubic-bezier(0.16,1,0.3,1);transition:opacity .3s ease,transform .3s ease}
+.dsh-sst-toast-error{border-color:rgba(220,38,38,0.35);color:var(--dsw-alias-state-error-primary,#ef4444)}
+.dsh-sst-toast-fadeout{opacity:0;transform:translateY(-8px)}
+@keyframes dsh-sst-toast-in{from{opacity:0;transform:translateY(-10px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
 `
     //#endregion
 
@@ -428,6 +494,18 @@ window.__ModuleLoader__.load({
       return h('svg', { width: 14, height: 14, viewBox: '0 0 16 16', 'aria-hidden': 'true', fill: 'none' },
         h('path', { d: 'M2.2 5.4L8 2.4l5.8 3-5.8 3-5.8-3z', stroke: 'currentColor', strokeWidth: 1.2, strokeLinejoin: 'round' }),
         h('path', { d: 'M2.6 8.4L8 11.2l5.4-2.8M2.6 11.2L8 14l5.4-2.8', stroke: 'currentColor', strokeWidth: 1.2, strokeLinejoin: 'round' }))
+    }
+
+    /** Small linear close icon. */
+    function CloseIcon() {
+      return h('svg', { width: 12, height: 12, viewBox: '0 0 12 12', fill: 'none', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', 'aria-hidden': 'true' },
+        h('path', { d: 'M2.5 2.5l7 7M9.5 2.5l-7 7' }))
+    }
+
+    /** Small right arrow icon. */
+    function ArrowRightIcon() {
+      return h('svg', { width: 12, height: 12, viewBox: '0 0 12 12', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true', className: 'dsh-sst-arrow' },
+        h('path', { d: 'M2.5 6h7M6.5 3l3 3-3 3' }))
     }
 
     /**
@@ -472,7 +550,7 @@ window.__ModuleLoader__.load({
         h('div', { className: 'dsh-sst-row-main' },
           h('div', { className: 'dsh-sst-row-titles' },
             h('span', { className: 'dsh-sst-old' }, row.oldTitle || t('panel.untitled')),
-            h('span', { className: 'dsh-sst-arrow', 'aria-hidden': 'true' }, '→'),
+            h(ArrowRightIcon),
             h('span', { className: 'dsh-sst-new' }, title || t('panel.untitled'))),
           h('div', {
             className: 'dsh-sst-row-meta',
@@ -584,7 +662,7 @@ window.__ModuleLoader__.load({
             'aria-label': t('panel.close'),
             disabled: busy,
             onClick: () => props.actions.cancel(),
-          }, '×')),
+          }, h(CloseIcon))),
         h('div', { className: 'dsh-sst-body' },
           state.error === null ? null : h('p', { className: 'dsh-sst-error', role: 'alert' }, state.error),
           state.notes === null ? null : h('p', { className: 'dsh-sst-status', role: 'status' }, state.notes),

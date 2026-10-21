@@ -65,16 +65,36 @@ export function createController(React, ctx, original, disclosures, getModeFace)
     if (!model.workCount && model.phase === 'completed') return null
     const label = summary(model, tr)
     const css = !choice.expanded ? hiddenStyle(id, turn.turn, model.hidden) : ''
+    const dotIcon = model.waiting
+      ? h('svg', { width: 12, height: 12, viewBox: '0 0 16 16', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' },
+          h('circle', { cx: 8, cy: 8, r: 6.5 }), h('path', { d: 'M8 7v4.5M8 4.75v.5' }))
+      : model.errors || model.phase === 'failed'
+        ? h('svg', { width: 12, height: 12, viewBox: '0 0 16 16', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' },
+            h('path', { d: 'M8 2.5l6 11H2l6-11z' }), h('path', { d: 'M8 7v3.5M8 12.5v.5' }))
+        : model.phase === 'running'
+          ? h('svg', { width: 12, height: 12, viewBox: '0 0 16 16', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', className: 'dcc-spinner' },
+              h('circle', { cx: 8, cy: 8, r: 6, strokeOpacity: 0.25 }), h('path', { d: 'M14 8a6 6 0 0 0-6-6' }))
+          : model.phase === 'stopped'
+            ? h('svg', { width: 9, height: 9, viewBox: '0 0 10 10', fill: 'currentColor' }, h('rect', { width: 10, height: 10, rx: 2 }))
+            : h('svg', { width: 12, height: 12, viewBox: '0 0 12 12', fill: 'none', stroke: '#16a34a', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+                h('path', { d: 'M2.5 6.5l2.5 2.5 4.5-5' }))
+
+    const chevronIcon = h('svg', {
+      width: 12, height: 12, viewBox: '0 0 12 12', fill: 'none', stroke: 'currentColor',
+      strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round',
+      className: `dcc-chevron ${choice.expanded ? 'is-expanded' : ''}`,
+      'aria-hidden': 'true',
+    }, h('path', { d: 'M4.5 3L7.5 6L4.5 9' }))
+
     return h('div', { className: 'dcc-root', 'data-dcc-scope': id, 'data-alert': model.errors || model.phase === 'failed' || model.waiting ? '' : undefined },
       h('style', null, BASE_STYLE + css),
       h('button', {
         type: 'button', className: 'dcc-toggle', 'aria-expanded': choice.expanded,
         title: label, onClick: () => disclosures.toggle(key),
       },
-      h('span', { className: 'dcc-dot', 'aria-hidden': true, 'data-live': model.phase === 'running' && !model.waiting ? '' : undefined },
-        model.waiting ? '?' : model.errors || model.phase === 'failed' ? '!' : model.phase === 'running' ? '•' : model.phase === 'stopped' ? '■' : '✓'),
+      h('span', { className: 'dcc-dot', 'aria-hidden': true }, dotIcon),
       h('span', { className: 'dcc-label' }, label),
-      h('span', { className: 'dcc-chevron', 'data-open': choice.expanded ? '' : undefined, 'aria-hidden': true }, '›')),
+      chevronIcon),
       h('span', { role: 'status', 'aria-live': 'polite', className: 'dcc-note' },
         model.waiting ? tr('attention.visible') : model.phase === 'failed' ? tr('failed.visible') : null))
   }

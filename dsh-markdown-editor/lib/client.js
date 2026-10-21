@@ -26,11 +26,13 @@
     "action.collapseTip": "Collapse this message"
   };
   function translatorOf(t) {
-    if (typeof t === "function") return t;
+    if (typeof t === "function")
+      return t;
     return fallbackTranslator;
   }
   function fallbackTranslator(key) {
-    if (typeof zh[key] === "string") return zh[key];
+    if (typeof zh[key] === "string")
+      return zh[key];
     return key;
   }
   function markdownLabels(tr) {
@@ -57,9 +59,11 @@
     ".dsh-mde-block{display:block;min-width:0;max-width:100%;white-space:normal;color:inherit}",
     ".dsh-mde-clip{display:block;position:relative;min-width:0;max-width:100%}",
     ".dsh-mde-clip[data-collapsed]{max-height:calc((22px + var(--dsh-content-font-delta,0px)) * 18);overflow:hidden}",
-    ".dsh-mde-fade{display:block;position:absolute;left:0;right:0;bottom:0;height:calc((22px + var(--dsh-content-font-delta,0px)) * 3);background:linear-gradient(to bottom,transparent,var(--dsw-specific-bubble,var(--dsw-alias-bg-base)));border-bottom-left-radius:var(--dsw-radius-xl);border-bottom-right-radius:var(--dsw-radius-xl);pointer-events:none}",
-    ".dsh-mde-toggle{display:inline-flex;align-items:center;gap:4px;margin:4px 0 0;padding:2px 6px;border:0;border-radius:var(--dsw-radius-sm);background:0 0;color:var(--dsw-alias-state-business-primary);cursor:pointer;font:inherit;font-size:var(--dsh-content-font-size-secondary,13px);line-height:calc(20px + var(--dsh-content-font-delta-secondary,0px))}",
-    ".dsh-mde-toggle:hover{background:var(--dsw-alias-interactive-bg-hover)}",
+    ".dsh-mde-fade{display:block;position:absolute;left:0;right:0;bottom:0;height:48px;background:linear-gradient(to bottom,transparent,var(--dsw-specific-bubble,var(--dsw-alias-bg-base)));border-bottom-left-radius:var(--dsw-radius-xl);border-bottom-right-radius:var(--dsw-radius-xl);pointer-events:none}",
+    ".dsh-mde-toggle{display:inline-flex;align-items:center;gap:6px;margin:6px 0 0;padding:3px 10px;border:1px solid var(--dsw-alias-border-l2,rgba(128,128,128,0.18));border-radius:14px;background:var(--dsw-alias-bg-layer-2,rgba(128,128,128,0.08));color:var(--dsw-alias-label-secondary);cursor:pointer;font:inherit;font-size:12px;line-height:18px;backdrop-filter:blur(8px);transition:all .15s ease}",
+    ".dsh-mde-toggle:hover{background:var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,0.15));color:var(--dsw-alias-label-primary);border-color:var(--dsw-alias-border-l1,rgba(128,128,128,0.3))}",
+    ".dsh-mde-chevron{transition:transform .18s ease;flex:none}",
+    ".dsh-mde-chevron.is-expanded{transform:rotate(180deg)}",
     ".dsh-mde-toggle:focus-visible{outline:1.5px solid var(--dsw-focus-ring-color,var(--dsw-alias-state-business-primary));outline-offset:2px}",
     ".dsh-mde-plain{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;color:inherit}",
     // Composer Custom Highlight paint: color-only, theme-token driven.
@@ -73,11 +77,13 @@
     "::highlight(dsh-mde-md-marker){color:var(--dsw-alias-label-caption)}"
   ].join("");
   function installStyles() {
-    if (typeof document === "undefined") return () => {
-    };
+    if (typeof document === "undefined")
+      return () => {
+      };
     const key = `${NS}/client.css`;
-    if (document.querySelector(`style[data-plugin-css="${key}"]`) !== null) return () => {
-    };
+    if (document.querySelector(`style[data-plugin-css="${key}"]`) !== null)
+      return () => {
+      };
     const style = document.createElement("style");
     style.dataset.plugin = NS;
     style.dataset.pluginCss = key;
@@ -116,7 +122,8 @@
         console.warn(`[${NS3}] markdown rendering failed; falling back to plain user text:`, error);
       }
       componentDidUpdate(previous) {
-        if (previous.resetKey !== this.props.resetKey && this.state.failed === true) this.setState({ failed: false });
+        if (previous.resetKey !== this.props.resetKey && this.state.failed === true)
+          this.setState({ failed: false });
       }
       render() {
         return this.state.failed === true ? this.props.fallback : this.props.children;
@@ -127,7 +134,8 @@
       const labels = useMemo(() => markdownLabels(tr), [tr]);
       const MarkdownText = primitives.MarkdownText;
       const body = useMemo(() => {
-        if (isRenderable(MarkdownText) === false) return h("div", { className: "dsh-mde-plain" }, text);
+        if (isRenderable(MarkdownText) === false)
+          return h("div", { className: "dsh-mde-plain" }, text);
         return h(MarkdownText, { text, labels });
       }, [MarkdownText, text, labels]);
       const collapsed = collapsible === true && expanded === false;
@@ -158,7 +166,19 @@
             title: expanded === true ? tr("action.collapseTip") : tr("action.expandTip"),
             onClick: toggle
           },
-          expanded === true ? tr("action.collapse") : tr("action.expand")
+          h("svg", {
+            width: 12,
+            height: 12,
+            viewBox: "0 0 12 12",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: 1.75,
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            className: `dsh-mde-chevron ${expanded === true ? "is-expanded" : ""}`,
+            "aria-hidden": "true"
+          }, h("path", { d: "M3 4.5L6 7.5L9 4.5" })),
+          h("span", null, expanded === true ? tr("action.collapse") : tr("action.expand"))
         )
       );
     });
@@ -170,8 +190,9 @@
     const h = React.createElement;
     const BlockUserText = createMessageView(React, primitives);
     const registry = ctx.uiConversation?.userText;
-    if (!registry?.createEvaluator || !ctx.slots.entries) return () => {
-    };
+    if (!registry?.createEvaluator || !ctx.slots.entries)
+      return () => {
+      };
     const ownComponents = /* @__PURE__ */ new Set();
     const bindings = /* @__PURE__ */ new Map();
     const subscribe = (listener) => registry.subscribe(listener);
@@ -185,7 +206,8 @@
         const renderFactorySlot = (...args) => {
           const [name, owner] = args;
           const content = owner?.content;
-          if (name !== "conversation.chat.user.content" || owner.interactive !== true || owner.ellipsis || !content || typeof content.text !== "string" || !content.text || !Array.isArray(content.attachments) || !Array.isArray(content.extraBlocks) || content.skillNames?.length || Object.keys(owner.facts?.skillNames ?? {}).length > 0) return props.renderFactorySlot(...args);
+          if (name !== "conversation.chat.user.content" || owner.interactive !== true || owner.ellipsis || !content || typeof content.text !== "string" || !content.text || !Array.isArray(content.attachments) || !Array.isArray(content.extraBlocks) || content.skillNames?.length || Object.keys(owner.facts?.skillNames ?? {}).length > 0)
+            return props.renderFactorySlot(...args);
           try {
             if (evaluate({ text: content.text, facts: owner.facts ?? {} }).some((node) => node.id !== "text")) {
               return props.renderFactorySlot(...args);
@@ -211,14 +233,17 @@
     }
     function sync() {
       scheduled = false;
-      if (disposed) return;
+      if (disposed)
+        return;
       for (const key of ["user", "steering"]) {
         const original = ctx.slots.entries("conversation.chat.node").filter((entry) => entry.options.key === key && !ownComponents.has(entry.component)).sort((a, b) => (a.options.priority ?? 0) - (b.options.priority ?? 0))[0];
         const previous = bindings.get(key);
-        if (previous?.original === original) continue;
+        if (previous?.original === original)
+          continue;
         previous?.off();
         bindings.delete(key);
-        if (!original || original.children || original.store) continue;
+        if (!original || original.children || original.store)
+          continue;
         const component = makeWrapper(original);
         ownComponents.add(component);
         try {
@@ -237,7 +262,8 @@
       }
     }
     const schedule = (key) => {
-      if (key !== "conversation.chat.node" || scheduled || disposed) return;
+      if (key !== "conversation.chat.node" || scheduled || disposed)
+        return;
       scheduled = true;
       queueMicrotask(sync);
     };
@@ -250,7 +276,8 @@
       disposed = true;
       offChanged?.();
       offSlot?.();
-      for (const binding of bindings.values()) binding.off();
+      for (const binding of bindings.values())
+        binding.off();
       bindings.clear();
       ownComponents.clear();
     };
@@ -274,31 +301,40 @@
         return { kind: "fence", text: text2 };
       }
       const list = /^([ \t]*)([-*+]|\d{1,9}[.)])([ \t]+)(.*)$/.exec(text2);
-      if (!list) return { kind: "text", text: text2 };
+      if (!list)
+        return { kind: "text", text: text2 };
       return { kind: "list", text: text2, indent: list[1], marker: list[2], spacer: list[3], body: list[4], bodyStart: list[1].length + list[2].length + list[3].length };
     });
   }
   function planListEdit(text, caret, key, shift = false) {
-    if (text.length > 1e5 || caret < 0 || caret > text.length) return null;
+    if (text.length > 1e5 || caret < 0 || caret > text.length)
+      return null;
     const start = caret === 0 ? 0 : text.lastIndexOf("\n", caret - 1) + 1;
     const newline = text.indexOf("\n", caret);
     const end = newline < 0 ? text.length : newline;
     const item = classifyLines(text.slice(0, end)).at(-1);
-    if (item?.kind !== "list") return null;
+    if (item?.kind !== "list")
+      return null;
     if (key === "Enter") {
-      if (!shift || caret < start + item.bodyStart) return null;
-      if (item.body.trim() === "") return { from: start, to: end, text: "", caret: start };
+      if (!shift || caret < start + item.bodyStart)
+        return null;
+      if (item.body.trim() === "")
+        return { from: start, to: end, text: "", caret: start };
       const ordered = /^(\d+)([.)])$/.exec(item.marker);
-      if (ordered && Number(ordered[1]) >= 999999999) return null;
+      if (ordered && Number(ordered[1]) >= 999999999)
+        return null;
       const marker = ordered ? `${Number(ordered[1]) + 1}${ordered[2]}` : item.marker;
       const next = `
 ${item.indent}${marker}${item.spacer}`;
       return { from: caret, to: caret, text: next, caret: caret + next.length };
     }
-    if (key !== "Tab") return null;
-    if (!shift) return { from: start, to: start, text: "  ", caret: caret + 2 };
+    if (key !== "Tab")
+      return null;
+    if (!shift)
+      return { from: start, to: start, text: "  ", caret: caret + 2 };
     const count = item.indent.startsWith("	") ? 1 : Math.min(2, item.indent.length);
-    if (!count) return null;
+    if (!count)
+      return null;
     return { from: start, to: start + count, text: "", caret: Math.max(start, caret - count) };
   }
 
@@ -316,13 +352,18 @@ ${item.indent}${marker}${item.spacer}`;
   function classifyMarkdown(text) {
     const classes = new Array(text.length).fill(null);
     const claim = (start, end, name) => {
-      if (start < 0) start = 0;
-      if (end > text.length) end = text.length;
-      for (let index = start; index < end; index++) if (classes[index] === null) classes[index] = name;
+      if (start < 0)
+        start = 0;
+      if (end > text.length)
+        end = text.length;
+      for (let index = start; index < end; index++)
+        if (classes[index] === null)
+          classes[index] = name;
     };
     let offset = 0;
     for (const line of classifyLines(text)) {
-      if (line.kind === "code" || line.kind === "fence") claim(offset, offset + line.text.length, line.kind === "fence" ? "marker" : "code");
+      if (line.kind === "code" || line.kind === "fence")
+        claim(offset, offset + line.text.length, line.kind === "fence" ? "marker" : "code");
       offset += line.text.length + 1;
     }
     const codePattern = /`([^`\n]{1,1000})`/g;
@@ -375,7 +416,8 @@ ${item.indent}${marker}${item.spacer}`;
         const bodyStart = markerStart + 1;
         const bodyEnd = bodyStart + match[2].length;
         const end = bodyEnd + 1;
-        if (end > text.length) continue;
+        if (end > text.length)
+          continue;
         claim(bodyStart, bodyEnd, "em");
         claim(markerStart, bodyStart, "marker");
         claim(bodyEnd, end, "marker");
@@ -411,8 +453,10 @@ ${item.indent}${marker}${item.spacer}`;
     while (index < classes.length) {
       const name = classes[index];
       let next = index + 1;
-      while (next < classes.length && classes[next] === name) next++;
-      if (name !== null) runs.push({ name, start: index, end: next });
+      while (next < classes.length && classes[next] === name)
+        next++;
+      if (name !== null)
+        runs.push({ name, start: index, end: next });
       index = next;
     }
     return runs;
@@ -427,40 +471,52 @@ ${item.indent}${marker}${item.spacer}`;
   function createComposerAdapter(root) {
     const editor = root?.__lexicalEditor;
     const version = editor?.constructor?.version;
-    if (!/^0\.49\.0(?:\+.*)?$/.test(version ?? "") || editor?._config?.namespace !== "dsh-composer") return null;
-    if (!METHODS.every((name) => typeof editor[name] === "function") || editor.getRootElement() !== root) return null;
-    if (!editor.isEditable() || editor.isComposing()) return null;
+    if (!/^0\.49\.0(?:\+.*)?$/.test(version ?? "") || editor?._config?.namespace !== "dsh-composer")
+      return null;
+    if (!METHODS.every((name) => typeof editor[name] === "function") || editor.getRootElement() !== root)
+      return null;
+    if (!editor.isEditable() || editor.isComposing())
+      return null;
     function snapshot(state) {
       const selection = state?._selection;
       const doc = state?._nodeMap?.get("root");
-      if (!doc || !selection?.isCollapsed?.() || selection.anchor?.type !== "text") return null;
-      if (!["insertText", "insertRawText", "removeText"].every((name) => typeof selection[name] === "function")) return null;
-      if (typeof selection.anchor.set !== "function" || typeof selection.focus?.set !== "function") return null;
+      if (!doc || !selection?.isCollapsed?.() || selection.anchor?.type !== "text")
+        return null;
+      if (!["insertText", "insertRawText", "removeText"].every((name) => typeof selection[name] === "function"))
+        return null;
+      if (typeof selection.anchor.set !== "function" || typeof selection.focus?.set !== "function")
+        return null;
       const anchor = selection.anchor;
       let text = "";
       let caret = -1;
       const segments = [];
       const blocks = doc.getChildren();
       for (const [i, block] of blocks.entries()) {
-        if (block.getType() !== "paragraph") return null;
-        if (i) text += "\n";
+        if (block.getType() !== "paragraph")
+          return null;
+        if (i)
+          text += "\n";
         for (const node of block.getChildren()) {
           const type = node.getType();
           if (type === "linebreak") {
             text += "\n";
             continue;
           }
-          if (type !== "text" || !node.isSimpleText?.() || node.isTextEntity?.()) return null;
+          if (type !== "text" || !node.isSimpleText?.() || node.isTextEntity?.())
+            return null;
           const value = node.getTextContent();
           const start = text.length;
           const segment = { node, start, end: start + value.length };
           segments.push(segment);
-          if (node.getKey() === anchor.key) caret = start + anchor.offset;
+          if (node.getKey() === anchor.key)
+            caret = start + anchor.offset;
           text += value;
-          if (text.length > 1e5) return null;
+          if (text.length > 1e5)
+            return null;
         }
       }
-      if (caret < 0 || caret > text.length) return null;
+      if (caret < 0 || caret > text.length)
+        return null;
       return { text, caret, selection, segments };
     }
     function pointAt(facts, offset) {
@@ -475,15 +531,19 @@ ${item.indent}${marker}${item.spacer}`;
       let changed = false;
       editor.update(() => {
         const facts = snapshot(editor._pendingEditorState);
-        if (!facts || facts.text !== expected.text || facts.caret !== expected.caret) return;
+        if (!facts || facts.text !== expected.text || facts.caret !== expected.caret)
+          return;
         const from = pointAt(facts, plan.from);
         const to = pointAt(facts, plan.to);
-        if (!from || !to) return;
+        if (!from || !to)
+          return;
         const { selection } = facts;
         selection.anchor.set(from.key, from.offset, "text");
         selection.focus.set(to.key, to.offset, "text");
-        if (plan.text) selection.insertRawText(plan.text);
-        else selection.removeText();
+        if (plan.text)
+          selection.insertRawText(plan.text);
+        else
+          selection.removeText();
         const after = snapshot(editor._pendingEditorState);
         if (after) {
           const caret = pointAt(after, plan.caret);
@@ -499,7 +559,8 @@ ${item.indent}${marker}${item.spacer}`;
     function insertLineBreak() {
       editor.update(() => {
         const selection = editor._pendingEditorState?._selection;
-        if (typeof selection?.isCollapsed !== "function" || typeof selection.insertLineBreak !== "function") return;
+        if (typeof selection?.isCollapsed !== "function" || typeof selection.insertLineBreak !== "function")
+          return;
         selection.insertLineBreak();
       }, { tag: "history-push", discrete: true });
     }
@@ -518,13 +579,15 @@ ${item.indent}${marker}${item.spacer}`;
     const visit = (node) => {
       if (node.nodeType === 3) {
         const value = node.data;
-        if (value.length === 0) return;
+        if (value.length === 0)
+          return;
         const start = text.length;
         text += value;
         segments.push({ node, start, end: text.length });
         return;
       }
-      if (node.nodeType !== 1) return;
+      if (node.nodeType !== 1)
+        return;
       const element = node;
       if (element.getAttribute("contenteditable") === "false" || element.hasAttribute("data-composer-chip") || element.hasAttribute("data-composer-command") || element.hasAttribute("data-composer-text-ref")) {
         text += "\n";
@@ -536,7 +599,8 @@ ${item.indent}${marker}${item.spacer}`;
       }
       for (const child of element.childNodes) {
         visit(child);
-        if (child.nodeType === 1 && BLOCK_TAGS.has(child.tagName)) text += "\n";
+        if (child.nodeType === 1 && BLOCK_TAGS.has(child.tagName))
+          text += "\n";
       }
     };
     visit(root);
@@ -548,14 +612,17 @@ ${item.indent}${marker}${item.spacer}`;
     while (low <= high) {
       const middle = low + high >> 1;
       const segment = segments[middle];
-      if (offset < segment.start) high = middle - 1;
-      else if (offset > segment.end) low = middle + 1;
+      if (offset < segment.start)
+        high = middle - 1;
+      else if (offset > segment.end)
+        low = middle + 1;
       else {
         const local = Math.max(0, Math.min(segment.end - segment.start, offset - segment.start));
         return { node: segment.node, offset: local };
       }
     }
-    if (segments.length === 0) return null;
+    if (segments.length === 0)
+      return null;
     if (low >= segments.length) {
       const last = segments[segments.length - 1];
       return { node: last.node, offset: last.end - last.start };
@@ -602,8 +669,10 @@ ${item.indent}${marker}${item.spacer}`;
     function rangeFor(segments, start2, end) {
       const from = positionAt(segments, start2);
       const to = positionAt(segments, end);
-      if (from === null || to === null) return null;
-      if (from.node === to.node && from.offset >= to.offset) return null;
+      if (from === null || to === null)
+        return null;
+      if (from.node === to.node && from.offset >= to.offset)
+        return null;
       const range = document.createRange();
       try {
         range.setStart(from.node, from.offset);
@@ -623,7 +692,8 @@ ${item.indent}${marker}${item.spacer}`;
         releaseEditor();
         return;
       }
-      if (text === lastText && segments.length === lastSegments.length && segments.every((s, i) => s.node === lastSegments[i].node && s.start === lastSegments[i].start && s.end === lastSegments[i].end)) return;
+      if (text === lastText && segments.length === lastSegments.length && segments.every((s, i) => s.node === lastSegments[i].node && s.start === lastSegments[i].start && s.end === lastSegments[i].end))
+        return;
       lastText = text;
       lastSegments = segments;
       if (text.length > MAX_SCAN_CHARS) {
@@ -636,9 +706,11 @@ ${item.indent}${marker}${item.spacer}`;
       const buckets = /* @__PURE__ */ new Map();
       let count = 0;
       for (const run of runs) {
-        if (count >= MAX_RUNS) break;
+        if (count >= MAX_RUNS)
+          break;
         const range = rangeFor(segments, run.start, run.end);
-        if (range === null) continue;
+        if (range === null)
+          continue;
         count++;
         let list = buckets.get(run.name);
         if (list === void 0) {
@@ -654,16 +726,19 @@ ${item.indent}${marker}${item.spacer}`;
           continue;
         }
         const highlight = new Highlight();
-        for (const range of list) highlight.add(range);
+        for (const range of list)
+          highlight.add(range);
         globalThis.CSS.highlights.set(name, highlight);
       }
     }
     function tick() {
       timer = 0;
-      if (disposed === true || composing === true) return;
+      if (disposed === true || composing === true)
+        return;
       const next = activeEditor();
       if (next !== editor) {
-        if (editor !== null) clearAll();
+        if (editor !== null)
+          clearAll();
         editor = next;
       }
       if (editor === null) {
@@ -673,11 +748,13 @@ ${item.indent}${marker}${item.spacer}`;
       refresh();
     }
     function schedule() {
-      if (disposed === true || composing === true || timer !== 0) return;
+      if (disposed === true || composing === true || timer !== 0)
+        return;
       timer = window.setTimeout(tick, HIGHLIGHT_DELAY_MS);
     }
     function start() {
-      if (disposed === true) return;
+      if (disposed === true)
+        return;
       observer = new MutationObserver(schedule);
       observer.observe(document.body, { subtree: true, childList: true, characterData: true });
       listen(document, "selectionchange", schedule);
@@ -727,15 +804,18 @@ ${item.indent}${marker}${item.spacer}`;
       composingUntil = Date.now() + 10;
     };
     const onKey = (event) => {
-      if (!["Enter", "Tab"].includes(event.key)) return;
+      if (!["Enter", "Tab"].includes(event.key))
+        return;
       const root = focusedComposerRoot(document2);
-      if (!root || !root.contains(event.target) || mustPass(event, root, composingUntil)) return;
+      if (!root || !root.contains(event.target) || mustPass(event, root, composingUntil))
+        return;
       const plainLineBreak = event.key === "Enter" && event.ctrlKey;
       if (plainLineBreak) {
         event.preventDefault();
         event.stopPropagation();
       }
-      if (disabled || plainLineBreak && event.repeat) return;
+      if (disabled || plainLineBreak && event.repeat)
+        return;
       try {
         const adapter = createComposerAdapter(root);
         if (plainLineBreak) {
@@ -743,12 +823,15 @@ ${item.indent}${marker}${item.spacer}`;
           return;
         }
         const facts = adapter?.read();
-        if (!facts) return;
+        if (!facts)
+          return;
         const plan = planListEdit(facts.text, facts.caret, event.key, event.shiftKey);
-        if (!plan || !adapter.canApply(facts, plan)) return;
+        if (!plan || !adapter.canApply(facts, plan))
+          return;
         event.preventDefault();
         event.stopPropagation();
-        if (event.repeat) return;
+        if (event.repeat)
+          return;
         adapter.apply(facts, plan);
       } catch (error) {
         disabled = true;

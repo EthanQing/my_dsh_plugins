@@ -7,31 +7,37 @@
     let saved = [];
     try {
       const parsed = JSON.parse(storage?.getItem(KEY) ?? "[]");
-      if (Array.isArray(parsed)) saved = parsed.filter((item) => Array.isArray(item) && typeof item[0] === "string" && typeof item[1] === "boolean").slice(-limit);
+      if (Array.isArray(parsed))
+        saved = parsed.filter((item) => Array.isArray(item) && typeof item[0] === "string" && typeof item[1] === "boolean").slice(-limit);
     } catch {
     }
     const choices = new Map(saved);
     const entries = /* @__PURE__ */ new Map();
     const listeners = /* @__PURE__ */ new Map();
     function get(key) {
-      if (!entries.has(key)) entries.set(key, choices.has(key) ? { ...DEFAULT, expanded: choices.get(key), choice: choices.get(key) } : DEFAULT);
+      if (!entries.has(key))
+        entries.set(key, choices.has(key) ? { ...DEFAULT, expanded: choices.get(key), choice: choices.get(key) } : DEFAULT);
       if (entries.size > limit) {
         for (const oldest of entries.keys()) {
-          if (oldest !== key && !listeners.has(oldest)) entries.delete(oldest);
-          if (entries.size <= limit) break;
+          if (oldest !== key && !listeners.has(oldest))
+            entries.delete(oldest);
+          if (entries.size <= limit)
+            break;
         }
       }
       return entries.get(key);
     }
     function publish(key, next) {
       entries.set(key, Object.freeze(next));
-      for (const notify of listeners.get(key) ?? []) notify();
+      for (const notify of listeners.get(key) ?? [])
+        notify();
     }
     return {
       get,
       observe(key, phase) {
         const previous = get(key);
-        if (previous.phase === phase) return;
+        if (previous.phase === phase)
+          return;
         publish(key, { ...previous, phase, expanded: previous.choice ?? false });
       },
       toggle(key) {
@@ -39,7 +45,8 @@
         const expanded = !previous.expanded;
         choices.delete(key);
         choices.set(key, expanded);
-        while (choices.size > limit) choices.delete(choices.keys().next().value);
+        while (choices.size > limit)
+          choices.delete(choices.keys().next().value);
         try {
           storage?.setItem(KEY, JSON.stringify([...choices]));
         } catch {
@@ -47,12 +54,14 @@
         publish(key, { ...previous, expanded, choice: expanded });
       },
       subscribe(key, notify) {
-        if (!listeners.has(key)) listeners.set(key, /* @__PURE__ */ new Set());
+        if (!listeners.has(key))
+          listeners.set(key, /* @__PURE__ */ new Set());
         listeners.get(key).add(notify);
         return () => {
           const set = listeners.get(key);
           set?.delete(notify);
-          if (set?.size === 0) listeners.delete(key);
+          if (set?.size === 0)
+            listeners.delete(key);
         };
       },
       clear() {
@@ -75,20 +84,29 @@
     return location?.kind === "turn" || location?.kind === "step" ? location.turn : null;
   }
   function phaseOf(turn) {
-    if (turn?.status !== "closed") return "running";
+    if (turn?.status !== "closed")
+      return "running";
     const reason = turn.end?.data?.reason?.kind;
-    if (reason === "aborted" || reason === "interrupted") return "stopped";
-    if (reason === "error") return "failed";
+    if (reason === "aborted" || reason === "interrupted")
+      return "stopped";
+    if (reason === "error")
+      return "failed";
     return reason === "completed" ? "completed" : "incomplete";
   }
   function toolKind(name = "") {
     const short = name.split(/[./]/).at(-1);
-    if (QUESTIONS.test(name)) return "question";
-    if (READ.has(short)) return "read";
-    if (EDIT.has(short)) return "edit";
-    if (SEARCH.has(short) || short.endsWith("_inspect")) return "search";
-    if (COMMAND.has(short) || short.startsWith("terminal_")) return "command";
-    if (short === "subagent" || short.startsWith("subagent_")) return "subagent";
+    if (QUESTIONS.test(name))
+      return "question";
+    if (READ.has(short))
+      return "read";
+    if (EDIT.has(short))
+      return "edit";
+    if (SEARCH.has(short) || short.endsWith("_inspect"))
+      return "search";
+    if (COMMAND.has(short) || short.startsWith("terminal_"))
+      return "command";
+    if (short === "subagent" || short.startsWith("subagent_"))
+      return "subagent";
     return "tool";
   }
   function arg(tool, key) {
@@ -102,7 +120,8 @@
     return tool.name || tool.call?.name || "";
   }
   function needsAttention(tool, seen = /* @__PURE__ */ new Set()) {
-    if (!tool || seen.has(tool)) return false;
+    if (!tool || seen.has(tool))
+      return false;
     seen.add(tool);
     const kind = toolKind(toolName(tool));
     const live = tool.kind !== "tool-result";
@@ -113,13 +132,15 @@
     for (const key of ["file_path", "path", "file", "paths"]) {
       const value = arg(tool, key);
       for (const item of Array.isArray(value) ? value : [value]) {
-        if (typeof item === "string" && item.trim()) paths.push(item.replaceAll("\\", "/"));
+        if (typeof item === "string" && item.trim())
+          paths.push(item.replaceAll("\\", "/"));
       }
     }
     if (toolName(tool).endsWith("apply_patch")) {
       const patch = arg(tool, "patch") ?? arg(tool, "input");
       if (typeof patch === "string") {
-        for (const match of patch.matchAll(/^\*\*\* (?:Update|Add|Delete) File: (.+)$/gm)) paths.push(match[1].trim());
+        for (const match of patch.matchAll(/^\*\*\* (?:Update|Add|Delete) File: (.+)$/gm))
+          paths.push(match[1].trim());
       }
     }
     return paths;
@@ -145,29 +166,43 @@
     let errors = 0;
     const visited = /* @__PURE__ */ new Set();
     const visit = (tool) => {
-      if (!tool || visited.has(tool)) return;
+      if (!tool || visited.has(tool))
+        return;
       visited.add(tool);
       const id = tool.callId;
-      if (id && calls.has(id)) return;
+      if (id && calls.has(id))
+        return;
       const kind = toolKind(toolName(tool));
       const live = tool.kind !== "tool-result";
       const item = { kind, detail: toolDetail(tool), build: kind === "command" && isBuild(tool), time: tool.callTime ?? tool.time ?? 0 };
-      if (id) calls.set(id, item);
-      if (!last || item.time >= last.time) last = item;
-      if (live && (!active || item.time >= active.time)) active = item;
-      if (tool.isError) errors++;
-      if (live && (kind === "question" || arg(tool, "sandbox_permissions") === "require_escalated" || tool.meta?.requiresApproval || tool.meta?.waitingForInput)) waiting = true;
+      if (id)
+        calls.set(id, item);
+      if (!last || item.time >= last.time)
+        last = item;
+      if (live && (!active || item.time >= active.time))
+        active = item;
+      if (tool.isError)
+        errors++;
+      if (live && (kind === "question" || arg(tool, "sandbox_permissions") === "require_escalated" || tool.meta?.requiresApproval || tool.meta?.waitingForInput))
+        waiting = true;
       if (!live && !tool.isError) {
-        if (kind === "read") for (const file of pathsOf(tool)) reads.add(file);
-        if (kind === "edit") for (const file of pathsOf(tool)) edits.add(file);
+        if (kind === "read")
+          for (const file of pathsOf(tool))
+            reads.add(file);
+        if (kind === "edit")
+          for (const file of pathsOf(tool))
+            edits.add(file);
       }
-      for (const child of tool.subCalls ?? []) visit(child);
+      for (const child of tool.subCalls ?? [])
+        visit(child);
     };
     for (const node of nodes) {
-      if (turnOf(node)?.turn !== turn.turn) continue;
+      if (turnOf(node)?.turn !== turn.turn)
+        continue;
       if (node.kind === "tool-call") {
         visit(node.data.root);
-        if (!needsAttention(node.data.root)) hidden.push({ key: node.key });
+        if (!needsAttention(node.data.root))
+          hidden.push({ key: node.key });
       } else if (node.kind === "assistant-step") {
         const blocks = node.data.blocks ?? [];
         if (blocks.some((block) => block.kind === "reasoning" && block.text?.trim())) {
@@ -175,7 +210,8 @@
           hidden.push({ key: node.key, part: "reasoning" });
         }
       } else if (INTERNAL.has(node.kind)) {
-        if (node.kind === "command" || node.kind === "manual-compaction" || node.kind === "model-retry") continue;
+        if (node.kind === "command" || node.kind === "manual-compaction" || node.kind === "model-retry")
+          continue;
         contexts++;
         hidden.push({ key: node.key });
       }
@@ -201,40 +237,47 @@
     if (model.phase === "running" && !model.waiting) {
       const work = model.active;
       pieces[0] = tr(work ? work.build ? "doing.build" : `doing.${work.kind}` : "doing.thinking");
-      if (work?.detail) pieces.push(work.detail);
+      if (work?.detail)
+        pieces.push(work.detail);
     } else {
-      if (model.reads) pieces.push(tr("count.read", { n: model.reads }));
-      if (model.edits) pieces.push(tr("count.edit", { n: model.edits }));
-      if (model.calls && !model.reads && !model.edits) pieces.push(tr("count.calls", { n: model.calls }));
-      if (model.phase === "stopped" && model.last) pieces.push(tr("last", { detail: model.last.detail }));
+      if (model.reads)
+        pieces.push(tr("count.read", { n: model.reads }));
+      if (model.edits)
+        pieces.push(tr("count.edit", { n: model.edits }));
+      if (model.calls && !model.reads && !model.edits)
+        pieces.push(tr("count.calls", { n: model.calls }));
+      if (model.phase === "stopped" && model.last)
+        pieces.push(tr("last", { detail: model.last.detail }));
     }
-    if (model.errors) pieces.push(tr("count.errors", { n: model.errors }));
+    if (model.errors)
+      pieces.push(tr("count.errors", { n: model.errors }));
     return pieces.join(" · ");
   }
 
   // src/styles.js
   var BASE_STYLE = `
-.dcc-root{min-width:0;color:var(--dsw-alias-label-tertiary);font:inherit;font-size:var(--dsh-content-font-size-secondary,13px);line-height:1.5}
-.dcc-toggle{display:flex;align-items:center;gap:8px;max-width:100%;padding:4px 0;background:none;border:0;color:inherit;font:inherit;text-align:start;cursor:pointer}
-.dcc-toggle:focus-visible,.dcc-mode:focus-visible{outline:2px solid var(--dsw-focus-ring-color,var(--dsw-alias-state-business-primary));outline-offset:3px;border-radius:var(--dsw-radius-xs,3px)}
-.dcc-toggle:hover{color:var(--dsw-alias-label-primary)}
-.dcc-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dcc-dot{width:12px;flex:none;display:inline-flex;justify-content:center}
-.dcc-dot[data-live]{animation:dcc-pulse 1.4s ease-in-out infinite}
-.dcc-chevron{flex:none;font-size:12px;transition:transform .12s}
-.dcc-chevron[data-open]{transform:rotate(90deg)}
+.dcc-root{min-width:0;color:var(--dsw-alias-label-tertiary);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei UI",sans-serif;font-size:12px;line-height:1.5;margin:4px 0;position:relative}
+.dcc-toggle{display:inline-flex;align-items:center;gap:6px;max-width:100%;height:30px;box-sizing:border-box;padding:0 10px;background:var(--dsw-alias-bg-layer-2,rgba(128,128,128,0.06));border:1px solid var(--dsw-alias-border-l2,rgba(128,128,128,0.14));border-radius:8px;color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;line-height:1;text-align:start;cursor:pointer;transition:all .15s ease}
+.dcc-toggle:focus-visible,.dcc-mode:focus-visible{outline:2px solid #3b82f6;outline-offset:1px}
+.dcc-toggle:hover{background:var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,0.12));color:var(--dsw-alias-label-primary);border-color:var(--dsw-alias-border-l1,rgba(128,128,128,0.25))}
+.dcc-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.dcc-dot{width:14px;height:14px;flex:none;display:inline-flex;align-items:center;justify-content:center}
+.dcc-chevron{flex:none;transition:transform .18s ease;display:inline-block;vertical-align:middle;opacity:.6}
+.dcc-chevron.is-expanded{transform:rotate(90deg)}
 .dcc-root[data-alert]{color:var(--dsw-alias-label-primary)}
-.dcc-note{margin:4px 0;color:var(--dsw-alias-label-tertiary);font:inherit}
-.dcc-mode{border:0;padding:2px 0;background:none;color:var(--dsw-alias-state-business-primary);font:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.dcc-note{margin:4px 0;color:var(--dsw-alias-label-tertiary);font:inherit;font-size:11.5px}
+.dcc-mode{border:0;padding:2px 0;background:none;color:#3b82f6;font:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .dcc-failure{white-space:normal;overflow-wrap:anywhere}
-@keyframes dcc-pulse{50%{opacity:.35}}
-@media(prefers-reduced-motion:reduce){.dcc-dot[data-live]{animation:none}.dcc-chevron{transition:none}}
+.dcc-spinner{animation:dcc-spin .8s linear infinite}
+@keyframes dcc-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.dcc-chevron{transition:none}.dcc-spinner{animation:none}}
 `;
   function quoted(value) {
     return '"' + String(value).replace(/[\\"\n\r\f\u0000-\u001f]/g, (char) => `\\${char.codePointAt(0).toString(16)} `) + '"';
   }
   function hiddenStyle(scope, turn, rows) {
-    if (!rows.length) return "";
+    if (!rows.length)
+      return "";
     const flow = `[data-slot="conversation.chat.flow"]:has([data-dcc-scope=${quoted(scope)}])`;
     const selectors = rows.map((row) => `${flow} [data-chat-turn=${quoted(turn)}][data-chat-node-key=${quoted(row.key)}]${row.part ? `[data-chat-group-part=${quoted(row.part)}]` : ""}:not(:focus-within)`);
     return `${selectors.join(",\n")}{display:none!important}`;
@@ -279,7 +322,8 @@
       const read = React.useCallback(() => disclosures.get(key), [key]);
       const choice = React.useSyncExternalStore(subscribe, read, read);
       React.useEffect(() => {
-        if (model) disclosures.observe(key, model.phase);
+        if (model)
+          disclosures.observe(key, model.phase);
       }, [key, model?.phase]);
       const tr = ctx.locale.bind("dsh-codex-collapse");
       const [modeError, setModeError] = React.useState("");
@@ -306,9 +350,42 @@
           modeError ? h("p", { role: "alert" }, modeError) : null
         );
       }
-      if (!model.workCount && model.phase === "completed") return null;
+      if (!model.workCount && model.phase === "completed")
+        return null;
       const label = summary(model, tr);
       const css = !choice.expanded ? hiddenStyle(id, turn.turn, model.hidden) : "";
+      const dotIcon = model.waiting ? h(
+        "svg",
+        { width: 12, height: 12, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" },
+        h("circle", { cx: 8, cy: 8, r: 6.5 }),
+        h("path", { d: "M8 7v4.5M8 4.75v.5" })
+      ) : model.errors || model.phase === "failed" ? h(
+        "svg",
+        { width: 12, height: 12, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" },
+        h("path", { d: "M8 2.5l6 11H2l6-11z" }),
+        h("path", { d: "M8 7v3.5M8 12.5v.5" })
+      ) : model.phase === "running" ? h(
+        "svg",
+        { width: 12, height: 12, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", className: "dcc-spinner" },
+        h("circle", { cx: 8, cy: 8, r: 6, strokeOpacity: 0.25 }),
+        h("path", { d: "M14 8a6 6 0 0 0-6-6" })
+      ) : model.phase === "stopped" ? h("svg", { width: 9, height: 9, viewBox: "0 0 10 10", fill: "currentColor" }, h("rect", { width: 10, height: 10, rx: 2 })) : h(
+        "svg",
+        { width: 12, height: 12, viewBox: "0 0 12 12", fill: "none", stroke: "#16a34a", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M2.5 6.5l2.5 2.5 4.5-5" })
+      );
+      const chevronIcon = h("svg", {
+        width: 12,
+        height: 12,
+        viewBox: "0 0 12 12",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: 1.75,
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: `dcc-chevron ${choice.expanded ? "is-expanded" : ""}`,
+        "aria-hidden": "true"
+      }, h("path", { d: "M4.5 3L7.5 6L4.5 9" }));
       return h(
         "div",
         { className: "dcc-root", "data-dcc-scope": id, "data-alert": model.errors || model.phase === "failed" || model.waiting ? "" : void 0 },
@@ -322,13 +399,9 @@
             title: label,
             onClick: () => disclosures.toggle(key)
           },
-          h(
-            "span",
-            { className: "dcc-dot", "aria-hidden": true, "data-live": model.phase === "running" && !model.waiting ? "" : void 0 },
-            model.waiting ? "?" : model.errors || model.phase === "failed" ? "!" : model.phase === "running" ? "•" : model.phase === "stopped" ? "■" : "✓"
-          ),
+          h("span", { className: "dcc-dot", "aria-hidden": true }, dotIcon),
           h("span", { className: "dcc-label" }, label),
-          h("span", { className: "dcc-chevron", "data-open": choice.expanded ? "" : void 0, "aria-hidden": true }, "›")
+          chevronIcon
         ),
         h(
           "span",

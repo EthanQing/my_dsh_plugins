@@ -82,7 +82,19 @@ export function createMessageView(React, primitives) {
             title: expanded === true ? tr('action.collapseTip') : tr('action.expandTip'),
             onClick: toggle,
           },
-          expanded === true ? tr('action.collapse') : tr('action.expand'),
+          h('svg', {
+            width: 12,
+            height: 12,
+            viewBox: '0 0 12 12',
+            fill: 'none',
+            stroke: 'currentColor',
+            strokeWidth: 1.75,
+            strokeLinecap: 'round',
+            strokeLinejoin: 'round',
+            className: `dsh-mde-chevron ${expanded === true ? 'is-expanded' : ''}`,
+            'aria-hidden': 'true',
+          }, h('path', { d: 'M3 4.5L6 7.5L9 4.5' })),
+          h('span', null, expanded === true ? tr('action.collapse') : tr('action.expand')),
         ),
     )
   })

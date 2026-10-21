@@ -23,7 +23,16 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
 .dsh-ssd-search-clear{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);cursor:pointer;padding:0 4px;font-size:15px;line-height:1;border-radius:4px}
 .dsh-ssd-search-clear:hover{color:var(--dsw-alias-label-primary);background:var(--dsw-alias-interactive-bg-hover)}
 .dsh-ssd-filter-toggle{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);cursor:pointer;padding:6px 10px;font-size:11px;line-height:1;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
-.dsh-ssd-filter-toggle:hover{color:var(--dsw-alias-label-primary);background:var(--dsw-alias-interactive-bg-hover)}.dsh-ssd-hide-btn{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);cursor:pointer;padding:0 4px;font-size:12px;line-height:16px;white-space:nowrap;align-self:start;min-width:max-content;display:inline-flex;align-items:center;gap:2px}.dsh-ssd-hide-btn:hover{color:var(--dsw-alias-label-primary);background:var(--dsw-alias-interactive-bg-hover);border-radius:5px}.dsh-ssd-hidden-badge{font-size:11px;line-height:16px;color:var(--dsw-alias-label-tertiary);white-space:nowrap}.dsh-ssd-delete-btn{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);cursor:pointer;padding:0 4px;font-size:12px;line-height:16px;white-space:nowrap;align-self:start;min-width:max-content}.dsh-ssd-delete-btn:hover{color:var(--dsw-alias-state-error-primary,#ef4444);background:var(--dsw-alias-interactive-bg-hover-danger,rgba(236,19,19,.12));border-radius:5px}.dsh-ssd-batch-delete-btn{color:var(--dsw-alias-state-error-primary,#ef4444)!important}.dsh-ssd-batch-delete-btn:hover{background:var(--dsw-alias-interactive-bg-hover-danger,rgba(236,19,19,.12))!important}.dsh-ssd-trigger{display:inline-flex;align-items:center;gap:0;border:0;background:transparent;color:var(--dsw-alias-label-secondary);border-radius:7px;padding:5px 7px;font:inherit;font-size:12px;cursor:pointer}.dsh-ssd-trigger:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}.dsh-ssd-trigger-wrap{position:relative;display:inline-flex;align-items:center}.dsh-ssd-active-float{position:fixed;top:56px;right:12px;z-index:999;box-sizing:border-box;width:min(360px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;padding:6px 8px;border:1px solid var(--dsw-alias-border-l2);border-radius:10px;background:var(--dsw-specific-menu,var(--dsw-alias-bg-layer-2));background:color-mix(in srgb,var(--dsw-alias-bg-layer-3,var(--dsw-alias-bg-layer-2)) 95%,transparent);box-shadow:var(--dsw-shadow-lv3);color:var(--dsw-alias-label-primary)}.dsh-ssd-active-head{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:1px 2px 5px;color:var(--dsw-alias-label-secondary);font-size:11px;font-weight:600;user-select:none}.dsh-ssd-active-drag-handle{cursor:move}.dsh-ssd-active-drag-handle:active{cursor:grabbing}.dsh-ssd-active-actions{display:inline-flex;align-items:center;gap:6px;margin-left:auto}.dsh-ssd-active-live-toggle{display:inline-flex;align-items:center;gap:3px;color:var(--dsw-alias-label-tertiary);font-size:10px;font-weight:400;cursor:pointer}.dsh-ssd-active-live-toggle input{width:12px;height:12px;margin:0;accent-color:#42bd7b}.dsh-ssd-active-close{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);font-size:17px;line-height:17px;cursor:pointer;padding:0 2px}.dsh-ssd-active-close:hover{color:var(--dsw-alias-label-primary)}.dsh-ssd-active-item{padding:7px 4px;border-top:1px solid var(--dsw-alias-border-l2);cursor:pointer}.dsh-ssd-active-item:hover{background:var(--dsw-alias-interactive-bg-hover);border-radius:6px}.dsh-ssd-active-title{display:flex;align-items:center;gap:5px;min-width:0;font-size:12px;line-height:17px;font-weight:600}.dsh-ssd-active-icon{flex:none;color:#42bd7b;font-size:12px}.dsh-ssd-active-elapsed{margin-left:auto;flex:none;color:var(--dsw-alias-label-tertiary);font-size:10px;font-weight:400}.dsh-ssd-stop-btn{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);border-radius:5px;padding:2px 5px;font:inherit;font-size:10px;line-height:15px;white-space:nowrap;cursor:pointer}.dsh-ssd-stop-btn:hover{background:var(--dsw-alias-interactive-bg-hover-danger,rgba(236,19,19,.12));color:var(--dsw-alias-state-error-primary,#ef4444)}.dsh-ssd-stop-btn:disabled{opacity:.45;cursor:wait}.dsh-ssd-continue-btn{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);border-radius:5px;padding:2px 5px;font:inherit;font-size:10px;line-height:15px;white-space:nowrap;cursor:pointer}.dsh-ssd-continue-btn:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}.dsh-ssd-continue-btn:disabled{opacity:.45;cursor:wait}.dsh-ssd-stop-all-btn{border:0;background:transparent;color:var(--dsw-alias-state-warn-label,var(--dsw-alias-label-tertiary));border-radius:4px;padding:1px 5px;font:inherit;font-size:10px;line-height:14px;white-space:nowrap;cursor:pointer}.dsh-ssd-stop-all-btn:hover{background:var(--dsw-alias-interactive-bg-hover-danger,rgba(236,19,19,.12));color:var(--dsw-alias-state-error-primary,#ef4444)}.dsh-ssd-stop-all-btn:disabled{opacity:.45;cursor:wait}.dsh-ssd-row-actions{display:inline-flex;align-items:center;gap:2px;white-space:nowrap}.dsh-ssd-row-actions .dsh-ssd-stop-btn,.dsh-ssd-row-actions .dsh-ssd-continue-btn{display:inline-flex;align-items:center;gap:2px;align-self:start;min-width:max-content;padding:0 4px;font-size:12px;line-height:16px}.dsh-ssd-active-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dsh-ssd-active-item .dsh-ssd-live{margin:3px 0 3px 17px;max-height:32px;font-size:11px;line-height:15px;pointer-events:none;user-select:none}.dsh-ssd-active-stats{margin-left:17px;color:var(--dsw-alias-label-tertiary);font-size:10px;line-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dsh-ssd-active-model{margin-left:17px;color:var(--dsw-alias-label-tertiary);font-size:10px;line-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dsh-ssd-new-agent{position:absolute;top:calc(100% + 6px);left:0;z-index:1001;max-width:280px;padding:7px 10px;border:1px solid var(--dsw-alias-interactive-label-brand);border-radius:8px;background:var(--dsw-specific-menu,var(--dsw-alias-bg-layer-2));box-shadow:var(--dsw-shadow-lv2);color:var(--dsw-alias-label-primary);font-size:12px;white-space:nowrap;pointer-events:none;transform-origin:top left;animation:dsh-ssd-new-agent 5s ease-out both}@keyframes dsh-ssd-new-agent{0%{opacity:0;transform:translateY(-5px) scale(.96)}8%,78%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-3px) scale(.98)}}.dsh-ssd-pulse{width:7px;height:7px;border-radius:50%;background:#42bd7b;animation:dsh-ssd-pulse 1.5s ease-in-out infinite}@keyframes dsh-ssd-pulse{0%,100%{box-shadow:0 0 0 0 rgba(66,189,123,.55)}50%{box-shadow:0 0 0 4px rgba(66,189,123,0)}}.dsh-ssd-count{font-variant-numeric:tabular-nums}.dsh-ssd-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px}.dsh-ssd-icon.dsh-ssd-pulse{width:18px;height:18px;background:transparent}.dsh-ssd-panel mark{background:#d7a83d;color:#171717;border-radius:2px;padding:0 1px}.dsh-ssd-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.38);display:flex;justify-content:flex-end;pointer-events:auto}.dsh-ssd-panel{height:100%;width:min(680px,100vw);box-sizing:border-box;display:flex;flex-direction:column;background:var(--dsw-specific-sidebar-fill,var(--dsw-alias-bg-layer-1));color:var(--dsw-alias-label-primary);box-shadow:var(--dsw-shadow-lv3);padding:22px;gap:14px}.dsh-ssd-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.dsh-ssd-head h2{font-size:20px;margin:0}.dsh-ssd-close{border:0;background:transparent;color:inherit;font-size:26px;line-height:24px;cursor:pointer}.dsh-ssd-controls{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.45fr) minmax(0,1.1fr) minmax(0,1.1fr);gap:8px;align-items:center;order:1;position:relative}.dsh-ssd-controls input{grid-column:1/-1;grid-row:1}.dsh-ssd-controls>select{display:block;grid-row:2;box-sizing:border-box;width:100%;min-width:0;height:30px!important;min-height:30px!important;padding:0 16px 0 8px!important;font:inherit;font-size:11px!important;line-height:normal!important;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dsh-ssd-controls option{font:inherit;font-size:12px!important;line-height:normal!important}.dsh-ssd-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.dsh-ssd-tab-wrap{display:inline-flex;align-items:center}.dsh-ssd-tab-count{display:inline-block;margin-left:5px;min-width:14px;color:var(--dsw-alias-label-tertiary);font-size:10px;font-weight:500;line-height:14px;vertical-align:middle}.dsh-ssd-custom-wrap{border-radius:7px;background:transparent;overflow:hidden}.dsh-ssd-custom-wrap.dsh-ssd-tab-selected{background:var(--dsw-alias-interactive-bg-hover)}.dsh-ssd-custom-wrap:hover{box-shadow:inset 0 0 0 1px var(--dsw-alias-interactive-label-brand)}.dsh-ssd-custom-wrap .dsh-ssd-custom-tab,.dsh-ssd-custom-wrap .dsh-ssd-custom-tab[aria-pressed=true]{background:transparent!important;border-radius:0}.dsh-ssd-custom-wrap .dsh-ssd-delete-tab{margin-left:0;padding:0 6px 0 2px}.dsh-ssd-tab-wrap:has(.dsh-ssd-other-tab){order:99}.dsh-ssd-new-tab{order:98}.dsh-ssd-other-tab{order:0}.dsh-ssd-delete-tab{border:0;background:transparent;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1;padding:0 2px;margin-left:-5px;cursor:pointer}.dsh-ssd-delete-tab:hover{color:var(--dsw-alias-label-primary)}.dsh-ssd-one-shot{display:inline-block;margin-left:6px;padding:1px 4px;border-radius:4px;background:rgba(214,166,70,.18);color:#d6a646;font-size:10px;font-weight:500;vertical-align:middle}.dsh-ssd-session-id{display:inline-block;margin-left:8px;color:var(--dsw-alias-label-tertiary,var(--dsw-alias-label-secondary));font-size:11px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;max-width:45%}.dsh-ssd-controls>select:nth-of-type(1){grid-column:1}.dsh-ssd-controls>select:nth-of-type(2){grid-column:2}.dsh-ssd-controls>select:nth-of-type(3){grid-column:4}.dsh-ssd-controls>select:nth-of-type(4){grid-column:3}.dsh-ssd-filter-btn{display:none}.dsh-ssd-tabs{order:2;min-width:0;width:100%;overflow-x:auto;scrollbar-width:none}.dsh-ssd-options{order:2}.dsh-ssd-panel>.dsh-ssd-summary{order:3}.dsh-ssd-summary-line{order:3;display:flex;align-items:center;justify-content:space-between;gap:10px}.dsh-ssd-batch-btn{border:0;background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-secondary);border-radius:5px;padding:4px 8px;font:inherit;font-size:12px;cursor:pointer}.dsh-ssd-batch-done{background:#d6a646;color:#171717;font-weight:700;box-shadow:0 0 0 2px rgba(214,166,70,.28)}.dsh-ssd-row-batch{cursor:default}.dsh-ssd-row-batch:hover{background:rgba(214,166,70,.08)}.dsh-ssd-row-selected{background:rgba(214,166,70,.16)}.dsh-ssd-archive-btn:disabled{opacity:.4;cursor:not-allowed}.dsh-ssd-row-batch .dsh-ssd-archive-btn{opacity:.4;cursor:default}.dsh-ssd-archived-label{font-size:11px;line-height:16px;color:var(--dsw-alias-label-tertiary);white-space:nowrap}.dsh-ssd-batch-bar{order:3;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.dsh-ssd-batch-bar button{border:0;background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-secondary);border-radius:5px;padding:4px 7px;font:inherit;font-size:11px;cursor:pointer}.dsh-ssd-batch-bar button:disabled{opacity:.45;cursor:not-allowed}.dsh-ssd-panel>.dsh-ssd-list{order:4}.dsh-ssd-filter-popover{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;border:1px solid var(--dsw-alias-border-l2);border-radius:9px;background:var(--dsw-specific-menu,var(--dsw-alias-bg-layer-2));box-shadow:var(--dsw-shadow-lv2)}.dsh-ssd-filter-popover label{font-size:11px;color:var(--dsw-alias-label-tertiary);display:flex;flex-direction:column;gap:4px}.dsh-ssd-filter-popover select{color:inherit;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:6px;padding:7px;font:inherit}.dsh-ssd-filter-popover .dsh-ssd-filter-wide{grid-column:1/-1}.dsh-ssd-controls>*{height:40px;box-sizing:border-box}.dsh-ssd-controls input,.dsh-ssd-controls select,.dsh-ssd-options select{min-width:0;color:inherit;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l2);border-radius:7px;padding:8px;font:inherit}.dsh-ssd-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.dsh-ssd-tabs button{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);padding:6px 9px;border-radius:6px;white-space:nowrap;cursor:pointer}.dsh-ssd-tabs button:hover,.dsh-ssd-tabs button[aria-pressed="true"]{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}.dsh-ssd-tabs button[aria-pressed="true"]{box-shadow:inset 0 -2px 0 var(--dsw-alias-interactive-label-brand)}.dsh-ssd-options{display:flex;flex-wrap:wrap;gap:12px;align-items:center;color:var(--dsw-alias-label-secondary);font-size:12px}.dsh-ssd-options label{display:flex;align-items:center;gap:5px;cursor:pointer}.dsh-ssd-bg-config{display:inline-flex;align-items:center;gap:6px;padding:2px 6px;border-radius:6px;background:var(--dsw-alias-interactive-bg-hover)}.dsh-ssd-color-input{width:18px;height:18px;padding:0;border:0;border-radius:4px;cursor:pointer;background:transparent;vertical-align:middle}.dsh-ssd-summary{font-size:12px;color:var(--dsw-alias-label-tertiary)}.dsh-ssd-list{min-height:0;flex:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;display:flex;flex-direction:column;gap:10px;padding:2px 4px 20px 2px;scrollbar-gutter:stable}.dsh-ssd-group{border:1px solid var(--dsw-alias-border-l2);border-radius:10px;overflow:hidden;flex:none}.dsh-ssd-group-head{width:100%;border:0;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-secondary);padding:9px 12px;text-align:left;display:flex;justify-content:space-between;align-items:center;font:inherit;font-size:12px;font-weight:600;cursor:pointer}.dsh-ssd-group-head-actions{display:inline-flex;align-items:center;gap:8px}.dsh-ssd-row{width:100%;box-sizing:border-box;min-width:0;border:0;border-top:1px solid var(--dsw-alias-border-l2);background:transparent;color:inherit;text-align:left;padding:10px 12px;cursor:pointer;display:grid;grid-template-columns:minmax(22px,auto) minmax(0,1fr) auto auto;gap:9px;align-items:start}.dsh-ssd-row:hover{background:var(--dsw-alias-bg-layer-2)}.dsh-ssd-marker{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:18px;height:18px;align-self:center}.dsh-ssd-marker input{margin:0;width:16px;height:16px}.dsh-ssd-dot{width:8px;height:8px;border-radius:50%;background:var(--dsw-alias-label-caption);display:inline-block;flex:none}.dsh-ssd-dot.running{background:#42bd7b;box-shadow:0 0 0 3px rgba(66,189,123,.16)}.dsh-ssd-dot.hidden-dot{background:transparent!important;border-radius:0!important;font-size:13px;line-height:1;width:auto;height:auto;box-shadow:none!important;display:inline-flex;align-items:center;justify-content:center}.dsh-ssd-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.dsh-ssd-meta{margin-top:3px;font-size:11px;color:var(--dsw-alias-label-tertiary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dsh-ssd-time{font-size:11px;line-height:16px;color:var(--dsw-alias-label-tertiary);white-space:nowrap;align-self:start}.dsh-ssd-details{grid-column:2/-1;box-sizing:border-box;width:100%;color:var(--dsw-alias-label-tertiary);font-size:11px}.dsh-ssd-details summary{cursor:pointer;color:var(--dsw-alias-label-secondary)}.dsh-ssd-live{color:#42bd7b;white-space:pre-wrap;line-height:16px;max-height:32px;overflow:hidden}.dsh-ssd-live-old{display:block;opacity:.48}.dsh-ssd-live-latest{display:block;opacity:1;font-weight:500}.dsh-ssd-live-running{color:#42bd7b}.dsh-ssd-live-running .dsh-ssd-live-latest{background:linear-gradient(110deg,#42bd7b 20%,#f2fff7 45%,#42bd7b 70%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:dsh-ssd-live-shine 2.4s linear infinite}@keyframes dsh-ssd-live-shine{from{background-position:180% 0}to{background-position:-20% 0}}.dsh-ssd-live-final{color:var(--dsw-alias-label-tertiary);opacity:.82}.dsh-ssd-load-live-btn{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);cursor:pointer;padding:0 4px;font-size:11px;line-height:16px;border-radius:4px;display:inline-flex;align-items:center;gap:3px;margin:2px 0;opacity:.85}.dsh-ssd-load-live-btn:hover{color:var(--dsw-alias-label-primary);background:var(--dsw-alias-interactive-bg-hover);opacity:1}.dsh-ssd-archive-btn{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);cursor:pointer;padding:0 4px;font-size:12px;line-height:16px;white-space:nowrap;align-self:start;min-width:max-content}.dsh-ssd-archive-btn:hover{color:var(--dsw-alias-label-primary);background:var(--dsw-alias-interactive-bg-hover);border-radius:5px}.dsh-ssd-more{width:100%;border:0;border-top:1px solid var(--dsw-alias-border-l2);background:transparent;color:var(--dsw-alias-label-secondary);padding:9px 12px;text-align:left;font:inherit;font-size:12px;cursor:pointer}.dsh-ssd-more:hover{background:var(--dsw-alias-bg-layer-2)}.dsh-ssd-empty{padding:30px 12px;text-align:center;color:var(--dsw-alias-label-tertiary)}@media(max-width:560px){.dsh-ssd-panel{padding:16px;max-width:100vw;overflow:hidden}.dsh-ssd-controls{grid-template-columns:minmax(0,1fr);width:100%}.dsh-ssd-controls>*{grid-column:auto!important;width:100%;box-sizing:border-box}.dsh-ssd-controls input{grid-column:1/-1!important}.dsh-ssd-row{grid-template-columns:8px minmax(0,1fr) auto 42px;gap:6px}.dsh-ssd-meta{max-width:100%;overflow:hidden;text-overflow:ellipsis}.dsh-ssd-archive-btn{white-space:nowrap;font-size:11px;padding:2px}.dsh-ssd-list{width:100%;box-sizing:border-box}}.dsh-ssd-thinking{display:inline-flex;align-items:center;gap:5px;font-size:11px;line-height:15px;color:var(--dsw-alias-label-secondary);font-weight:500}.dsh-ssd-thinking::before{content:"";width:9px;height:9px;border-radius:50%;border:2px solid transparent;border-top-color:currentColor;border-right-color:currentColor;animation:dsh-ssd-spin .7s linear infinite;flex:none}@keyframes dsh-ssd-spin{to{transform:rotate(360deg)}}
+.dsh-ssd-filter-toggle:hover{color:var(--dsw-alias-label-primary);background:var(--dsw-alias-interactive-bg-hover)}.dsh-ssd-hide-btn{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);cursor:pointer;padding:0 4px;font-size:12px;line-height:16px;white-space:nowrap;align-self:start;min-width:max-content;display:inline-flex;align-items:center;gap:2px}.dsh-ssd-hide-btn:hover{color:var(--dsw-alias-label-primary);background:var(--dsw-alias-interactive-bg-hover);border-radius:5px}.dsh-ssd-hidden-badge{font-size:11px;line-height:16px;color:var(--dsw-alias-label-tertiary);white-space:nowrap}.dsh-ssd-delete-btn{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);cursor:pointer;padding:0 4px;font-size:12px;line-height:16px;white-space:nowrap;align-self:start;min-width:max-content}.dsh-ssd-delete-btn:hover{color:var(--dsw-alias-state-error-primary,#ef4444);background:var(--dsw-alias-interactive-bg-hover-danger,rgba(236,19,19,.12));border-radius:5px}.dsh-ssd-batch-delete-btn{color:var(--dsw-alias-state-error-primary,#ef4444)!important}.dsh-ssd-batch-delete-btn:hover{background:var(--dsw-alias-interactive-bg-hover-danger,rgba(236,19,19,.12))!important}.dsh-ssd-trigger{display:inline-flex;align-items:center;gap:0;border:0;background:transparent;color:var(--dsw-alias-label-secondary);border-radius:7px;padding:5px 7px;font:inherit;font-size:12px;cursor:pointer}.dsh-ssd-trigger:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}.dsh-ssd-trigger-wrap{position:relative;display:inline-flex;align-items:center}.dsh-ssd-active-float{position:fixed;top:56px;right:12px;z-index:999;box-sizing:border-box;width:min(360px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;padding:6px 8px;border:1px solid var(--dsw-alias-border-l2);border-radius:10px;background:var(--dsw-specific-menu,var(--dsw-alias-bg-layer-2));background:color-mix(in srgb,var(--dsw-alias-bg-layer-3,var(--dsw-alias-bg-layer-2)) 95%,transparent);box-shadow:var(--dsw-shadow-lv3);color:var(--dsw-alias-label-primary)}.dsh-ssd-active-head{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:1px 2px 5px;color:var(--dsw-alias-label-secondary);font-size:11px;font-weight:600;user-select:none}.dsh-ssd-active-drag-handle{cursor:move}.dsh-ssd-active-drag-handle:active{cursor:grabbing}.dsh-ssd-active-actions{display:inline-flex;align-items:center;gap:6px;margin-left:auto}.dsh-ssd-active-live-toggle{display:inline-flex;align-items:center;gap:3px;color:var(--dsw-alias-label-tertiary);font-size:10px;font-weight:400;cursor:pointer}.dsh-ssd-active-live-toggle input{width:12px;height:12px;margin:0;accent-color:#42bd7b}.dsh-ssd-active-close{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);font-size:17px;line-height:17px;cursor:pointer;padding:0 2px}.dsh-ssd-active-close:hover{color:var(--dsw-alias-label-primary)}.dsh-ssd-active-item{padding:7px 4px;border-top:1px solid var(--dsw-alias-border-l2);cursor:pointer}.dsh-ssd-active-item:hover{background:var(--dsw-alias-interactive-bg-hover);border-radius:6px}.dsh-ssd-active-title{display:flex;align-items:center;gap:5px;min-width:0;font-size:12px;line-height:17px;font-weight:600}.dsh-ssd-active-icon{flex:none;color:#42bd7b;font-size:12px}.dsh-ssd-active-elapsed{margin-left:auto;flex:none;color:var(--dsw-alias-label-tertiary);font-size:10px;font-weight:400}.dsh-ssd-stop-btn{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);border-radius:5px;padding:2px 5px;font:inherit;font-size:10px;line-height:15px;white-space:nowrap;cursor:pointer}.dsh-ssd-stop-btn:hover{background:var(--dsw-alias-interactive-bg-hover-danger,rgba(236,19,19,.12));color:var(--dsw-alias-state-error-primary,#ef4444)}.dsh-ssd-stop-btn:disabled{opacity:.45;cursor:wait}.dsh-ssd-continue-btn{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);border-radius:5px;padding:2px 5px;font:inherit;font-size:10px;line-height:15px;white-space:nowrap;cursor:pointer}.dsh-ssd-continue-btn:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}.dsh-ssd-continue-btn:disabled{opacity:.45;cursor:wait}.dsh-ssd-stop-all-btn{border:0;background:transparent;color:var(--dsw-alias-state-warn-label,var(--dsw-alias-label-tertiary));border-radius:4px;padding:1px 5px;font:inherit;font-size:10px;line-height:14px;white-space:nowrap;cursor:pointer}.dsh-ssd-stop-all-btn:hover{background:var(--dsw-alias-interactive-bg-hover-danger,rgba(236,19,19,.12));color:var(--dsw-alias-state-error-primary,#ef4444)}.dsh-ssd-stop-all-btn:disabled{opacity:.45;cursor:wait}.dsh-ssd-row-actions{display:inline-flex;align-items:center;gap:2px;white-space:nowrap}.dsh-ssd-row-actions .dsh-ssd-stop-btn,.dsh-ssd-row-actions .dsh-ssd-continue-btn{display:inline-flex;align-items:center;gap:2px;align-self:start;min-width:max-content;padding:0 4px;font-size:12px;line-height:16px}.dsh-ssd-active-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dsh-ssd-active-item .dsh-ssd-live{margin:3px 0 3px 17px;max-height:32px;font-size:11px;line-height:15px;pointer-events:none;user-select:none}.dsh-ssd-active-stats{margin-left:17px;color:var(--dsw-alias-label-tertiary);font-size:10px;line-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dsh-ssd-active-model{margin-left:17px;color:var(--dsw-alias-label-tertiary);font-size:10px;line-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dsh-ssd-new-agent{position:absolute;top:calc(100% + 6px);left:0;z-index:1001;max-width:280px;padding:7px 10px;border:1px solid var(--dsw-alias-interactive-label-brand);border-radius:8px;background:var(--dsw-specific-menu,var(--dsw-alias-bg-layer-2));box-shadow:var(--dsw-shadow-lv2);color:var(--dsw-alias-label-primary);font-size:12px;white-space:nowrap;pointer-events:none;transform-origin:top left;animation:dsh-ssd-new-agent 5s ease-out both}@keyframes dsh-ssd-new-agent{0%{opacity:0;transform:translateY(-5px) scale(.96)}8%,78%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-3px) scale(.98)}}.dsh-ssd-pulse{width:7px;height:7px;border-radius:50%;background:#42bd7b;animation:dsh-ssd-pulse 1.5s ease-in-out infinite}@keyframes dsh-ssd-pulse{0%,100%{box-shadow:0 0 0 0 rgba(66,189,123,.55)}50%{box-shadow:0 0 0 4px rgba(66,189,123,0)}}.dsh-ssd-count{font-variant-numeric:tabular-nums}.dsh-ssd-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px}.dsh-ssd-icon.dsh-ssd-pulse{width:18px;height:18px;background:transparent}.dsh-ssd-panel mark{background:#d7a83d;color:#171717;border-radius:2px;padding:0 1px}.dsh-ssd-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.38);display:flex;justify-content:flex-end;pointer-events:auto}.dsh-ssd-panel{height:100%;width:min(680px,100vw);box-sizing:border-box;display:flex;flex-direction:column;background:var(--dsw-specific-sidebar-fill,var(--dsw-alias-bg-layer-1));color:var(--dsw-alias-label-primary);box-shadow:var(--dsw-shadow-lv3);padding:22px;gap:14px}
+[data-windows-titlebar] .dsh-ssd-panel,html[data-windows-titlebar] .dsh-ssd-panel{margin-top:36px;height:calc(100% - 36px);padding-top:16px}
+.dsh-ssd-head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.dsh-ssd-head h2{font-size:18px;font-weight:600;margin:0}
+.dsh-ssd-close-btn{height:28px;padding:0 10px;border-radius:6px;background:var(--dsw-alias-bg-layer-2,rgba(128,128,128,0.1));border:1px solid var(--dsw-alias-border-l2,rgba(128,128,128,0.18));color:var(--dsw-alias-label-primary);font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px;cursor:pointer;flex:none;transition:all .15s ease}
+.dsh-ssd-close-btn:hover{background:var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,0.18));border-color:var(--dsw-alias-border-l1,rgba(128,128,128,0.3))}
+.dsh-ssd-close-icon{font-size:11px;line-height:1;opacity:.8}
+.dsh-ssd-chevron{transition:transform .18s ease;flex:none;display:inline-block;vertical-align:middle;margin-left:6px}
+.dsh-ssd-chevron.is-expanded{transform:rotate(90deg)}
+.dsh-ssd-controls input:focus,.dsh-ssd-search-wrap input:focus{outline:none!important;border-color:#3b82f6!important;box-shadow:0 0 0 2px rgba(59,130,246,0.18)!important}.dsh-ssd-controls{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.45fr) minmax(0,1.1fr) minmax(0,1.1fr);gap:8px;align-items:center;order:1;position:relative}.dsh-ssd-controls input{grid-column:1/-1;grid-row:1}.dsh-ssd-controls>select{display:block;grid-row:2;box-sizing:border-box;width:100%;min-width:0;height:30px!important;min-height:30px!important;padding:0 16px 0 8px!important;font:inherit;font-size:11px!important;line-height:normal!important;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dsh-ssd-controls option{font:inherit;font-size:12px!important;line-height:normal!important}.dsh-ssd-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.dsh-ssd-tab-wrap{display:inline-flex;align-items:center}.dsh-ssd-tab-count{display:inline-block;margin-left:5px;min-width:14px;color:var(--dsw-alias-label-tertiary);font-size:10px;font-weight:500;line-height:14px;vertical-align:middle}.dsh-ssd-custom-wrap{border-radius:7px;background:transparent;overflow:hidden}.dsh-ssd-custom-wrap.dsh-ssd-tab-selected{background:var(--dsw-alias-interactive-bg-hover)}.dsh-ssd-custom-wrap:hover{box-shadow:inset 0 0 0 1px var(--dsw-alias-interactive-label-brand)}.dsh-ssd-custom-wrap .dsh-ssd-custom-tab,.dsh-ssd-custom-wrap .dsh-ssd-custom-tab[aria-pressed=true]{background:transparent!important;border-radius:0}.dsh-ssd-custom-wrap .dsh-ssd-delete-tab{margin-left:0;padding:0 6px 0 2px}.dsh-ssd-tab-wrap:has(.dsh-ssd-other-tab){order:99}.dsh-ssd-new-tab{order:98}.dsh-ssd-other-tab{order:0}.dsh-ssd-delete-tab{border:0;background:transparent;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1;padding:0 2px;margin-left:-5px;cursor:pointer}.dsh-ssd-delete-tab:hover{color:var(--dsw-alias-label-primary)}.dsh-ssd-one-shot{display:inline-block;margin-left:6px;padding:1px 4px;border-radius:4px;background:rgba(214,166,70,.18);color:#d6a646;font-size:10px;font-weight:500;vertical-align:middle}.dsh-ssd-session-id{display:inline-block;margin-left:8px;color:var(--dsw-alias-label-tertiary,var(--dsw-alias-label-secondary));font-size:11px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;max-width:45%}.dsh-ssd-controls>select:nth-of-type(1){grid-column:1}.dsh-ssd-controls>select:nth-of-type(2){grid-column:2}.dsh-ssd-controls>select:nth-of-type(3){grid-column:4}.dsh-ssd-controls>select:nth-of-type(4){grid-column:3}.dsh-ssd-filter-btn{display:none}.dsh-ssd-tabs{order:2;min-width:0;width:100%;overflow-x:auto;scrollbar-width:none}.dsh-ssd-options{order:2}.dsh-ssd-panel>.dsh-ssd-summary{order:3}.dsh-ssd-summary-line{order:3;display:flex;align-items:center;justify-content:space-between;gap:10px}.dsh-ssd-batch-btn{border:0;background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-secondary);border-radius:5px;padding:4px 8px;font:inherit;font-size:12px;cursor:pointer}.dsh-ssd-batch-done{background:#d6a646;color:#171717;font-weight:700;box-shadow:0 0 0 2px rgba(214,166,70,.28)}.dsh-ssd-row-batch{cursor:default}.dsh-ssd-row-batch:hover{background:rgba(214,166,70,.08)}.dsh-ssd-row-selected{background:rgba(214,166,70,.16)}.dsh-ssd-archive-btn:disabled{opacity:.4;cursor:not-allowed}.dsh-ssd-row-batch .dsh-ssd-archive-btn{opacity:.4;cursor:default}.dsh-ssd-archived-label{font-size:11px;line-height:16px;color:var(--dsw-alias-label-tertiary);white-space:nowrap}.dsh-ssd-batch-bar{order:3;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.dsh-ssd-batch-bar button{border:0;background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-secondary);border-radius:5px;padding:4px 7px;font:inherit;font-size:11px;cursor:pointer}.dsh-ssd-batch-bar button:disabled{opacity:.45;cursor:not-allowed}.dsh-ssd-panel>.dsh-ssd-list{order:4}.dsh-ssd-filter-popover{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;border:1px solid var(--dsw-alias-border-l2);border-radius:9px;background:var(--dsw-specific-menu,var(--dsw-alias-bg-layer-2));box-shadow:var(--dsw-shadow-lv2)}.dsh-ssd-filter-popover label{font-size:11px;color:var(--dsw-alias-label-tertiary);display:flex;flex-direction:column;gap:4px}.dsh-ssd-filter-popover select{color:inherit;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:6px;padding:7px;font:inherit}.dsh-ssd-filter-popover .dsh-ssd-filter-wide{grid-column:1/-1}.dsh-ssd-controls>*{height:40px;box-sizing:border-box}.dsh-ssd-controls input,.dsh-ssd-controls select,.dsh-ssd-options select{min-width:0;color:inherit;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l2);border-radius:7px;padding:8px;font:inherit}.dsh-ssd-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.dsh-ssd-tabs button{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);padding:6px 9px;border-radius:6px;white-space:nowrap;cursor:pointer}.dsh-ssd-tabs button:hover,.dsh-ssd-tabs button[aria-pressed="true"]{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}.dsh-ssd-tabs button[aria-pressed="true"]{box-shadow:inset 0 -2px 0 var(--dsw-alias-interactive-label-brand)}.dsh-ssd-options{display:flex;flex-wrap:wrap;gap:12px;align-items:center;color:var(--dsw-alias-label-secondary);font-size:12px}.dsh-ssd-options label{display:flex;align-items:center;gap:5px;cursor:pointer}.dsh-ssd-bg-config{display:inline-flex;align-items:center;gap:6px;padding:2px 6px;border-radius:6px;background:var(--dsw-alias-interactive-bg-hover)}.dsh-ssd-color-input{width:18px;height:18px;padding:0;border:0;border-radius:4px;cursor:pointer;background:transparent;vertical-align:middle}.dsh-ssd-summary{font-size:12px;color:var(--dsw-alias-label-tertiary)}.dsh-ssd-list{min-height:0;flex:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;display:flex;flex-direction:column;gap:10px;padding:2px 4px 20px 2px;scrollbar-gutter:stable}.dsh-ssd-group{border:1px solid var(--dsw-alias-border-l2);border-radius:10px;overflow:hidden;flex:none}.dsh-ssd-group-head{width:100%;border:0;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-secondary);padding:9px 12px;text-align:left;display:flex;justify-content:space-between;align-items:center;font:inherit;font-size:12px;font-weight:600;cursor:pointer}.dsh-ssd-group-head-actions{display:inline-flex;align-items:center;gap:8px}.dsh-ssd-row{width:100%;box-sizing:border-box;min-width:0;border:0;border-top:1px solid var(--dsw-alias-border-l2);background:transparent;color:inherit;text-align:left;padding:10px 12px;cursor:pointer;display:grid;grid-template-columns:minmax(22px,auto) minmax(0,1fr) auto auto;gap:9px;align-items:start}.dsh-ssd-row:hover{background:var(--dsw-alias-bg-layer-2)}.dsh-ssd-marker{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:18px;height:18px;align-self:center}.dsh-ssd-marker input{margin:0;width:16px;height:16px}.dsh-ssd-dot{width:8px;height:8px;border-radius:50%;background:var(--dsw-alias-label-caption);display:inline-block;flex:none}.dsh-ssd-dot.running{background:#42bd7b;box-shadow:0 0 0 3px rgba(66,189,123,.16)}.dsh-ssd-dot.hidden-dot{background:transparent!important;border-radius:0!important;font-size:13px;line-height:1;width:auto;height:auto;box-shadow:none!important;display:inline-flex;align-items:center;justify-content:center}.dsh-ssd-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.dsh-ssd-meta{margin-top:3px;font-size:11px;color:var(--dsw-alias-label-tertiary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dsh-ssd-time{font-size:11px;line-height:16px;color:var(--dsw-alias-label-tertiary);white-space:nowrap;align-self:start}.dsh-ssd-details{grid-column:2/-1;box-sizing:border-box;width:100%;color:var(--dsw-alias-label-tertiary);font-size:11px}.dsh-ssd-details summary{cursor:pointer;color:var(--dsw-alias-label-secondary)}.dsh-ssd-live{color:#42bd7b;white-space:pre-wrap;line-height:16px;max-height:32px;overflow:hidden}.dsh-ssd-live-old{display:block;opacity:.48}.dsh-ssd-live-latest{display:block;opacity:1;font-weight:500}.dsh-ssd-live-running{color:#42bd7b}.dsh-ssd-live-running .dsh-ssd-live-latest{background:linear-gradient(110deg,#42bd7b 20%,#f2fff7 45%,#42bd7b 70%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:dsh-ssd-live-shine 2.4s linear infinite}@keyframes dsh-ssd-live-shine{from{background-position:180% 0}to{background-position:-20% 0}}.dsh-ssd-live-final{color:var(--dsw-alias-label-tertiary);opacity:.82}.dsh-ssd-load-live-btn{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);cursor:pointer;padding:0 4px;font-size:11px;line-height:16px;border-radius:4px;display:inline-flex;align-items:center;gap:3px;margin:2px 0;opacity:.85}.dsh-ssd-load-live-btn:hover{color:var(--dsw-alias-label-primary);background:var(--dsw-alias-interactive-bg-hover);opacity:1}.dsh-ssd-archive-btn{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);cursor:pointer;padding:0 4px;font-size:12px;line-height:16px;white-space:nowrap;align-self:start;min-width:max-content}.dsh-ssd-archive-btn:hover{color:var(--dsw-alias-label-primary);background:var(--dsw-alias-interactive-bg-hover);border-radius:5px}.dsh-ssd-more{width:100%;border:0;border-top:1px solid var(--dsw-alias-border-l2);background:transparent;color:var(--dsw-alias-label-secondary);padding:9px 12px;text-align:left;font:inherit;font-size:12px;cursor:pointer}.dsh-ssd-more:hover{background:var(--dsw-alias-bg-layer-2)}.dsh-ssd-empty{padding:30px 12px;text-align:center;color:var(--dsw-alias-label-tertiary)}@media(max-width:560px){.dsh-ssd-panel{padding:16px;max-width:100vw;overflow:hidden}.dsh-ssd-controls{grid-template-columns:minmax(0,1fr);width:100%}.dsh-ssd-controls>*{grid-column:auto!important;width:100%;box-sizing:border-box}.dsh-ssd-controls input{grid-column:1/-1!important}.dsh-ssd-row{grid-template-columns:8px minmax(0,1fr) auto 42px;gap:6px}.dsh-ssd-meta{max-width:100%;overflow:hidden;text-overflow:ellipsis}.dsh-ssd-archive-btn{white-space:nowrap;font-size:11px;padding:2px}.dsh-ssd-list{width:100%;box-sizing:border-box}}.dsh-ssd-thinking{display:inline-flex;align-items:center;gap:5px;font-size:11px;line-height:15px;color:var(--dsw-alias-label-secondary);font-weight:500}.dsh-ssd-thinking::before{content:"";width:9px;height:9px;border-radius:50%;border:2px solid transparent;border-top-color:currentColor;border-right-color:currentColor;animation:dsh-ssd-spin .7s linear infinite;flex:none}@keyframes dsh-ssd-spin{to{transform:rotate(360deg)}}
 .dsh-ssd-side-btn{border:0;background:transparent;color:var(--dsw-alias-label-tertiary);cursor:pointer;padding:4px 4px 4px 10px;margin:-4px 0 -4px -6px;font-size:12px;line-height:16px;white-space:nowrap;align-self:start;min-width:24px;display:inline-flex;align-items:center;gap:2px;position:relative}
 .dsh-ssd-side-btn::after{content:"";position:absolute;left:6px;right:0;top:4px;bottom:4px;border-radius:5px;pointer-events:none}
 .dsh-ssd-side-btn:hover:not(:disabled){color:var(--dsw-alias-label-primary)}
@@ -82,11 +91,14 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
     };
     const age = (tr, stamp) => {
       const seconds = Math.max(0, Math.floor((Date.now() - (stamp || Date.now())) / 1e3));
-      if (seconds < 60) return tr("age.sAgo", { s: seconds });
+      if (seconds < 60)
+        return tr("age.sAgo", { s: seconds });
       const minutes = Math.floor(seconds / 60);
-      if (minutes < 60) return tr("age.mAgo", { m: minutes });
+      if (minutes < 60)
+        return tr("age.mAgo", { m: minutes });
       const hours = Math.floor(minutes / 60);
-      if (hours < 24) return tr("age.hmAgo", { h: hours, m: minutes % 60 });
+      if (hours < 24)
+        return tr("age.hmAgo", { h: hours, m: minutes % 60 });
       return tr("age.dAgo", { d: Math.floor(hours / 24) });
     };
     function roundedPercentUnits(cacheReadTokens, denominator, decimalPlaces) {
@@ -99,23 +111,29 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       while (lower < upper) {
         const candidate = Math.floor((lower + upper + 1) / 2);
         const factor = candidate * 2 - 1;
-        if (cacheReadTokens >= factor * denominatorQuotient + Math.ceil(factor * denominatorRemainder / doubledScale)) lower = candidate;
-        else upper = candidate - 1;
+        if (cacheReadTokens >= factor * denominatorQuotient + Math.ceil(factor * denominatorRemainder / doubledScale))
+          lower = candidate;
+        else
+          upper = candidate - 1;
       }
       return lower;
     }
     function displayPercentUnits(units, decimalPlaces) {
-      if (decimalPlaces === 0) return String(units);
+      if (decimalPlaces === 0)
+        return String(units);
       const whole = Math.floor(units / 10);
       const tenths = units % 10;
       return tenths === 0 ? String(whole) : `${whole}.${tenths}`;
     }
     function formatCacheHitPercent(cacheReadTokens, promptTokens, decimalPlaces) {
-      if (promptTokens === 0) return null;
+      if (promptTokens === 0)
+        return null;
       const missedInputTokens = promptTokens - cacheReadTokens;
-      if (missedInputTokens === 0) return "100";
+      if (missedInputTokens === 0)
+        return "100";
       const roundedUnits = roundedPercentUnits(cacheReadTokens, promptTokens, decimalPlaces);
-      if (roundedUnits < (decimalPlaces === 0 ? 100 : 1e3)) return displayPercentUnits(roundedUnits, decimalPlaces);
+      if (roundedUnits < (decimalPlaces === 0 ? 100 : 1e3))
+        return displayPercentUnits(roundedUnits, decimalPlaces);
       let distinguishingPlaces = 1;
       let scaledDoubleGap = missedInputTokens * 200;
       const denominatorTens = Math.floor(promptTokens / 10);
@@ -140,7 +158,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       return uncached == null || read == null || write == null ? void 0 : uncached + read + write;
     }, cacheHitText = (read, billed) => billed == null || billed <= 0 || read == null ? null : read >= billed ? "100" : formatCacheHitPercent(read, billed, 0), tpsText = (tokens, ms) => {
       const decodeTokens = num(tokens), decodeMs = num(ms);
-      if (decodeTokens == null || decodeMs == null || decodeTokens <= 0 || decodeMs <= 0) return null;
+      if (decodeTokens == null || decodeMs == null || decodeTokens <= 0 || decodeMs <= 0)
+        return null;
       const tps = decodeTokens / (decodeMs / 1e3);
       return tps >= 10 ? String(Math.round(tps)) : String(Math.round(tps * 10) / 10);
     }, durationText = (ms) => ms >= 1e4 ? `${Math.round(ms / 1e3)}s` : `${(ms / 1e3).toFixed(1)}s`, fmt = (tr, n) => n == null ? tr("unknown") : n >= 1e6 ? `${(n / 1e6).toFixed(1)}m` : n >= 1e3 ? `${(n / 1e3).toFixed(1)}k` : String(n), promptPreview = (s) => String(s?.prompt || s?.projectionValues?.prompt || "").slice(0, 100), usageStats = (tr, row) => {
@@ -148,16 +167,21 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       return { total: billed == null || output == null ? void 0 : billed + output, billed, uncached: num(u?.uncachedInputTokens), cacheRead, cacheWrite: num(u?.cacheWriteTokens), output, hit: cacheHitText(cacheRead, billed), tps: tpsText(num(s?.decodeTokens), num(s?.decodeMs)), turns: num(s?.turns) ?? num(values?.turns) ?? tr("unknown"), steps: num(s?.steps) ?? num(values?.steps) ?? tr("unknown"), llmMs: num(s?.llmMs), toolMs: num(s?.toolMs), ttftMs: num(s?.ttftMs) };
     }, statsLine = (tr, row) => {
       const u = usageStats(tr, row), parts = [tr("stats.usage", { input: fmt(tr, u.billed), uncached: fmt(tr, u.uncached), output: fmt(tr, u.output) })];
-      if (u.hit != null) parts.push(tr("stats.hit", { percent: u.hit }));
-      if (u.tps != null) parts.push(tr("stats.tps", { tps: u.tps }));
+      if (u.hit != null)
+        parts.push(tr("stats.hit", { percent: u.hit }));
+      if (u.tps != null)
+        parts.push(tr("stats.tps", { tps: u.tps }));
       parts.push(tr("stats.turns", { turns: u.turns }));
       parts.push(tr("stats.steps", { steps: u.steps }));
       return parts.join(" · ");
     }, statsUsageTitle = (tr, row) => {
       const u = usageStats(tr, row), lines = [tr("stats.titleLine"), tr("stats.f.total", { value: fmt(tr, u.total) }), tr("stats.f.billed", { value: fmt(tr, u.billed) }), tr("stats.f.uncached", { value: fmt(tr, u.uncached) }), tr("stats.f.cacheRead", { value: fmt(tr, u.cacheRead) }), tr("stats.f.cacheWrite", { value: fmt(tr, u.cacheWrite) }), tr("stats.f.output", { value: fmt(tr, u.output) }), tr("stats.f.hit", { value: u.hit != null ? `${u.hit}%` : tr("unknown") }), tr("stats.f.tps", { value: u.tps != null ? tr("stats.tps", { tps: u.tps }) : tr("unknown") }), tr("stats.f.turns", { value: u.turns }), tr("stats.f.steps", { value: u.steps })];
-      if (u.llmMs != null) lines.push(tr("stats.f.llm", { value: durationText(u.llmMs) }));
-      if (u.toolMs != null) lines.push(tr("stats.f.tool", { value: durationText(u.toolMs) }));
-      if (u.ttftMs != null) lines.push(tr("stats.f.ttft", { value: durationText(u.ttftMs) }));
+      if (u.llmMs != null)
+        lines.push(tr("stats.f.llm", { value: durationText(u.llmMs) }));
+      if (u.toolMs != null)
+        lines.push(tr("stats.f.tool", { value: durationText(u.toolMs) }));
+      if (u.ttftMs != null)
+        lines.push(tr("stats.f.ttft", { value: durationText(u.ttftMs) }));
       return lines.join("\n");
     };
     const category = (tr, name) => {
@@ -179,7 +203,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
     const knownMode = (mode) => mode === "one-shot" || mode === "continuable" ? mode : void 0;
     const catalogEntriesOf = (state, parentId) => {
       const legacy = state?.subagentsByParent?.[parentId]?.entries;
-      if (Array.isArray(legacy)) return legacy.filter((e) => e.kind === "child").map((e) => ({ id: e.id, mode: knownMode(e.mode), label: e.label }));
+      if (Array.isArray(legacy))
+        return legacy.filter((e) => e.kind === "child").map((e) => ({ id: e.id, mode: knownMode(e.mode), label: e.label }));
       const projected = state?.byId?.[parentId]?.projectionValues?.subagentCatalog ?? state?.projectionsBySession?.[parentId]?.values?.subagentCatalog;
       return Array.isArray(projected) ? projected.filter((e) => e && e.id).map((e) => ({ id: e.id, mode: knownMode(e.mode), label: e.label })) : [];
     };
@@ -189,26 +214,31 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       const parents = /* @__PURE__ */ new Set();
       Object.keys(state?.subagentsByParent || {}).forEach((id) => parents.add(id));
       Object.keys(state?.byId || {}).forEach((id) => {
-        if (state?.byId?.[id]?.projectionValues?.subagentCatalog) parents.add(id);
+        if (state?.byId?.[id]?.projectionValues?.subagentCatalog)
+          parents.add(id);
       });
       Object.keys(state?.projectionsBySession || {}).forEach((id) => {
-        if (state?.projectionsBySession?.[id]?.values?.subagentCatalog) parents.add(id);
+        if (state?.projectionsBySession?.[id]?.values?.subagentCatalog)
+          parents.add(id);
       });
       const map = {};
       parents.forEach((parentId) => {
         catalogEntriesOf(state, parentId).forEach((entry) => {
-          if (map[entry.id] === void 0) map[entry.id] = entry;
+          if (map[entry.id] === void 0)
+            map[entry.id] = entry;
         });
       });
       return map;
     }, highlight = (text, term) => {
-      if (!term) return text;
+      if (!term)
+        return text;
       const parts = String(text).split(new RegExp(`(${term.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")})`, "ig"));
       return parts.map((part, i) => i % 2 ? jsx("mark", { children: part }, i) : part);
     };
     const modelText = (row) => {
       const sel = row?.projectionValues?.modelSelection, shown = sel?.next ?? sel?.lastUsed;
-      if (!shown || !shown.provider || !shown.model) return "";
+      if (!shown || !shown.provider || !shown.model)
+        return "";
       return shown.reasoningEffort ? `${shown.provider}/${shown.model} · ${shown.reasoningEffort}` : `${shown.provider}/${shown.model}`;
     };
     const modelLabel = (tr, row) => {
@@ -220,23 +250,28 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
     const modeModelCompact = (tr, row) => `${modeLabel(tr, row?.mode)} · ${modelCompact(tr, row)}`;
     const terminalOf = (row) => {
       const timing = row?.projectionValues?.subagentTiming, completed = timing?.lastTurnCompleted;
-      if (completed !== true && completed !== false) return void 0;
-      if (timing?.active !== void 0) return void 0;
+      if (completed !== true && completed !== false)
+        return void 0;
+      if (timing?.active !== void 0)
+        return void 0;
       return completed ? "normal" : "abnormal";
     };
     const terminalClass = (row) => {
-      if (row?.running) return "";
+      if (row?.running)
+        return "";
       const ended = terminalOf(row);
       return ended === void 0 ? "" : ` dsh-ssd-dot-${ended}`;
     };
     const terminalTitle = (tr, row) => {
-      if (row?.running) return void 0;
+      if (row?.running)
+        return void 0;
       const ended = terminalOf(row);
       return ended === void 0 ? void 0 : ended === "normal" ? tr("end.normalNamed", { name: row?.name }) : tr("end.abnormalNamed", { name: row?.name });
     };
     const asideButton = (options) => {
       const addressOf = options.addressOf;
-      if (typeof addressOf !== "function") return null;
+      if (typeof addressOf !== "function")
+        return null;
       const tr = options.tr;
       let address = null;
       try {
@@ -245,12 +280,15 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         console.warn("subagent-sidebar-default: sidebar address lookup failed", error);
         address = null;
       }
-      if (address === void 0) return null;
+      if (address === void 0)
+        return null;
       return jsx("button", { type: "button", className: options.compact ? "dsh-ssd-side-btn dsh-ssd-side-btn-compact" : "dsh-ssd-side-btn", disabled: !address, title: address ? tr("openInSidebar") : tr("openInSidebarUnavailable"), "aria-label": address ? tr("openInSidebar.named", { name: options.row.name }) : tr("openInSidebarUnavailable"), onClick: (event) => {
         event.stopPropagation();
-        if (!address) return;
+        if (!address)
+          return;
         if (typeof options.open === "function" && options.open(address) === true) {
-          if (typeof options.onOpened === "function") options.onOpened();
+          if (typeof options.onOpened === "function")
+            options.onOpened();
           return;
         }
         window.alert(tr("openInSidebarFailed"));
@@ -277,16 +315,20 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       });
     };
     const retainDispose = (reference) => {
-      if (!reference) return;
+      if (!reference)
+        return;
       try {
-        if (typeof reference.release === "function") reference.release();
-        else if (typeof reference.dispose === "function") reference.dispose();
+        if (typeof reference.release === "function")
+          reference.release();
+        else if (typeof reference.dispose === "function")
+          reference.dispose();
       } catch (error) {
         console.warn("subagent-sidebar-default: unable to release a retained session", error);
       }
     };
     const retainBindingOf = (reference) => {
-      if (!reference) return null;
+      if (!reference)
+        return null;
       try {
         const binding = reference.binding;
         return binding && (binding.session || binding.eventSource) ? binding : null;
@@ -296,14 +338,16 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
     };
     const retainDrop = (childId) => {
       const entry = retainEntries.get(childId);
-      if (!entry) return false;
+      if (!entry)
+        return false;
       retainEntries.delete(childId);
       retainDispose(entry.reference);
       return true;
     };
     const retainAcquire = (want) => {
       const runtime = sessionsRt;
-      if (!runtime || typeof runtime.retain !== "function") return null;
+      if (!runtime || typeof runtime.retain !== "function")
+        return null;
       let reference = null;
       try {
         reference = runtime.retain(retainTarget(want), { source: RETAIN_SOURCE });
@@ -322,15 +366,19 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       const ranked = [];
       for (const owner of retainOrder) {
         const group = retainWants.get(owner);
-        if (!group) continue;
+        if (!group)
+          continue;
         const list = [...group.values()].filter((want) => want && want.childId);
         list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-        for (const want of list) ranked.push(want);
+        for (const want of list)
+          ranked.push(want);
       }
       const kept = [], seen = /* @__PURE__ */ new Set();
       for (const want of ranked) {
-        if (kept.length >= RETAIN_LIMIT) break;
-        if (seen.has(want.childId)) continue;
+        if (kept.length >= RETAIN_LIMIT)
+          break;
+        if (seen.has(want.childId))
+          continue;
         seen.add(want.childId);
         kept.push(want);
       }
@@ -338,39 +386,49 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       for (const childId of [...retainEntries.keys()]) {
         const want = kept.find((item) => item.childId === childId);
         if (!want || retainSignature(want) !== retainEntries.get(childId)?.signature) {
-          if (retainDrop(childId)) changed = true;
+          if (retainDrop(childId))
+            changed = true;
         }
       }
       for (const want of kept) {
-        if (retainEntries.has(want.childId)) continue;
+        if (retainEntries.has(want.childId))
+          continue;
         const entry = retainAcquire(want);
         if (entry) {
           retainEntries.set(want.childId, entry);
           changed = true;
         }
       }
-      if (changed) retainNotify();
+      if (changed)
+        retainNotify();
     };
     const retainDeclare = (owner, wants) => {
       const group = /* @__PURE__ */ new Map();
-      for (const want of wants) if (want && want.childId) group.set(want.childId, want);
+      for (const want of wants)
+        if (want && want.childId)
+          group.set(want.childId, want);
       retainWants.set(owner, group);
       retainSync();
     };
     const retainClear = (owner) => {
-      if (retainWants.delete(owner)) retainSync();
+      if (retainWants.delete(owner))
+        retainSync();
     };
     const retainReleaseAll = () => {
       retainWants.clear();
       let changed = false;
-      for (const childId of [...retainEntries.keys()]) if (retainDrop(childId)) changed = true;
-      if (changed) retainNotify();
+      for (const childId of [...retainEntries.keys()])
+        if (retainDrop(childId))
+          changed = true;
+      if (changed)
+        retainNotify();
     };
     const liveBindingFor = (childId) => {
       const entry = retainEntries.get(childId);
       if (entry) {
         const own = retainBindingOf(entry.reference);
-        if (own) return own;
+        if (own)
+          return own;
       }
       try {
         return sessionsRt?.binding?.(childId) || null;
@@ -381,7 +439,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
     const retainOwned = (childId) => retainEntries.has(childId);
     const retainSettled = async (childId) => {
       const entry = retainEntries.get(childId);
-      if (!entry) return;
+      if (!entry)
+        return;
       try {
         await entry.reference.ready;
       } catch {
@@ -395,11 +454,14 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
     };
     const continueFaceFor = (rowId, fallbackIds) => {
       const owned = retainOwned(rowId) ? liveBindingFor(rowId)?.session : null;
-      if (owned && typeof owned.prompt === "function") return owned;
+      if (owned && typeof owned.prompt === "function")
+        return owned;
       for (const id of fallbackIds) {
-        if (!id || id === rowId) continue;
+        if (!id || id === rowId)
+          continue;
         const face = liveBindingFor(id)?.session;
-        if (face && typeof face.prompt === "function") return face;
+        if (face && typeof face.prompt === "function")
+          return face;
       }
       return null;
     };
@@ -414,7 +476,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
           return null;
         }
         try {
-          if (reference && typeof reference.ready?.then === "function") await reference.ready;
+          if (reference && typeof reference.ready?.then === "function")
+            await reference.ready;
         } catch (error) {
           console.warn("subagent-sidebar-default: the retained session never became ready", childId, error);
         }
@@ -426,22 +489,26 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         return { face: face2, release: () => retainDispose(reference) };
       }
       const face = liveBindingFor(childId)?.session || null;
-      if (!face || typeof face.prompt !== "function") return null;
+      if (!face || typeof face.prompt !== "function")
+        return null;
       return { face, release: () => {
       } };
     };
     function LiveOutput({ t: tr, parentId, childId, running, prefix = true, autoLoad = true, onLoad, live = true }) {
       const [loading, setLoading] = React.useState(false), [, bump] = React.useState(0), [retainTick, setRetainTick] = React.useState(0), [lastText, setLastText] = React.useState(""), wantLive = live && (running || autoLoad), binding = React.useMemo(() => wantLive ? liveBindingFor(childId) : null, [childId, wantLive, retainTick]), session = binding?.session || null, feed = binding?.eventSource || null;
       React.useEffect(() => {
-        if (!binding) return;
+        if (!binding)
+          return;
         let alive = true, timer = null, scheduled = false;
         const notify = () => {
-          if (!alive || scheduled) return;
+          if (!alive || scheduled)
+            return;
           scheduled = true;
           timer = setTimeout(() => {
             scheduled = false;
             timer = null;
-            if (alive) bump((v) => v + 1);
+            if (alive)
+              bump((v) => v + 1);
           }, 100);
         };
         const setup = async () => {
@@ -451,7 +518,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
             } else {
               if (parentId) {
                 const entry = catalogEntryOf(sessionsRt?.list?.getSnapshot?.(), parentId, childId);
-                if (entry?.mode) session?.configureSubagent?.({ parentSessionId: parentId, childSessionId: childId, mode: entry.mode });
+                if (entry?.mode)
+                  session?.configureSubagent?.({ parentSessionId: parentId, childSessionId: childId, mode: entry.mode });
               }
               await session?.open?.();
             }
@@ -467,7 +535,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         const source = feed || session, unsub = source?.subscribe?.(notify) || NOOP();
         return () => {
           alive = false;
-          if (timer) clearTimeout(timer);
+          if (timer)
+            clearTimeout(timer);
           unsub();
         };
       }, [binding, session, feed, parentId, childId]);
@@ -479,19 +548,25 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
           const out = liveFromEvents(tr, win.entries, running);
           thinking = !!out.thinking;
           const parts = [];
-          if (out.activity.length) parts.push(out.activity.join("\n"));
-          if (running && out.streamText && !out.thinking) parts.push(out.streamText);
+          if (out.activity.length)
+            parts.push(out.activity.join("\n"));
+          if (running && out.streamText && !out.thinking)
+            parts.push(out.streamText);
           text = parts.length ? parts.join("\n") : out.finalText;
         }
       } else {
         const snap = session?.getSnapshot?.(), chat = snap?.chat, blocks = chat?.legacy?.partial?.blocks || [], runningCalls = chat?.legacy?.runningCalls || [], nodes = chat?.legacy?.nodes || [];
         const activity = [];
         runningCalls.slice(-2).forEach((c) => activity.push(`▶ ${c.name || tr("toolCall")}${c.argsRaw ? ` · ${toolDetail(c.argsRaw)}` : ""}`));
-        if (!activity.length) nodes.slice(-8).filter((n) => n.kind === "context" || n.kind === "tool-result" || n.kind === "command").slice(-2).forEach((n) => {
-          if (n.kind === "context") activity.push(tr("contextInjection", { name: `${n.provenance?.label || n.form || "context"}` }));
-          else if (n.kind === "tool-result") activity.push(`${n.isError ? "✖" : "✓"} ${n.call?.name || tr("toolCall")}${n.call?.argsRaw ? ` · ${toolDetail(n.call.argsRaw)}` : ""}`);
-          else activity.push(tr("command.named", { name: `${n.name || tr("command")}` }));
-        });
+        if (!activity.length)
+          nodes.slice(-8).filter((n) => n.kind === "context" || n.kind === "tool-result" || n.kind === "command").slice(-2).forEach((n) => {
+            if (n.kind === "context")
+              activity.push(tr("contextInjection", { name: `${n.provenance?.label || n.form || "context"}` }));
+            else if (n.kind === "tool-result")
+              activity.push(`${n.isError ? "✖" : "✓"} ${n.call?.name || tr("toolCall")}${n.call?.argsRaw ? ` · ${toolDetail(n.call.argsRaw)}` : ""}`);
+            else
+              activity.push(tr("command.named", { name: `${n.name || tr("command")}` }));
+          });
         let streamText = "";
         for (let i = blocks.length - 1; i >= 0; i--) {
           const b = blocks[i];
@@ -503,25 +578,30 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
             }
           }
         }
-        if (runningCalls.length) text = activity.join("\n");
-        else if (running && streamText) text = streamText;
-        else if (activity.length) text = activity.join("\n");
-        else for (let i = blocks.length - 1; i >= 0; i--) {
-          const b = blocks[i];
-          if ((b.kind === "text" || b.kind === "reasoning") && b.text) {
-            const lines2 = b.text.split("\n").map((x) => x.trim()).filter(Boolean);
-            if (lines2.length) {
-              text = (b.kind === "reasoning" ? "💭 " : "") + lines2.slice(-2).join("\n");
+        if (runningCalls.length)
+          text = activity.join("\n");
+        else if (running && streamText)
+          text = streamText;
+        else if (activity.length)
+          text = activity.join("\n");
+        else
+          for (let i = blocks.length - 1; i >= 0; i--) {
+            const b = blocks[i];
+            if ((b.kind === "text" || b.kind === "reasoning") && b.text) {
+              const lines2 = b.text.split("\n").map((x) => x.trim()).filter(Boolean);
+              if (lines2.length) {
+                text = (b.kind === "reasoning" ? "💭 " : "") + lines2.slice(-2).join("\n");
+                break;
+              }
+            } else if (b.kind === "tool-call" && b.name) {
+              text = tr("callTool") + b.name;
               break;
             }
-          } else if (b.kind === "tool-call" && b.name) {
-            text = tr("callTool") + b.name;
-            break;
           }
-        }
       }
       React.useEffect(() => {
-        if (text) setLastText(text);
+        if (text)
+          setLastText(text);
       }, [text]);
       if (!wantLive) {
         return jsx("button", { type: "button", className: "dsh-ssd-load-live-btn", onClick: (e) => {
@@ -530,7 +610,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
           onLoad?.();
         }, title: tr("loadHistoryTitle"), children: loading ? tr("loading") : tr("loadLatest") });
       }
-      if (!session) return null;
+      if (!session)
+        return null;
       const showText = thinking ? text : text || lastText, lines = showText.slice(-400).split("\n").filter(Boolean);
       return showText || thinking && running ? jsx("div", { className: `dsh-ssd-live ${running ? "dsh-ssd-live-running" : "dsh-ssd-live-final"}`, children: [prefix && jsx("span", { className: "dsh-ssd-live-prefix", children: tr("liveOutputPrefix") }), thinking && running && jsx("span", { className: "dsh-ssd-thinking", children: tr("thinking") }), lines.map((line, index) => jsx("span", { className: index === lines.length - 1 ? "dsh-ssd-live-latest" : "dsh-ssd-live-old", children: line }, index))] }) : null;
     }
@@ -539,16 +620,20 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       return seconds >= 3600 ? tr("elapsed.hm", { h: Math.floor(seconds / 3600), m: Math.floor(seconds % 3600 / 60) }) : seconds >= 60 ? tr("elapsed.ms", { m: Math.floor(seconds / 60), s: seconds % 60 }) : tr("elapsed.s", { s: seconds });
     }, compactPath = (v) => {
       const value = String(v).replace(/\\/g, "/"), max = 72;
-      if (value.length <= max) return value;
+      if (value.length <= max)
+        return value;
       const parts = value.split("/").filter(Boolean);
       let result = parts.pop() || value;
-      while (parts.length && `.../${parts[parts.length - 1]}/${result}`.length <= max) result = `${parts.pop()}/${result}`;
+      while (parts.length && `.../${parts[parts.length - 1]}/${result}`.length <= max)
+        result = `${parts.pop()}/${result}`;
       return `.../${result}`;
     }, toolDetail = (v) => {
-      if (!v) return "";
+      if (!v)
+        return "";
       try {
         const value = JSON.parse(v), key2 = value.description != null ? "description" : value.command != null ? "command" : value.file_path != null ? "file_path" : value.path != null ? "path" : value.prompt != null ? "prompt" : null, preferred = key2 ? value[key2] : void 0;
-        if (preferred) return (key2 === "file_path" || key2 === "path" ? compactPath : String)(String(preferred).split("\n")[0].slice(0, 100));
+        if (preferred)
+          return (key2 === "file_path" || key2 === "path" ? compactPath : String)(String(preferred).split("\n")[0].slice(0, 100));
         const first = Object.values(value).find((x) => typeof x === "string");
         return first ? first.split("\n")[0].slice(0, 100) : String(v).slice(0, 100);
       } catch {
@@ -581,10 +666,13 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
     const promptBlockStart = (line) => PROMPT_FENCE_RE.test(line) || PROMPT_HEAD_RE.test(line) || PROMPT_RULE_RE.test(line) || PROMPT_ITEM_RE.test(line) || PROMPT_QUOTE_RE.test(line);
     const promptSafeHref = (raw) => {
       const url = String(raw || "").trim();
-      if (!url || url.length > PROMPT_MAX_HREF_CHARS) return "";
-      if (url.startsWith("//")) return "";
+      if (!url || url.length > PROMPT_MAX_HREF_CHARS)
+        return "";
+      if (url.startsWith("//"))
+        return "";
       const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url);
-      if (scheme) return /^https?$/i.test(scheme[1]) ? url : "";
+      if (scheme)
+        return /^https?$/i.test(scheme[1]) ? url : "";
       return url;
     };
     const promptInlineInto = (target, text, depth) => {
@@ -594,7 +682,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       }
       let buffer = "";
       const flush = () => {
-        if (!buffer) return;
+        if (!buffer)
+          return;
         target.appendChild(document.createTextNode(buffer));
         buffer = "";
       };
@@ -682,13 +771,15 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       const stack = [];
       const container = () => stack.length ? stack[stack.length - 1].item : target;
       const closeFor = (indent, orEqual) => {
-        while (stack.length && (orEqual ? indent <= stack[stack.length - 1].indent : indent < stack[stack.length - 1].indent)) stack.pop();
+        while (stack.length && (orEqual ? indent <= stack[stack.length - 1].indent : indent < stack[stack.length - 1].indent))
+          stack.pop();
       };
       const openList = (ordered, start, indent) => {
         const host = container();
         const list = document.createElement(ordered ? "ol" : "ul");
         list.className = "dsh-ssd-prompt-list";
-        if (ordered && start !== "1") list.setAttribute("start", start);
+        if (ordered && start !== "1")
+          list.setAttribute("start", start);
         host.appendChild(list);
         stack.push({ indent, ordered, list, item: list });
         return stack[stack.length - 1];
@@ -749,7 +840,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
             }
             if (!lines[i].trim()) {
               let next = i;
-              while (next < lines.length && !lines[next].trim()) next += 1;
+              while (next < lines.length && !lines[next].trim())
+                next += 1;
               if (next < lines.length && PROMPT_QUOTE_RE.test(lines[next])) {
                 inner.push("");
                 i = next;
@@ -770,7 +862,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
           closeFor(indent, false);
           const top = stack.length ? stack[stack.length - 1] : null;
           if (!top || indent > top.indent || top.ordered !== ordered) {
-            if (top && indent <= top.indent && top.ordered !== ordered) stack.pop();
+            if (top && indent <= top.indent && top.ordered !== ordered)
+              stack.pop();
             openList(ordered, ordered ? item[3] : "", indent);
           }
           const frame = stack[stack.length - 1];
@@ -786,7 +879,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         const para = [];
         while (i < lines.length) {
           const next = lines[i];
-          if (!next.trim() || promptBlockStart(next)) break;
+          if (!next.trim() || promptBlockStart(next))
+            break;
           para.push(next);
           i += 1;
         }
@@ -812,22 +906,27 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
           const b = list[i];
           if (b?.type === "text" || b?.type === "reasoning") {
             const t = tail(b.text);
-            if (t) return (b.type === "reasoning" ? "💭 " : "") + t;
+            if (t)
+              return (b.type === "reasoning" ? "💭 " : "") + t;
           }
-          if (b?.type === "tool-call" && b.name) return tr("callTool") + b.name;
+          if (b?.type === "tool-call" && b.name)
+            return tr("callTool") + b.name;
         }
         return "";
       };
       let text = "", reasoning = "", finalText = "", hasStream = false, lastKind = "text";
       const pending = [], done = [], context = [], byCall = /* @__PURE__ */ new Map();
       for (const entry of entries) {
-        if (!entry || entry.type !== "event") continue;
+        if (!entry || entry.type !== "event")
+          continue;
         const e = entry.event;
-        if (!e || typeof e.type !== "string") continue;
+        if (!e || typeof e.type !== "string")
+          continue;
         switch (e.type) {
           case "assistant/chunk": {
             const c = e.data?.chunk;
-            if (!c) break;
+            if (!c)
+              break;
             if (c.type === "text-delta") {
               text += c.text || "";
               hasStream = true;
@@ -843,7 +942,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
                 byCall.set(c.id, rec);
                 pending.push(rec);
               }
-              if (c.name) rec.name = c.name;
+              if (c.name)
+                rec.name = c.name;
               rec.args += c.argumentsDelta || "";
             } else if (c.type === "block-end" && c.block?.type === "tool-call") {
               let rec = byCall.get(c.block.id);
@@ -852,7 +952,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
                 byCall.set(c.block.id, rec);
                 pending.push(rec);
               }
-              if (c.block.name) rec.name = c.block.name;
+              if (c.block.name)
+                rec.name = c.block.name;
               rec.args = c.block.arguments || rec.args;
               rec.complete = true;
             }
@@ -860,7 +961,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
           }
           case "user/message": {
             const src = e.data?.source;
-            if (src?.kind === "plugin" || src?.kind === "relay" || src?.kind === "recall") context.push(tr("contextInjection", { name: `${src?.form || src?.plugin || src?.kind}` }));
+            if (src?.kind === "plugin" || src?.kind === "relay" || src?.kind === "recall")
+              context.push(tr("contextInjection", { name: `${src?.form || src?.plugin || src?.kind}` }));
             break;
           }
           case "assistant/message": {
@@ -877,7 +979,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
               byCall.set(e.data?.callId, rec);
               pending.push(rec);
             }
-            if (e.data?.name) rec.name = e.data?.name;
+            if (e.data?.name)
+              rec.name = e.data?.name;
             if (e.data?.arguments != null) {
               rec.args = e.data?.arguments;
               rec.complete = true;
@@ -911,11 +1014,13 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       }, [rows]);
       React.useEffect(() => () => retainClear("float"), []);
       const move = (e) => {
-        if (!drag.current) return;
+        if (!drag.current)
+          return;
         const { offsetX, offsetY, width, height } = drag.current;
         setPosition({ x: Math.max(8, Math.min(window.innerWidth - width - 8, e.clientX - offsetX)), y: Math.max(8, Math.min(window.innerHeight - height - 8, e.clientY - offsetY)) });
       }, startDrag = (e) => {
-        if (e.button !== 0 || e.target.closest("button,input,label")) return;
+        if (e.button !== 0 || e.target.closest("button,input,label"))
+          return;
         const rect = e.currentTarget.parentElement.getBoundingClientRect();
         drag.current = { offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top, width: rect.width, height: rect.height };
         e.currentTarget.setPointerCapture?.(e.pointerId);
@@ -937,14 +1042,16 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
     const SIDEBAR_CHAT_PREFIX = "dsh-resource://subagentchat/session/";
     const validAddress = (address) => address && typeof address.parentSessionId === "string" && address.parentSessionId.length > 0 && typeof address.childSessionId === "string" && address.childSessionId.length > 0 && ["one-shot", "continuable", "unknown"].includes(address.mode);
     function sidebarChatAddress(address) {
-      if (!validAddress(address)) return null;
+      if (!validAddress(address))
+        return null;
       return `${SIDEBAR_CHAT_PREFIX}${encodeURIComponent(address.childSessionId)}?${new URLSearchParams({ parent: address.parentSessionId, mode: address.mode })}`;
     }
     function canonicalSidebarAddress(value) {
       try {
         const url = new URL(value);
         const parts = url.pathname.split("/").filter(Boolean);
-        if (url.protocol !== "dsh-resource:" || url.hostname !== "subagentchat" || url.username || url.password || url.port || url.hash || parts.length !== 2 || parts[0] !== "session") return null;
+        if (url.protocol !== "dsh-resource:" || url.hostname !== "subagentchat" || url.username || url.password || url.port || url.hash || parts.length !== 2 || parts[0] !== "session")
+          return null;
         return sidebarChatAddress({
           parentSessionId: url.searchParams.get("parent"),
           childSessionId: decodeURIComponent(parts[1]),
@@ -967,16 +1074,19 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       const accepted = (tabs, address) => address !== null && tabs.candidates(address).some((candidate) => candidate.kind === "subagentchat");
       const asideAddressOf = (row) => {
         const faces = services();
-        if (!faces) return void 0;
+        if (!faces)
+          return void 0;
         try {
-          if (typeof row?.id !== "string" || !row.id) return null;
+          if (typeof row?.id !== "string" || !row.id)
+            return null;
           const resolved = ctx.sessions?.subagentAddress?.(row.id);
           const address = resolved ?? {
             parentSessionId: row.parentId,
             childSessionId: row.id,
             mode: row.mode
           };
-          if (address.childSessionId !== row.id) return null;
+          if (address.childSessionId !== row.id)
+            return null;
           const value = sidebarChatAddress(address);
           return accepted(faces.tabs, value) ? value : null;
         } catch (error) {
@@ -988,7 +1098,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         try {
           const faces = services();
           const address = canonicalSidebarAddress(value);
-          if (!faces || !accepted(faces.tabs, address)) return false;
+          if (!faces || !accepted(faces.tabs, address))
+            return false;
           faces.sidebar.openResource(address, {
             kind: "subagentchat",
             preferNewPane: false,
@@ -1020,7 +1131,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         headers: { "x-dsh-ssd-client": "1" }
       });
       const token = await tokenResponse.json();
-      if (!tokenResponse.ok || typeof token.token !== "string" || !token.token) throw new Error("token-missing");
+      if (!tokenResponse.ok || typeof token.token !== "string" || !token.token)
+        throw new Error("token-missing");
       for (let offset = 0; offset < sessionIds.length; offset += 200) {
         const chunk = sessionIds.slice(offset, offset + 200);
         try {
@@ -1033,8 +1145,10 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
           const data = await response.json();
           for (const sessionId of chunk) {
             const result = response.ok && Array.isArray(data.results) ? data.results.find((item) => item.sessionId === sessionId) : void 0;
-            if (result?.ok === true) deleted.push(sessionId);
-            else failed.push({ sessionId, code: result?.code || data.code || "unconfirmed" });
+            if (result?.ok === true)
+              deleted.push(sessionId);
+            else
+              failed.push({ sessionId, code: result?.code || data.code || "unconfirmed" });
           }
         } catch {
           failed.push(...chunk.map((sessionId) => ({ sessionId, code: "unconfirmed" })));
@@ -1053,15 +1167,21 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
           return { ...s, ...catalog, mode: childModeOf(s, catalog), name: catalog?.label || title(s), parentCwd: byId[s.parentId]?.cwd };
         });
       }, [state.byId, modes]), allRows = React.useMemo(() => {
-        if (!open) return [];
+        if (!open)
+          return [];
         const rawTerm = query.trim().toLocaleLowerCase(), idOnly = rawTerm.startsWith("id:"), term = idOnly ? rawTerm.slice(3).trim() : rawTerm;
         return subagentRows.filter((s) => {
-          if (workspaceKey && s.parentCwd !== workspaceKey) return false;
-          if (selectedSession !== "all" && s.parentId !== selectedSession) return false;
+          if (workspaceKey && s.parentCwd !== workspaceKey)
+            return false;
+          if (selectedSession !== "all" && s.parentId !== selectedSession)
+            return false;
           const unfiltered = tab === "all";
-          if (!prefs.showArchived && archived.has(s.id)) return false;
-          if (prefs.hideOneShot && s.mode === "one-shot") return false;
-          if (!unfiltered && prefs.hideOld && !s.running && Date.now() - s.updatedAt > (prefs.oldDays || 30) * DAY) return false;
+          if (!prefs.showArchived && archived.has(s.id))
+            return false;
+          if (prefs.hideOneShot && s.mode === "one-shot")
+            return false;
+          if (!unfiltered && prefs.hideOld && !s.running && Date.now() - s.updatedAt > (prefs.oldDays || 30) * DAY)
+            return false;
           const custom = tabs.find((t) => t.id === tab);
           if (custom?.regex === "__OTHER__") {
             const matched = tabs.some((t) => !["filtered", "all", "other"].includes(t.id) && t.regex && (() => {
@@ -1071,10 +1191,12 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
                 return false;
               }
             })());
-            if (matched) return false;
+            if (matched)
+              return false;
           } else if (custom?.regex && custom.regex !== "__ALL__") {
             try {
-              if (!new RegExp(custom.regex, "i").test(s.name)) return false;
+              if (!new RegExp(custom.regex, "i").test(s.name))
+                return false;
             } catch {
               return false;
             }
@@ -1087,8 +1209,10 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       }, [open, subagentRows, query, sort, prefs, scope, currentCwd, currentId, scopeDetail, workspaceKey, selectedSession, tab, tabs, recentIds, tr]);
       const deferredSubagentRows = React.useDeferredValue(subagentRows), activeRows = React.useMemo(() => subagentRows.filter((s) => s.running).filter((s) => (!currentCwd || s.parentCwd === currentCwd) && (prefs.showArchived || !archived.has(s.id)) && (!prefs.hideOneShot || s.mode !== "one-shot")).sort((a, b) => b.updatedAt - a.updatedAt), [subagentRows, currentCwd, prefs, archived]);
       const stopAgent = async (row) => {
-        if (row.mode === "one-shot" || stoppingIds.has(row.id)) return;
-        if (!window.confirm(tr("confirm.pauseNamed", { name: row.name }))) return;
+        if (row.mode === "one-shot" || stoppingIds.has(row.id))
+          return;
+        if (!window.confirm(tr("confirm.pauseNamed", { name: row.name })))
+          return;
         setStoppingIds((prev) => new Set(prev).add(row.id));
         try {
           const session = liveBindingFor(row.id)?.session;
@@ -1114,8 +1238,10 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       };
       const stopAllAgents = async (rowsToStop) => {
         const targetRows = rowsToStop.filter((r) => r.mode !== "one-shot" && !stoppingIds.has(r.id));
-        if (!targetRows.length) return;
-        if (!window.confirm(tr("confirm.pauseSelected", { count: targetRows.length }))) return;
+        if (!targetRows.length)
+          return;
+        if (!window.confirm(tr("confirm.pauseSelected", { count: targetRows.length })))
+          return;
         const ids = targetRows.map((r) => r.id);
         setStoppingIds((prev) => /* @__PURE__ */ new Set([...prev, ...ids]));
         try {
@@ -1145,9 +1271,11 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         }
       };
       const fireAndForgetContinue = (pending) => {
-        if (pending && typeof pending.catch === "function") pending.catch((error) => console.warn("subagent-sidebar-default: unable to continue the subagent", error));
+        if (pending && typeof pending.catch === "function")
+          pending.catch((error) => console.warn("subagent-sidebar-default: unable to continue the subagent", error));
       }, continueSubagent = async (row) => {
-        if (row.running || row.mode === "one-shot" || continuingIds.has(row.id)) return;
+        if (row.running || row.mode === "one-shot" || continuingIds.has(row.id))
+          return;
         setContinuingIds((prev) => new Set(prev).add(row.id));
         try {
           const address = row.parentId && row.mode ? { parentSessionId: row.parentId, childSessionId: row.id, mode: row.mode } : null, held = await acquirePromptFace(row.id, address);
@@ -1156,15 +1284,19 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
             return;
           }
           try {
-            if (address) held.face.configureSubagent?.(address);
+            if (address)
+              held.face.configureSubagent?.(address);
             const result = await held.face.prompt([{ type: "text", text: tr("continuePrompt") }], "queue");
             if (result && result.ok === false) {
               const code = result.error?.code || "";
-              if (code === "subagent/parent-unavailable") console.warn("subagent-sidebar-default: the parent session is not live, so the subagent cannot be continued", row.parentId, row.id);
-              else console.warn("subagent-sidebar-default: the host refused the continue instruction", row.id, code || result.error);
+              if (code === "subagent/parent-unavailable")
+                console.warn("subagent-sidebar-default: the parent session is not live, so the subagent cannot be continued", row.parentId, row.id);
+              else
+                console.warn("subagent-sidebar-default: the host refused the continue instruction", row.id, code || result.error);
               return;
             }
-            if (row.parentId) refresh(row.parentId);
+            if (row.parentId)
+              refresh(row.parentId);
           } finally {
             held.release();
           }
@@ -1203,33 +1335,39 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
           window.alert(tr("deleteCode.running"));
           return;
         }
-        if (!window.confirm(tr("confirm.deleteOne", { name: row.name }))) return;
+        if (!window.confirm(tr("confirm.deleteOne", { name: row.name })))
+          return;
         await deleteChosen([row.id]);
       };
       const batchDeleteSubagents = async (ids) => {
-        if (!ids.length || !window.confirm(tr("confirm.deleteMany", { count: ids.length }))) return;
+        if (!ids.length || !window.confirm(tr("confirm.deleteMany", { count: ids.length })))
+          return;
         await deleteChosen(ids);
       };
       const currentTabName = nameOf(tabs.find((t) => t.id === tab) || {}) || tr("tab.all"), currentScopeName = scope === "currentWorkspace" ? tr("scope.currentWorkspace") : scope === "currentSession" ? tr("scope.currentSession") : scope === "all" ? tr("scope.allWorkspaces") : workspace(tr, { cwd: workspaceKey }) || scope, currentSessionName = selectedSession === "all" ? tr("scope.allSessions") : selectedSession === currentId ? tr("session.currentParen", { name: title(current) }) : title(state.byId[selectedSession]) || short(tr, selectedSession), currentSortName = sort === "recent" ? tr("sort.recent") : sort === "title" ? tr("name") : tr("type"), currentGroupName = grouping === "session" ? tr("grouping.bySession") : grouping === "workspace" ? tr("grouping.byWorkspace") : grouping === "category" ? tr("grouping.byCategory") : grouping === "type" ? tr("grouping.byType") : tr("grouping.none");
       const tabCounts = React.useMemo(() => {
-        if (!open) return {};
+        if (!open)
+          return {};
         const candidates = deferredSubagentRows.filter((s) => (!workspaceKey || s.parentCwd === workspaceKey) && (selectedSession === "all" || s.parentId === selectedSession) && (prefs.showArchived || !archived.has(s.id)) && (!prefs.hideOneShot || s.mode !== "one-shot") && (!prefs.hideOld || s.running || Date.now() - s.updatedAt <= (prefs.oldDays || 30) * DAY)), counts = {};
         for (const t of tabs) {
-          if (t.id === "all") counts[t.id] = candidates.length;
-          else if (t.regex === "__OTHER__") counts[t.id] = candidates.filter((s) => !tabs.some((x) => !["all", "other", "filtered"].includes(x.id) && x.regex && (() => {
-            try {
-              return new RegExp(x.regex, "i").test(s.name);
-            } catch {
-              return false;
-            }
-          })())).length;
-          else counts[t.id] = candidates.filter((s) => {
-            try {
-              return t.regex && new RegExp(t.regex, "i").test(s.name);
-            } catch {
-              return false;
-            }
-          }).length;
+          if (t.id === "all")
+            counts[t.id] = candidates.length;
+          else if (t.regex === "__OTHER__")
+            counts[t.id] = candidates.filter((s) => !tabs.some((x) => !["all", "other", "filtered"].includes(x.id) && x.regex && (() => {
+              try {
+                return new RegExp(x.regex, "i").test(s.name);
+              } catch {
+                return false;
+              }
+            })())).length;
+          else
+            counts[t.id] = candidates.filter((s) => {
+              try {
+                return t.regex && new RegExp(t.regex, "i").test(s.name);
+              } catch {
+                return false;
+              }
+            }).length;
         }
         return counts;
       }, [open, deferredSubagentRows, workspaceKey, selectedSession, prefs, tabs]), rows = allRows.slice(0, limit), currentSessionRows = subagentRows.filter((r) => r.parentId === currentId && (prefs.showArchived || !archived.has(r.id)) && (!prefs.hideOneShot || r.mode !== "one-shot")), active = currentSessionRows.filter((r) => r.running).length, currentCount = currentSessionRows.length, liveCap = Math.max(0, prefs.liveCap ?? 3), runningLiveIds = liveCap > 0 ? new Set(rows.filter((r) => r.running).slice(0, liveCap).map((r) => r.id)) : null;
@@ -1260,7 +1398,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         localStorage.setItem(key, JSON.stringify(prefs));
       }, [prefs]);
       React.useEffect(() => {
-        if (!open) return;
+        if (!open)
+          return;
         const ps = [...new Set(rows.map((r) => r.parentId).filter(Boolean))];
         ps.forEach((p) => {
           setCatalogOpen(p, true);
@@ -1270,14 +1409,16 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       }, [open, limit, grouping, sort, query]);
       React.useEffect(() => {
         const runningIds = subagentRows.filter((r) => r.running).map((r) => r.id);
-        if (!runningIds.length) return;
+        if (!runningIds.length)
+          return;
         setRecentIds((prev) => {
           const next = [...runningIds, ...prev.filter((id) => !runningIds.includes(id))].slice(0, 100);
           return next.length === prev.length && next.every((id, i) => id === prev[i]) ? prev : next;
         });
       }, [subagentRows]);
       React.useEffect(() => {
-        if (!subagentRows.length) return;
+        if (!subagentRows.length)
+          return;
         const runningIds = subagentRows.filter((r) => r.running).map((r) => r.id), current2 = new Set(runningIds);
         if (!runningSeen.current) {
           runningSeen.current = true;
@@ -1286,9 +1427,11 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         }
         const fresh = runningIds.filter((id) => !runningIdsSeen.current.has(id));
         runningIdsSeen.current = current2;
-        if (!fresh.length) return;
+        if (!fresh.length)
+          return;
         const names = fresh.map((id) => ({ id, name: subagentRows.find((r) => r.id === id)?.name })).filter((r) => r.name).slice(0, 5);
-        if (!names.length) return;
+        if (!names.length)
+          return;
         setFloatHidden(false);
         setNewAgents((prev) => [...prev, ...names].slice(-5));
         names.forEach((item) => {
@@ -1296,7 +1439,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
             setNewAgents((prev) => prev.filter((x) => x.id !== item.id));
             noticeTimers.current.delete(item.id);
           }, 5e3);
-          if (noticeTimers.current.has(item.id)) clearTimeout(noticeTimers.current.get(item.id));
+          if (noticeTimers.current.has(item.id))
+            clearTimeout(noticeTimers.current.get(item.id));
           noticeTimers.current.set(item.id, timer);
         });
       }, [subagentRows]);
@@ -1313,14 +1457,19 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
             const shouldSelect = lastSelectedAction !== false;
             for (let i = from; i <= to; i++) {
               const id = rows[i]?.id;
-              if (!id) continue;
-              if (shouldSelect) next.add(id);
-              else next.delete(id);
+              if (!id)
+                continue;
+              if (shouldSelect)
+                next.add(id);
+              else
+                next.delete(id);
             }
           } else {
             const willSelect = !next.has(row.id);
-            if (willSelect) next.add(row.id);
-            else next.delete(row.id);
+            if (willSelect)
+              next.add(row.id);
+            else
+              next.delete(row.id);
             setLastSelectedAction(willSelect);
           }
           ;
@@ -1331,11 +1480,14 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         const current2 = new Set(p.archived || []);
         ids.forEach((id) => restore ? current2.delete(id) : current2.add(id));
         const nextParents = { ...p.archivedParents || {} };
-        if (restore) ids.forEach((id) => delete nextParents[id]);
-        else ids.forEach((id) => {
-          const row = state.byId[id];
-          if (row) nextParents[id] = row.parentId;
-        });
+        if (restore)
+          ids.forEach((id) => delete nextParents[id]);
+        else
+          ids.forEach((id) => {
+            const row = state.byId[id];
+            if (row)
+              nextParents[id] = row.parentId;
+          });
         return { ...p, archived: [...current2], archivedParents: nextParents };
       }), archiveSelected = (restore = false) => {
         const ids = [...selectedIds];
@@ -1345,7 +1497,8 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         }
       }, selectOld = () => {
         const hours = Number(window.prompt(tr("selectHoursPrompt"), "24"));
-        if (!Number.isFinite(hours) || hours < 0) return;
+        if (!Number.isFinite(hours) || hours < 0)
+          return;
         const cutoff = Date.now() - hours * 36e5;
         setSelectedIds(new Set(allRows.filter((r) => r.updatedAt && r.updatedAt <= cutoff).slice(0, 1e3).map((r) => r.id)));
         setLimit(1e3);
@@ -1358,8 +1511,10 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         const was = p.archived?.includes(row.id);
         const nextArchived = was ? p.archived.filter((x) => x !== row.id) : [...p.archived || [], row.id];
         const nextParents = { ...p.archivedParents || {} };
-        if (was) delete nextParents[row.id];
-        else nextParents[row.id] = row.parentId;
+        if (was)
+          delete nextParents[row.id];
+        else
+          nextParents[row.id] = row.parentId;
         return { ...p, archived: nextArchived, archivedParents: nextParents };
       }), openRow = (r) => {
         try {
@@ -1375,7 +1530,24 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         }
       };
       React.useEffect(() => {
-        if (!sessionId || state.byId[sessionId]?.origin !== "subagent" || prefs.customSubagentBg === false || typeof CSS?.escape !== "function") return;
+        if (!open)
+          return;
+        const onKeyDown = (e) => {
+          if (e.key === "Escape") {
+            e.preventDefault();
+            e.stopPropagation();
+            setOpen(false);
+            setBatchMode(false);
+            setSelectedIds(/* @__PURE__ */ new Set());
+            setLastSelectedIndex(-1);
+          }
+        };
+        window.addEventListener("keydown", onKeyDown, true);
+        return () => window.removeEventListener("keydown", onKeyDown, true);
+      }, [open]);
+      React.useEffect(() => {
+        if (!sessionId || state.byId[sessionId]?.origin !== "subagent" || prefs.customSubagentBg === false || typeof CSS?.escape !== "function")
+          return;
         const scope2 = '[data-conversation-content][data-conversation-session="' + CSS.escape(sessionId) + '"]';
         const color = (value, fallback) => typeof value === "string" && CSS.supports("color", value) ? value : fallback;
         const tag = document.createElement("style");
@@ -1399,24 +1571,28 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       }, children: jsxs("section", { className: "dsh-ssd-panel", role: "dialog", "aria-modal": true, children: [jsxs("header", { className: "dsh-ssd-head", children: [jsxs("div", { style: { flex: 1, minWidth: 0 }, children: [jsx("h2", { children: tr("managerTitle") }), jsxs("div", { className: "dsh-ssd-head-sub", children: [jsx("div", { className: "dsh-ssd-summary", children: tr("head.summary", { session: allRows.filter((r) => r.parentId === currentId).length, workspace: allRows.filter((r) => currentCwd && state.byId[r.parentId]?.cwd === currentCwd).length, active }) }), jsx("span", { className: "dsh-ssd-summary", style: { opacity: 0.6 }, children: "·" }), jsx("label", { className: "dsh-ssd-head-float-toggle", children: [jsx("input", { type: "checkbox", checked: prefs.activeFloat !== false, onChange: () => {
         setFloatHidden(false);
         setPrefs((p) => ({ ...p, activeFloat: p.activeFloat === false }));
-      } }), tr("showActiveFloat")] })] })] }), jsx("button", { className: "dsh-ssd-close", type: "button", onClick: () => {
+      } }), tr("showActiveFloat")] })] })] }), jsx("button", { className: "dsh-ssd-close-btn", type: "button", onClick: () => {
         setOpen(false);
         setBatchMode(false);
         setSelectedIds(/* @__PURE__ */ new Set());
         setLastSelectedIndex(-1);
-      }, children: "×" })] }), !filterCollapsed && jsxs("div", { className: "dsh-ssd-tabs", children: [tabs.map((t) => jsxs("span", { className: `dsh-ssd-tab-wrap ${prefs.tabs?.some((x) => x.id === t.id) && !defaultTabs.some((x) => x.id === t.id) ? `dsh-ssd-custom-wrap ${tab === t.id ? "dsh-ssd-tab-selected" : ""}` : ""}`, children: [jsx("button", { type: "button", className: `${t.id === "other" ? "dsh-ssd-other-tab " : ""}${prefs.tabs?.some((x) => x.id === t.id) && !defaultTabs.some((x) => x.id === t.id) ? "dsh-ssd-custom-tab" : ""}`, "aria-pressed": tab === t.id, onClick: () => {
+      }, title: "关闭 (Esc)", children: [jsx("svg", { width: 12, height: 12, viewBox: "0 0 12 12", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", className: "dsh-ssd-close-icon", children: [jsx("path", { d: "M2.5 2.5l7 7M9.5 2.5l-7 7" })] }), jsx("span", { children: "关闭" })] })] }), !filterCollapsed && jsxs("div", { className: "dsh-ssd-tabs", children: [tabs.map((t) => jsxs("span", { className: `dsh-ssd-tab-wrap ${prefs.tabs?.some((x) => x.id === t.id) && !defaultTabs.some((x) => x.id === t.id) ? `dsh-ssd-custom-wrap ${tab === t.id ? "dsh-ssd-tab-selected" : ""}` : ""}`, children: [jsx("button", { type: "button", className: `${t.id === "other" ? "dsh-ssd-other-tab " : ""}${prefs.tabs?.some((x) => x.id === t.id) && !defaultTabs.some((x) => x.id === t.id) ? "dsh-ssd-custom-tab" : ""}`, "aria-pressed": tab === t.id, onClick: () => {
         setTab(t.id);
         setLimit(PAGE);
       }, children: jsxs(React.Fragment, { children: [nameOf(t), jsx("small", { className: "dsh-ssd-tab-count", children: tabCounts[t.id] > 99 ? "99+" : tabCounts[t.id] || 0 })] }) }, `tab-select-${t.id}`), ...prefs.tabs?.some((x) => x.id === t.id) && !defaultTabs.some((x) => x.id === t.id) ? [jsx("button", { type: "button", className: "dsh-ssd-delete-tab", title: tr("deleteCategory.named", { name: t.name }), "aria-label": tr("deleteCategory.named", { name: t.name }), onClick: (e) => {
         e.stopPropagation();
-        if (!window.confirm(tr("confirm.deleteCategory", { name: t.name }))) return;
+        if (!window.confirm(tr("confirm.deleteCategory", { name: t.name })))
+          return;
         setPrefs((p) => ({ ...p, tabs: (p.tabs || []).filter((x) => x.id !== t.id) }));
-        if (tab === t.id) setTab("all");
-      }, children: "×" }, `tab-delete-${t.id}`)] : []] }, t.id)), jsx("button", { type: "button", className: "dsh-ssd-new-tab", onClick: () => {
+        if (tab === t.id)
+          setTab("all");
+      }, children: jsx("svg", { width: 11, height: 11, viewBox: "0 0 12 12", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", children: [jsx("path", { d: "M2.5 2.5l7 7M9.5 2.5l-7 7" })] }) }, `tab-delete-${t.id}`)] : []] }, t.id)), jsx("button", { type: "button", className: "dsh-ssd-new-tab", onClick: () => {
         const name = window.prompt(tr("categoryNamePrompt"));
-        if (!name) return;
+        if (!name)
+          return;
         const regex = window.prompt(tr("regexPrompt"));
-        if (!regex) return;
+        if (!regex)
+          return;
         setPrefs((p) => ({ ...p, tabs: [...p.tabs || defaultTabs, { id: `tab-${Date.now()}`, name, regex }] }));
       }, children: tr("newCategory") })] }), jsxs("div", { className: "dsh-ssd-controls", children: [jsx("button", { type: "button", className: "dsh-ssd-filter-btn", onClick: () => setFilterOpen((v) => !v), children: `⚙ ${tr("filterSort")} · ${scope === "currentWorkspace" ? tr("scope.currentWorkspace") : scope === "currentSession" ? tr("scope.currentSession") : tr("scope.custom")} · ${sort === "recent" ? tr("sort.recent") : sort === "title" ? tr("sort.name") : tr("sort.type")}` }), !filterCollapsed && jsx("select", { value: scope, onChange: (e) => {
         setScope(e.target.value);
@@ -1425,7 +1601,7 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
       }, "aria-label": tr("scopeAria"), children: [jsx("option", { value: "currentWorkspace", children: tr("scope.currentWorkspace") }), jsx("option", { value: "all", children: tr("scope.allWorkspaces") }), ...scopeOptions.map((c) => jsx("option", { value: `workspace:${c}`, children: workspace(tr, { cwd: c }) }, c))] }), !filterCollapsed && jsx("select", { value: selectedSession, onChange: (e) => setSessionScope(e.target.value), children: [jsx("option", { value: "all", children: tr("scope.allSessions") }), ...availableSessions.map((s) => jsx("option", { value: s.id, children: s.id === currentId ? tr("session.currentDot", { name: title(s) }) : title(s) }, s.id))] }), jsxs("div", { className: "dsh-ssd-search-wrap", children: [jsx("input", { autoFocus: true, value: query, placeholder: tr("searchPlaceholder"), onChange: (e) => {
         setQuery(e.target.value);
         setLimit(PAGE);
-      } }), jsxs("div", { className: "dsh-ssd-search-actions", children: [query && jsx("button", { type: "button", className: "dsh-ssd-search-clear", title: tr("clearSearch"), onClick: () => setQuery(""), children: "×" }), jsx("button", { type: "button", className: "dsh-ssd-filter-toggle", title: filterCollapsed ? tr("expandFiltersFull") : tr("collapseFiltersFull"), onClick: () => setPrefs((p) => ({ ...p, filterCollapsed: !(p.filterCollapsed !== false) })), children: filterCollapsed ? tr("expandFilters") : tr("collapseFilters") })] })] }), !filterCollapsed && jsx("select", { value: grouping, onChange: (e) => {
+      } }), jsxs("div", { className: "dsh-ssd-search-actions", children: [query && jsx("button", { type: "button", className: "dsh-ssd-search-clear", title: tr("clearSearch"), onClick: () => setQuery(""), children: jsx("svg", { width: 11, height: 11, viewBox: "0 0 12 12", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", children: [jsx("path", { d: "M2.5 2.5l7 7M9.5 2.5l-7 7" })] }) }), jsx("button", { type: "button", className: "dsh-ssd-filter-toggle", title: filterCollapsed ? tr("expandFiltersFull") : tr("collapseFiltersFull"), onClick: () => setPrefs((p) => ({ ...p, filterCollapsed: !(p.filterCollapsed !== false) })), children: filterCollapsed ? tr("expandFilters") : tr("collapseFilters") })] })] }), !filterCollapsed && jsx("select", { value: grouping, onChange: (e) => {
         setGrouping(e.target.value);
         setLimit(PAGE);
       }, children: [["session", tr("grouping.optionSession")], ["workspace", tr("grouping.optionWorkspace")], ["category", tr("grouping.optionCategory")], ["type", tr("grouping.optionType")], ["none", tr("grouping.optionNone")]].map(([v, l]) => jsx("option", { value: v, children: l }, v)) }), !filterCollapsed && jsx("select", { value: sort, onChange: (e) => setSort(e.target.value), children: [["recent", tr("sort.optionRecent")], ["title", tr("sort.optionName")], ["type", tr("sort.optionType")]].map(([v, l]) => jsx("option", { value: v, children: l }, v)) })] }), filterOpen && jsxs("div", { className: "dsh-ssd-filter-popover", children: [jsx("label", { children: [tr("scope"), jsx("select", { value: scope, onChange: (e) => {
@@ -1448,10 +1624,12 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         setSort("recent");
         setLimit(PAGE);
       }, children: tr("resetFilters") })] }), filterCollapsed && jsxs("div", { className: "dsh-ssd-collapsed-info", role: "button", tabIndex: 0, "aria-expanded": false, title: tr("expandFiltersFull"), onClick: (e) => {
-        if (e.target instanceof HTMLElement && e.target.closest("button,select,input,textarea,a")) return;
+        if (e.target instanceof HTMLElement && e.target.closest("button,select,input,textarea,a"))
+          return;
         setPrefs((p) => ({ ...p, filterCollapsed: false }));
       }, onKeyDown: (e) => {
-        if (e.target !== e.currentTarget) return;
+        if (e.target !== e.currentTarget)
+          return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           setPrefs((p) => ({ ...p, filterCollapsed: false }));
@@ -1460,19 +1638,24 @@ body[data-ds-dark-theme] .dsh-ssd-row-hidden{background:rgba(255,255,255,0.03)!i
         setBatchMode((v) => !v);
         setSelectedIds(/* @__PURE__ */ new Set());
       }, children: batchMode ? tr("done") : tr("batch") })] }), batchMode && jsxs("div", { className: "dsh-ssd-batch-bar", children: [jsx("button", { type: "button", onClick: () => setSelectedIds(new Set(allRows.map((r) => r.id))), children: tr("selectAll") }), jsx("button", { type: "button", onClick: () => setSelectedIds(/* @__PURE__ */ new Set()), children: tr("clear") }), jsx("button", { type: "button", onClick: selectOld, children: tr("selectOld") }), jsx("button", { type: "button", disabled: !selectedIds.size, onClick: () => archiveSelected(false), title: tr("hideSelectedTitle"), children: tr("batch.hide", { count: selectedIds.size }) }), jsx("button", { type: "button", disabled: !selectedIds.size, onClick: () => archiveSelected(true), title: tr("unhideSelectedTitle"), children: tr("batchUnhide") }), jsx("button", { type: "button", onClick: () => {
-        if (!window.confirm(tr("confirmHideAll"))) return;
+        if (!window.confirm(tr("confirmHideAll")))
+          return;
         batchArchive(allRows.map((r) => r.id));
         setSelectedIds(/* @__PURE__ */ new Set());
-      }, children: tr("hideAll") }), jsx("button", { type: "button", className: "dsh-ssd-batch-delete-btn", disabled: !selectedIds.size, onClick: () => batchDeleteSubagents([...selectedIds]), children: tr("batch.delete", { count: selectedIds.size }) }), jsx("button", { type: "button", className: "dsh-ssd-batch-delete-btn", onClick: () => batchDeleteSubagents(allRows.map((r) => r.id)), children: tr("deleteAll") })] }), jsx("div", { className: "dsh-ssd-list", onWheel: (e) => e.stopPropagation(), children: Object.keys(groups).length === 0 ? jsx("div", { className: "dsh-ssd-empty", children: tr("empty") }) : Object.entries(groups).map(([name, entries]) => jsxs("section", { className: "dsh-ssd-group", children: [jsxs("div", { className: "dsh-ssd-group-head", onClick: () => name === tr("group.active") && setActiveOpen((v) => !v), children: [jsx("span", { children: `${name}${name === tr("group.active") ? activeOpen ? "  ▾" : "  ▸" : ""}` }), jsxs("div", { className: "dsh-ssd-group-head-actions", children: [name === tr("group.active") && activeGroupContinuableRows.length > 0 && jsx("button", { type: "button", className: "dsh-ssd-stop-all-btn", title: tr("pauseAllActive"), disabled: activeGroupContinuableRows.some((r) => stoppingIds.has(r.id)), onClick: (e) => {
+      }, children: tr("hideAll") }), jsx("button", { type: "button", className: "dsh-ssd-batch-delete-btn", disabled: !selectedIds.size, onClick: () => batchDeleteSubagents([...selectedIds]), children: tr("batch.delete", { count: selectedIds.size }) }), jsx("button", { type: "button", className: "dsh-ssd-batch-delete-btn", onClick: () => batchDeleteSubagents(allRows.map((r) => r.id)), children: tr("deleteAll") })] }), jsx("div", { className: "dsh-ssd-list", onWheel: (e) => e.stopPropagation(), children: Object.keys(groups).length === 0 ? jsx("div", { className: "dsh-ssd-empty", children: tr("empty") }) : Object.entries(groups).map(([name, entries]) => jsxs("section", { className: "dsh-ssd-group", children: [jsxs("div", { className: "dsh-ssd-group-head", onClick: () => name === tr("group.active") && setActiveOpen((v) => !v), children: [jsxs("span", { style: { display: "inline-flex", alignItems: "center", gap: "6px" }, children: [name, name === tr("group.active") && jsx("svg", { width: 12, height: 12, viewBox: "0 0 12 12", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", strokeLinejoin: "round", className: `dsh-ssd-chevron ${activeOpen ? "is-expanded" : ""}`, children: [jsx("path", { d: "M4.5 3L7.5 6L4.5 9" })] })] }), jsxs("div", { className: "dsh-ssd-group-head-actions", children: [name === tr("group.active") && activeGroupContinuableRows.length > 0 && jsx("button", { type: "button", className: "dsh-ssd-stop-all-btn", title: tr("pauseAllActive"), disabled: activeGroupContinuableRows.some((r) => stoppingIds.has(r.id)), onClick: (e) => {
         e.stopPropagation();
         stopAllAgents(activeGroupContinuableRows);
       }, children: activeGroupContinuableRows.some((r) => stoppingIds.has(r.id)) ? tr("pausing") : tr("pauseAll") }), jsx("span", { children: entries.length })] })] }), (name === tr("group.active") && !activeOpen ? [] : entries).map((row) => jsx("div", { className: `dsh-ssd-row ${batchMode ? "dsh-ssd-row-batch" : ""}${selectedIds.has(row.id) ? " dsh-ssd-row-selected" : ""}${archived.has(row.id) ? " dsh-ssd-row-hidden" : ""}`, onClick: (e) => {
-        if (batchMode) toggleSelected(row, rows.indexOf(row), e);
-        else openRow(row);
+        if (batchMode)
+          toggleSelected(row, rows.indexOf(row), e);
+        else
+          openRow(row);
       }, title: prefs.showDetails !== false ? void 0 : statsLine(tr, row), children: [jsx("span", { className: "dsh-ssd-marker", children: [batchMode && jsx("input", { type: "checkbox", checked: selectedIds.has(row.id), onChange: (e) => toggleSelected(row, rows.indexOf(row), e), onClick: (e) => e.stopPropagation(), "aria-label": tr("select.named", { name: row.name }) }), archived.has(row.id) ? jsx("span", { className: "dsh-ssd-dot hidden-dot", title: tr("hidden"), children: "🙈" }) : jsx("span", { className: `dsh-ssd-dot ${row.running ? "running" : ""}${terminalClass(row)}`, title: terminalTitle(tr, row), "aria-label": terminalTitle(tr, row) })] }), jsx("button", { type: "button", className: "dsh-ssd-row-open", style: { all: "unset", cursor: batchMode ? "default" : "pointer", minWidth: 0 }, onClick: (e) => {
         e.stopPropagation();
-        if (batchMode) toggleSelected(row, rows.indexOf(row), e);
-        else openRow(row);
+        if (batchMode)
+          toggleSelected(row, rows.indexOf(row), e);
+        else
+          openRow(row);
       }, title: prefs.showDetails !== false ? `${row.name}
 ${row.id}` : `${row.name}
 ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { className: "dsh-ssd-title", children: jsxs("span", { children: [highlight(row.name, query), row.mode === "one-shot" && jsx("small", { className: "dsh-ssd-one-shot", children: tr("oneShotBadge") }), jsx("small", { className: "dsh-ssd-session-id", children: row.id })] }) }), grouping === "session" ? null : jsx("div", { className: "dsh-ssd-meta", children: highlight(`${modeLabel(tr, row.mode)}${grouping === "session" ? "" : ` · ${row.parentId ? `${workspace(tr, state.byId[row.parentId] || row)} / ${title(state.byId[row.parentId] || row)}` : tr("noParent")}`}`, query) })] }) }), jsx("span", { className: "dsh-ssd-time", title: tr("lastActivity", { time: new Date(row.updatedAt).toLocaleString() }), children: age(tr, row.updatedAt) }), batchMode ? archived.has(row.id) && jsx("span", { className: "dsh-ssd-archived-label", children: tr("hidden") }) : jsxs("span", { className: "dsh-ssd-row-actions", children: [asideButton({ tr, row, addressOf: asideAddressOf, open: openAside, onOpened: () => {
@@ -1519,21 +1702,26 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
     const PROMPT_SYNC_DELAY = 80;
     const promptStoreCurrent = () => sessionsRt?.list?.getSnapshot?.()?.current || "";
     const promptIsSubagent = (sessionId) => {
-      if (!sessionId) return false;
+      if (!sessionId)
+        return false;
       const summary = sessionsRt?.list?.getSnapshot?.()?.byId?.[sessionId];
       return Boolean(summary && (summary.origin === "subagent" || typeof summary.parentId === "string"));
     };
     const promptContinueTexts = () => [zh["continuePrompt"], en["continuePrompt"]].filter(Boolean);
     const promptIsPreviewable = (message) => {
-      if (!message.text.trim()) return false;
+      if (!message.text.trim())
+        return false;
       const stamp = message.text.trim();
-      for (const candidate of promptContinueTexts()) if (candidate && stamp === candidate) return false;
+      for (const candidate of promptContinueTexts())
+        if (candidate && stamp === candidate)
+          return false;
       return true;
     };
     const promptSampleHash = (text) => {
       const step = text.length > 512 ? Math.floor(text.length / 8) : 1;
       let hash = text.length;
-      for (let index = 0; index < text.length; index += step) hash = hash * 31 + text.charCodeAt(index) | 0;
+      for (let index = 0; index < text.length; index += step)
+        hash = hash * 31 + text.charCodeAt(index) | 0;
       return String(hash);
     };
     const promptNodeKey = (node) => node.getAttribute("data-chat-node-key") || "";
@@ -1543,29 +1731,35 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
     };
     const promptIdOfKey = (key2) => {
       const cut = key2.indexOf(":");
-      if (cut < 0) return "";
+      if (cut < 0)
+        return "";
       return key2.slice(cut + 1).replace(/^[a-z][a-z-]*/, "");
     };
     const promptMessagesFromWindow = (win) => {
       const out = [];
       const entries = win && Array.isArray(win.entries) ? win.entries : [];
       for (const entry of entries) {
-        if (!entry || entry.type !== "event") continue;
+        if (!entry || entry.type !== "event")
+          continue;
         const event = entry.event;
-        if (!event || event.type !== "user/message" || event.surfaceOp !== "append") continue;
+        if (!event || event.type !== "user/message" || event.surfaceOp !== "append")
+          continue;
         const data = event.data;
-        if (!data) continue;
+        if (!data)
+          continue;
         const blocks = Array.isArray(data.content) ? data.content : Array.isArray(data.message?.content) ? data.message.content : [];
         let text = "";
         let textOnly = true;
         for (const block of blocks) {
-          if (!block) continue;
+          if (!block)
+            continue;
           const kind = typeof block.type === "string" ? block.type : "";
           if (kind && kind !== "text") {
             textOnly = false;
             continue;
           }
-          if (typeof block.text === "string") text += block.text;
+          if (typeof block.text === "string")
+            text += block.text;
         }
         const source = data.source;
         out.push({
@@ -1582,17 +1776,21 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
       if (sessionId) {
         const bodies = document.querySelectorAll("[data-conversation-content][data-conversation-session]");
         for (const body of Array.from(bodies)) {
-          if (body.getAttribute("data-conversation-session") !== sessionId) continue;
+          if (body.getAttribute("data-conversation-session") !== sessionId)
+            continue;
           const scroll = body.querySelector("[data-conversation-scroll]");
-          if (scroll) return scroll;
+          if (scroll)
+            return scroll;
         }
       }
       let node = anchor ? anchor.parentElement : null;
       let hops = 0;
       while (node && hops < PROMPT_MAX_ANCHOR_HOPS) {
         const found = node.querySelectorAll("[data-conversation-scroll]");
-        if (found.length === 1) return found[0];
-        if (found.length > 1) break;
+        if (found.length === 1)
+          return found[0];
+        if (found.length > 1)
+          break;
         node = node.parentElement;
         hops += 1;
       }
@@ -1605,23 +1803,30 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
       while (node && hops < PROMPT_MAX_ANCHOR_HOPS) {
         const overflow = window.getComputedStyle(node).overflowY;
         const scrolls = overflow === "auto" || overflow === "scroll" || overflow === "overlay";
-        if (scrolls && node.scrollHeight > node.clientHeight + 1) return node;
+        if (scrolls && node.scrollHeight > node.clientHeight + 1)
+          return node;
         node = node.parentElement;
         hops += 1;
       }
       const doc = document.scrollingElement;
-      if (doc && doc.scrollHeight > doc.clientHeight + 1) return doc;
+      if (doc && doc.scrollHeight > doc.clientHeight + 1)
+        return doc;
       return null;
     };
     const promptRevealBlock = (block) => {
-      if (!block) return;
-      if (block.getAttribute("data-dsh-ssd-prompt-state") !== PROMPT_MODE_RENDERED) return;
+      if (!block)
+        return;
+      if (block.getAttribute("data-dsh-ssd-prompt-state") !== PROMPT_MODE_RENDERED)
+        return;
       const scroller = promptScrollerFor(block);
-      if (!scroller) return;
+      if (!scroller)
+        return;
       const box = block.getBoundingClientRect();
-      if (!box.width && !box.height) return;
+      if (!box.width && !box.height)
+        return;
       const frame = scroller.getBoundingClientRect();
-      if (box.top >= frame.top && box.top <= frame.bottom) return;
+      if (box.top >= frame.top && box.top <= frame.bottom)
+        return;
       scroller.scrollTop += box.top - frame.top;
     };
     const promptActivateTrigger = (key2, node, tr) => {
@@ -1639,9 +1844,12 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
           out += node.nodeValue || "";
           return;
         }
-        if (!(node instanceof Element)) return;
-        if (promptChromeNode(node)) return;
-        for (const child of Array.from(node.childNodes)) walk(child);
+        if (!(node instanceof Element))
+          return;
+        if (promptChromeNode(node))
+          return;
+        for (const child of Array.from(node.childNodes))
+          walk(child);
       };
       walk(el);
       return out;
@@ -1650,11 +1858,14 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
       let best = null;
       let bestLength = 0;
       const visit = (node) => {
-        if (!(node instanceof Element)) return;
-        if (promptChromeNode(node)) return;
+        if (!(node instanceof Element))
+          return;
+        if (promptChromeNode(node))
+          return;
         let branch = false;
         for (const child of Array.from(node.children)) {
-          if (!promptChromeNode(child)) branch = true;
+          if (!promptChromeNode(child))
+            branch = true;
         }
         if (!branch) {
           const length = promptTextOf(node).trim().length;
@@ -1664,9 +1875,11 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
           }
           return;
         }
-        for (const child of Array.from(node.children)) visit(child);
+        for (const child of Array.from(node.children))
+          visit(child);
       };
-      for (const child of Array.from(root.children)) visit(child);
+      for (const child of Array.from(root.children))
+        visit(child);
       return best;
     };
     const promptCommonAncestor = (els) => {
@@ -1679,7 +1892,8 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
             break;
           }
         }
-        if (covers) return region;
+        if (covers)
+          return region;
         region = region.parentElement;
       }
       return null;
@@ -1687,19 +1901,23 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
     const promptOfficialText = (node) => {
       const marked = [];
       for (const el of Array.from(node.querySelectorAll(PROMPT_BODY_SELECTOR))) {
-        if (promptIsOurs(el)) continue;
-        if ((el.textContent || "").trim()) marked.push(el);
+        if (promptIsOurs(el))
+          continue;
+        if ((el.textContent || "").trim())
+          marked.push(el);
       }
       if (marked.length) {
         const region = promptCommonAncestor(marked);
         if (region && region !== node) {
           const merged = promptTextOf(region);
-          if (merged.trim()) return merged;
+          if (merged.trim())
+            return merged;
         }
         const parts = [];
         for (const el of marked) {
           const part = promptTextOf(el);
-          if (part.trim()) parts.push(part);
+          if (part.trim())
+            parts.push(part);
         }
         return parts.join("\n\n");
       }
@@ -1708,7 +1926,8 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
         const parent = leaf.parentElement;
         if (parent && parent !== node && !promptChromeNode(parent)) {
           const outer = promptTextOf(parent);
-          if (outer.trim().length >= promptTextOf(leaf).trim().length) return outer;
+          if (outer.trim().length >= promptTextOf(leaf).trim().length)
+            return outer;
         }
         return promptTextOf(leaf);
       }
@@ -1719,15 +1938,18 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
     const promptCopyButton = (node) => {
       const buttons = Array.from(node.querySelectorAll("button")).filter((button) => !promptIsOurs(button));
       for (const button of buttons) {
-        if (PROMPT_COPY_TEXT.test(promptButtonLabel(button))) return button;
+        if (PROMPT_COPY_TEXT.test(promptButtonLabel(button)))
+          return button;
       }
       return null;
     };
     const promptActionAnchor = (node) => {
       const copy = promptCopyButton(node);
-      if (copy) return copy;
+      if (copy)
+        return copy;
       const row = node.querySelector(PROMPT_ROW_SELECTOR);
-      if (!row) return null;
+      if (!row)
+        return null;
       const buttons = Array.from(row.querySelectorAll("button")).filter((button) => !promptIsOurs(button));
       return buttons.length ? buttons[buttons.length - 1] : row;
     };
@@ -1737,16 +1959,22 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
       trigger.setAttribute("data-dsh-ssd-prompt-state", state);
       trigger.classList.toggle(PROMPT_TRIGGER_ON_CLASS, state === PROMPT_MODE_RAW);
       const label = tr("prompt.previewAria");
-      if (trigger.textContent !== tr("prompt.preview")) trigger.textContent = tr("prompt.preview");
-      if (trigger.getAttribute("aria-label") !== label) trigger.setAttribute("aria-label", label);
-      if (trigger.getAttribute("title") !== label) trigger.setAttribute("title", label);
+      if (trigger.textContent !== tr("prompt.preview"))
+        trigger.textContent = tr("prompt.preview");
+      if (trigger.getAttribute("aria-label") !== label)
+        trigger.setAttribute("aria-label", label);
+      if (trigger.getAttribute("title") !== label)
+        trigger.setAttribute("title", label);
     };
     const promptRowChild = (node, el) => {
       const row = node.querySelector(PROMPT_ROW_SELECTOR);
-      if (!row) return null;
+      if (!row)
+        return null;
       let current = el;
-      while (current && current.parentElement && current.parentElement !== row) current = current.parentElement;
-      if (!current || current.parentElement !== row) return null;
+      while (current && current.parentElement && current.parentElement !== row)
+        current = current.parentElement;
+      if (!current || current.parentElement !== row)
+        return null;
       return current;
     };
     const promptTriggerFor = (key2, node, tr) => {
@@ -1764,18 +1992,24 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
       trigger.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
-        if (Date.now() - (promptTriggerPress.get(key2) || 0) < PROMPT_PRESS_GUARD_MS) return;
+        if (Date.now() - (promptTriggerPress.get(key2) || 0) < PROMPT_PRESS_GUARD_MS)
+          return;
         promptActivateTrigger(key2, node, tr);
       });
       const anchor = promptActionAnchor(node);
       const rowChild = anchor ? promptRowChild(node, anchor) : null;
-      if (rowChild) rowChild.after(trigger);
-      else if (anchor && anchor.tagName === "BUTTON") anchor.after(trigger);
-      else if (anchor) anchor.appendChild(trigger);
+      if (rowChild)
+        rowChild.after(trigger);
+      else if (anchor && anchor.tagName === "BUTTON")
+        anchor.after(trigger);
+      else if (anchor)
+        anchor.appendChild(trigger);
       else {
         const official = node.querySelector(PROMPT_OFFICIAL_SELECTOR);
-        if (official) official.appendChild(trigger);
-        else node.appendChild(trigger);
+        if (official)
+          official.appendChild(trigger);
+        else
+          node.appendChild(trigger);
       }
       return trigger;
     };
@@ -1846,7 +2080,8 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
       wrapper.addEventListener("mousedown", (event) => event.stopPropagation());
       wrapper.addEventListener("click", (event) => {
         const target = event.target instanceof Element ? event.target : null;
-        if (!target) return;
+        if (!target)
+          return;
         const mode = target.closest("[data-dsh-ssd-prompt-mode]");
         if (mode) {
           event.preventDefault();
@@ -1882,41 +2117,51 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
         body.classList.toggle("dsh-ssd-prompt-body-hidden", !rendered);
         body.classList.toggle("dsh-ssd-prompt-folded", folded);
         const fold = block.querySelector("[data-dsh-ssd-prompt-fold]");
-        if (fold) fold.textContent = folded ? tr("prompt.expand") : tr("prompt.collapse");
+        if (fold)
+          fold.textContent = folded ? tr("prompt.expand") : tr("prompt.collapse");
       }
       const tab = block.querySelector('[data-dsh-ssd-prompt-mode="' + PROMPT_MODE_RAW + '"]');
-      if (tab) tab.textContent = tr("prompt.raw");
+      if (tab)
+        tab.textContent = tr("prompt.raw");
       const attachPoint = block.parentElement;
-      if (!attachPoint) return;
+      if (!attachPoint)
+        return;
       const hide = rendered && block.getAttribute("data-dsh-ssd-prompt-hide-official") === "true";
       for (const child of Array.from(attachPoint.children)) {
-        if (child === block || promptIsOurs(child)) continue;
+        if (child === block || promptIsOurs(child))
+          continue;
         child.classList.toggle(PROMPT_HIDE_CLASS, hide);
       }
       for (const trigger of Array.from(attachPoint.querySelectorAll("[" + PROMPT_TRIGGER_ATTR + "]"))) {
-        if (trigger.getAttribute("data-dsh-ssd-prompt-key") === key2) promptApplyTrigger(trigger, tr);
+        if (trigger.getAttribute("data-dsh-ssd-prompt-key") === key2)
+          promptApplyTrigger(trigger, tr);
       }
     };
     const promptRefreshKey = (key2, tr) => {
       const blocks = document.querySelectorAll("[" + PROMPT_BLOCK_ATTR + "]");
       for (const block of Array.from(blocks)) {
-        if (block.getAttribute("data-dsh-ssd-prompt-key") !== key2) continue;
+        if (block.getAttribute("data-dsh-ssd-prompt-key") !== key2)
+          continue;
         promptApplyState(block, tr);
       }
       const triggers = document.querySelectorAll("[" + PROMPT_TRIGGER_ATTR + "]");
       for (const trigger of Array.from(triggers)) {
-        if (trigger.getAttribute("data-dsh-ssd-prompt-key") !== key2) continue;
+        if (trigger.getAttribute("data-dsh-ssd-prompt-key") !== key2)
+          continue;
         promptApplyTrigger(trigger, tr);
       }
     };
     const promptSetMode = (key2, mode, tr) => {
-      if (mode !== PROMPT_MODE_RAW && mode !== PROMPT_MODE_RENDERED) return;
+      if (mode !== PROMPT_MODE_RAW && mode !== PROMPT_MODE_RENDERED)
+        return;
       promptMode.set(key2, mode);
       promptRefreshKey(key2, tr);
     };
     const promptToggleFold = (key2, tr) => {
-      if (promptUnfolded.has(key2)) promptUnfolded.delete(key2);
-      else promptUnfolded.add(key2);
+      if (promptUnfolded.has(key2))
+        promptUnfolded.delete(key2);
+      else
+        promptUnfolded.add(key2);
       promptRefreshKey(key2, tr);
     };
     const promptSyncs = /* @__PURE__ */ new Set();
@@ -1951,13 +2196,18 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
         feed = null;
       };
       const restoreOfficial = () => {
-        for (const child of Array.from(hidden)) child.classList.remove(PROMPT_HIDE_CLASS);
+        for (const child of Array.from(hidden))
+          child.classList.remove(PROMPT_HIDE_CLASS);
         hidden.clear();
       };
       const dropBlocks = () => {
-        for (const block of Array.from(blocks.values())) if (block.parentNode) block.parentNode.removeChild(block);
+        for (const block of Array.from(blocks.values()))
+          if (block.parentNode)
+            block.parentNode.removeChild(block);
         blocks.clear();
-        for (const trigger of Array.from(triggers.values())) if (trigger.parentNode) trigger.parentNode.removeChild(trigger);
+        for (const trigger of Array.from(triggers.values()))
+          if (trigger.parentNode)
+            trigger.parentNode.removeChild(trigger);
         triggers.clear();
       };
       const clearAll = () => {
@@ -1965,7 +2215,8 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
         restoreOfficial();
       };
       const sync = () => {
-        if (disposed) return;
+        if (disposed)
+          return;
         const tr = translate();
         const sessionId = propSessionId || promptStoreCurrent();
         if (!sessionId || !promptIsSubagent(sessionId)) {
@@ -1979,7 +2230,8 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
           clearAll();
           container = nextContainer;
         }
-        if (!container) return;
+        if (!container)
+          return;
         const source = liveBindingFor(sessionId)?.eventSource || null;
         if (source !== feed) {
           detachFeed();
@@ -1994,8 +2246,10 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
         const bySeq = /* @__PURE__ */ new Map();
         const byId = /* @__PURE__ */ new Map();
         for (const message of records) {
-          if (message.seq !== null && !bySeq.has(message.seq)) bySeq.set(message.seq, message);
-          if (message.id && !byId.has(message.id)) byId.set(message.id, message);
+          if (message.seq !== null && !bySeq.has(message.seq))
+            bySeq.set(message.seq, message);
+          if (message.id && !byId.has(message.id))
+            byId.set(message.id, message);
         }
         const used = /* @__PURE__ */ new Set();
         const nodes = Array.from(container.querySelectorAll(PROMPT_NODE_SELECTOR));
@@ -2024,14 +2278,16 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
         });
         const freeNodes = [];
         mapped.forEach((hit, index) => {
-          if (!hit && !addressed.has(index)) freeNodes.push(index);
+          if (!hit && !addressed.has(index))
+            freeNodes.push(index);
         });
         const freeMessages = records.filter((message) => !used.has(message));
         if (freeMessages.length && freeNodes.length) {
           const count = Math.min(freeMessages.length, freeNodes.length);
           const nodeStart = freeNodes.length - count;
           const messageStart = freeMessages.length - count;
-          for (let step = 0; step < count; step += 1) mapped[freeNodes[nodeStart + step]] = freeMessages[messageStart + step];
+          for (let step = 0; step < count; step += 1)
+            mapped[freeNodes[nodeStart + step]] = freeMessages[messageStart + step];
         }
         const paged = Boolean(win && win.hasMore);
         let headPending = paged;
@@ -2044,7 +2300,8 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
           if (message && !preview) {
             const existing2 = blocks.get(key2);
             if (existing2) {
-              if (existing2.parentNode) existing2.parentNode.removeChild(existing2);
+              if (existing2.parentNode)
+                existing2.parentNode.removeChild(existing2);
               blocks.delete(key2);
             }
             return;
@@ -2071,19 +2328,23 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
             }
           }
           const head = text && headPending ? tr("prompt.notLoaded") : "";
-          if (text) headPending = false;
+          if (text)
+            headPending = false;
           const spec = { key: key2, tr, text, source: sourceKind, textOnly, limited, notice, head };
           const signature = promptBlockSignature(spec);
           const trigger = triggers.get(key2);
-          if (trigger && trigger.isConnected) promptApplyTrigger(trigger, tr);
-          else triggers.set(key2, promptTriggerFor(key2, node, tr));
+          if (trigger && trigger.isConnected)
+            promptApplyTrigger(trigger, tr);
+          else
+            triggers.set(key2, promptTriggerFor(key2, node, tr));
           const existing = blocks.get(key2);
           if (existing && existing.parentElement === node && existing.getAttribute("data-dsh-ssd-prompt-sig") === signature) {
             promptApplyState(existing, tr);
             return;
           }
           if (existing) {
-            if (existing.parentNode) existing.parentNode.removeChild(existing);
+            if (existing.parentNode)
+              existing.parentNode.removeChild(existing);
             blocks.delete(key2);
           }
           const block = promptBlockFor(spec);
@@ -2091,35 +2352,46 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
           blocks.set(key2, block);
         });
         for (const key2 of Array.from(blocks.keys())) {
-          if (seen.has(key2)) continue;
+          if (seen.has(key2))
+            continue;
           const block = blocks.get(key2);
-          if (block && block.parentNode) block.parentNode.removeChild(block);
+          if (block && block.parentNode)
+            block.parentNode.removeChild(block);
           blocks.delete(key2);
         }
         for (const key2 of Array.from(triggers.keys())) {
-          if (seen.has(key2)) continue;
+          if (seen.has(key2))
+            continue;
           const trigger = triggers.get(key2);
-          if (trigger && trigger.parentNode) trigger.parentNode.removeChild(trigger);
+          if (trigger && trigger.parentNode)
+            trigger.parentNode.removeChild(trigger);
           triggers.delete(key2);
         }
-        for (const block of Array.from(blocks.values())) promptApplyState(block, tr);
+        for (const block of Array.from(blocks.values()))
+          promptApplyState(block, tr);
         const claimed = /* @__PURE__ */ new Set();
         for (const block of Array.from(blocks.values())) {
-          if (block.getAttribute("data-dsh-ssd-prompt-state") !== PROMPT_MODE_RENDERED) continue;
-          if (block.getAttribute("data-dsh-ssd-prompt-hide-official") !== "true") continue;
+          if (block.getAttribute("data-dsh-ssd-prompt-state") !== PROMPT_MODE_RENDERED)
+            continue;
+          if (block.getAttribute("data-dsh-ssd-prompt-hide-official") !== "true")
+            continue;
           const owner = block.parentElement;
-          if (!owner) continue;
+          if (!owner)
+            continue;
           for (const child of Array.from(owner.children)) {
-            if (child === block || promptIsOurs(child)) continue;
+            if (child === block || promptIsOurs(child))
+              continue;
             claimed.add(child);
           }
         }
         for (const child of Array.from(hidden)) {
-          if (claimed.has(child)) continue;
+          if (claimed.has(child))
+            continue;
           child.classList.remove(PROMPT_HIDE_CLASS);
           hidden.delete(child);
         }
-        for (const child of Array.from(claimed)) hidden.add(child);
+        for (const child of Array.from(claimed))
+          hidden.add(child);
       };
       const run = () => {
         try {
@@ -2129,7 +2401,8 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
         }
       };
       function schedule() {
-        if (disposed || scheduled) return;
+        if (disposed || scheduled)
+          return;
         scheduled = true;
         timer = setTimeout(() => {
           scheduled = false;
@@ -2146,7 +2419,8 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
         promptSyncs.delete(run);
         observer.disconnect();
         detachFeed();
-        if (timer) clearTimeout(timer);
+        if (timer)
+          clearTimeout(timer);
         clearAll();
       };
     };
@@ -2156,7 +2430,8 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
       trRef.current = tr;
       React.useEffect(() => {
         const host = hostRef.current;
-        if (!host) return;
+        if (!host)
+          return;
         return promptPreviewAttach(host, sessionId || "", () => trRef.current);
       }, [sessionId]);
       React.useEffect(() => {
@@ -2166,7 +2441,8 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
     }
     const LineageShadow = ({ displayTitle, lineageSessionId, useSessions, openTitle }) => {
       const isSubagent = typeof useSessions === "function" ? useSessions((s) => s?.byId?.[lineageSessionId]?.origin === "subagent") : false;
-      if (!isSubagent || !displayTitle) return null;
+      if (!isSubagent || !displayTitle)
+        return null;
       const open = typeof openTitle === "function" ? openTitle : null;
       return jsx("button", { type: "button", className: open ? "dsh-ssd-lineage-title" : "dsh-ssd-lineage-title dsh-ssd-lineage-current", disabled: !open, title: displayTitle, onClick: open || void 0, children: displayTitle });
     };
@@ -2192,17 +2468,20 @@ ${statsLine(tr, row)}`, children: jsxs("span", { children: [jsx("div", { classNa
       ctx.effect(() => ctx.locale.register(NS, { zh, en }), "subagent-sidebar-default: dictionaries");
       ctx.effect(() => () => retainReleaseAll(), "subagent-sidebar-default: retained live bindings");
       const fireAndForget = (pending) => {
-        if (pending && typeof pending.catch === "function") pending.catch((error) => console.warn("subagent-sidebar-default: unable to refresh session projections", error));
+        if (pending && typeof pending.catch === "function")
+          pending.catch((error) => console.warn("subagent-sidebar-default: unable to refresh session projections", error));
       }, refreshCatalog = (p) => {
         if (typeof ctx.sessions?.refreshProjections === "function") {
           fireAndForget(ctx.sessions.refreshProjections(p));
           return;
         }
-        if (typeof ctx.sessions?.refreshSubagents === "function") fireAndForget(ctx.sessions.refreshSubagents(p));
+        if (typeof ctx.sessions?.refreshSubagents === "function")
+          fireAndForget(ctx.sessions.refreshSubagents(p));
       };
       const navigation = createSidebarNavigation(ctx);
       const face = () => ({ ...navigation, refresh: refreshCatalog, setCatalogOpen: (p, o) => {
-        if (typeof ctx.sessions?.setSubagentCatalogOpen === "function") ctx.sessions.setSubagentCatalogOpen(p, o);
+        if (typeof ctx.sessions?.setSubagentCatalogOpen === "function")
+          ctx.sessions.setSubagentCatalogOpen(p, o);
       } });
       ctx.slots.inject("conversation.session.header.actions", () => ctx.slots.register({ name: "conversation.session.header.actions", id: "subagent-sidebar-default-manager", order: 100, locale: NS, inject: face }, Manager));
       ctx.slots.inject("conversation.session.header.actions", () => ctx.slots.register({ name: "conversation.session.header.actions", id: "subagent-sidebar-default-prompt-preview", order: 101, locale: NS }, PromptPreview));

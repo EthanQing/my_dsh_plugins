@@ -116,23 +116,21 @@ window.__ModuleLoader__.load({
 .dsh-sdm-menu-item:disabled .dsh-sdm-menu-icon{color:var(--dsw-alias-label-secondary)}
 .dsh-sdm-menu-label{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dsh-sdm-menu-separator{height:0.5px;margin:3px 2px;background:var(--dsw-alias-border-l2)}
-.dsh-sdm-checkbox{width:14px;height:14px;margin:0;flex:none;accent-color:var(--dsw-alias-brand-primary);cursor:pointer}
+.dsh-sdm-checkbox{width:14px;height:14px;margin:0 6px 0 0;flex:none;accent-color:#3b82f6;cursor:pointer;border-radius:3px;vertical-align:middle}
 .dsh-sdm-checkbox:disabled{opacity:.55;cursor:not-allowed}
 [data-dsh-sdm-has-native="1"]{width:auto!important;min-width:32px;justify-content:flex-start!important;gap:2px}
-[data-dsh-sdm-selected="1"]{background:var(--dsw-alias-interactive-bg-hover)}
-.dsh-sdm-bar{position:fixed;left:12px;bottom:16px;z-index:900;pointer-events:auto;box-sizing:border-box;width:min(300px,calc(100vw - 24px));padding:12px;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-panel);background:var(--dsw-alias-bg-layer-2);box-shadow:var(--dsw-elevation-prominent);color:var(--dsw-alias-label-primary);font-size:12px;line-height:18px;display:flex;flex-direction:column;gap:8px}
-.dsh-sdm-bar-title{font-size:13px;line-height:19px;font-weight:500;overflow-wrap:anywhere}
-.dsh-sdm-bar-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--dsw-alias-label-secondary)}
-.dsh-sdm-bar-running{color:var(--dsw-alias-label-tertiary);overflow-wrap:anywhere}
-.dsh-sdm-bar-error{color:var(--dsw-alias-state-error-primary);overflow-wrap:anywhere}
-.dsh-sdm-bar-status{color:var(--dsw-alias-label-secondary)}
-.dsh-sdm-bar-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.dsh-sdm-bar-btn{height:28px;padding:0 10px;border:0.5px solid var(--dsw-alias-border-l3);border-radius:var(--dsw-radius-md);background:transparent;color:var(--dsw-alias-label-primary);font-size:12px;line-height:18px;cursor:pointer;box-sizing:border-box}
-.dsh-sdm-bar-btn:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}
-.dsh-sdm-bar-btn:disabled{opacity:.45;cursor:not-allowed}
-.dsh-sdm-bar-btn-danger{color:var(--dsw-alias-state-error-primary)}
-.dsh-sdm-bar-btn-danger:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover-danger)}
-.dsh-sdm-bar-btn:focus-visible,.dsh-sdm-modal-button:focus-visible,.dsh-sdm-modal-close:focus-visible,.dsh-sdm-menu-item:focus-visible,.dsh-sdm-checkbox:focus-visible{outline:var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color,var(--dsw-alias-state-business-primary));outline-offset:2px}
+[data-dsh-sdm-selected="1"]{background:rgba(59,130,246,0.12)!important}
+[data-dsh-sdm-target="1"]{cursor:pointer;user-select:none;display:flex!important;align-items:center!important}
+[data-dsh-sdm-target="1"]>span:first-child{display:inline-flex!important;align-items:center!important}
+.dsh-sdm-inline-bar{display:flex;align-items:center;justify-content:space-between;height:32px;box-sizing:border-box;padding:0 8px;margin:4px 6px;background:var(--dsw-alias-bg-layer-2,rgba(128,128,128,0.08));border:1px solid var(--dsw-alias-border-l2,rgba(128,128,128,0.16));border-radius:6px;font-size:12px;line-height:1;color:var(--dsw-alias-label-primary);position:sticky;top:0;z-index:10;backdrop-filter:blur(8px)}
+.dsh-sdm-inline-left{display:flex;align-items:center;gap:6px;min-width:0}
+.dsh-sdm-inline-count{font-size:11.5px;color:var(--dsw-alias-label-secondary);white-space:nowrap}
+.dsh-sdm-inline-right{display:flex;align-items:center;gap:4px}
+.dsh-sdm-inline-btn{height:22px;padding:0 8px;border-radius:4px;border:1px solid var(--dsw-alias-border-l2,rgba(128,128,128,0.18));background:transparent;color:var(--dsw-alias-label-primary);font-size:11.5px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.dsh-sdm-inline-btn:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}
+.dsh-sdm-inline-btn:disabled{opacity:.4;cursor:not-allowed}
+.dsh-sdm-inline-btn-danger{color:var(--dsw-alias-state-error-primary,#dc2626);border-color:rgba(220,38,38,0.25);background:rgba(220,38,38,0.08)}
+.dsh-sdm-inline-btn-danger:hover:not(:disabled){background:rgba(220,38,38,0.18);border-color:#dc2626}
 .dsh-sdm-modal-root{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:24px;pointer-events:auto}
 .dsh-sdm-modal-mask{position:absolute;inset:0;background:var(--dsw-alias-bg-mask-1);backdrop-filter:var(--dsw-mask-blur)}
 .dsh-sdm-modal{position:relative;z-index:1;width:min(420px,100%);box-sizing:border-box;display:flex;flex-direction:column;gap:20px;padding:0 0 24px;border-radius:var(--dsw-radius-panel);background:var(--dsw-alias-bg-layer-2);box-shadow:var(--dsw-elevation-prominent);color:var(--dsw-alias-label-primary)}
@@ -1089,6 +1087,8 @@ window.__ModuleLoader__.load({
           delete row.dataset.dshSdmTarget
           delete row.dataset.dshSdmSelected
         }
+        const bar = document.getElementById('dsh-sdm-inline-bar')
+        if (bar) bar.remove()
       }
 
       function removeWorkspaceMenuItems() {
@@ -1161,6 +1161,54 @@ window.__ModuleLoader__.load({
           else checkbox.removeAttribute('title')
           if (selected) row.dataset.dshSdmSelected = '1'
           else delete row.dataset.dshSdmSelected
+
+          if (!row.dataset.dshSdmClickAttached) {
+            row.dataset.dshSdmClickAttached = '1'
+            row.addEventListener('click', (event) => {
+              if (getState().mode !== 'batch') return
+              if (event.target.closest('button, [data-row-action], input[type="checkbox"]')) return
+              event.preventDefault()
+              event.stopPropagation()
+              const rKey = row.getAttribute('data-row-key') || ''
+              const rId = rKey.slice(SESSION_PREFIX.length)
+              if (rId) controller.toggle(rId)
+            }, true)
+          }
+        }
+
+        if (state.mode === 'batch' && state.workspaceId) {
+          const workspaceRow = document.querySelector('[data-row-key="' + WORKSPACE_PREFIX + state.workspaceId + '"]')
+          if (workspaceRow) {
+            let bar = document.getElementById('dsh-sdm-inline-bar')
+            if (!bar) {
+              bar = document.createElement('div')
+              bar.id = 'dsh-sdm-inline-bar'
+              bar.className = 'dsh-sdm-inline-bar'
+              bar.setAttribute('role', 'toolbar')
+            }
+            if (workspaceRow.nextElementSibling !== bar) {
+              workspaceRow.after(bar)
+            }
+            const selectableCount = state.items.filter((item) => !item.running).length
+            const allSelected = selectableCount > 0 && state.selected.size === selectableCount
+
+            bar.innerHTML = `
+              <div class="dsh-sdm-inline-left">
+                <input type="checkbox" class="dsh-sdm-checkbox" ${allSelected ? 'checked' : ''} ${state.busy || selectableCount === 0 ? 'disabled' : ''} title="${allSelected ? tr('batch.deselectAll') : tr('batch.selectAll')}" />
+                <span class="dsh-sdm-inline-count">${tr('batch.count', { selected: state.selected.size, total: state.items.length })}</span>
+              </div>
+              <div class="dsh-sdm-inline-right">
+                <button type="button" class="dsh-sdm-inline-btn dsh-sdm-inline-btn-danger" ${state.busy || state.selected.size === 0 ? 'disabled' : ''}>删除(${state.selected.size})</button>
+                <button type="button" class="dsh-sdm-inline-btn" ${state.busy ? 'disabled' : ''}>${tr('batch.cancel')}</button>
+              </div>
+            `
+            const selectAllBox = bar.querySelector('input[type="checkbox"]')
+            if (selectAllBox) selectAllBox.onchange = () => controller.selectAll()
+            const deleteBtn = bar.querySelector('.dsh-sdm-inline-btn-danger')
+            if (deleteBtn) deleteBtn.onclick = () => controller.openBatchConfirm()
+            const cancelBtn = bar.querySelector('.dsh-sdm-inline-btn:not(.dsh-sdm-inline-btn-danger)')
+            if (cancelBtn) cancelBtn.onclick = () => controller.stopBatch()
+          }
         }
       }
 
@@ -1397,46 +1445,9 @@ window.__ModuleLoader__.load({
           }
         }, [open])
 
-        if (state.mode !== 'batch' && modal === null) return null
+        if (modal === null) return null
 
-        const selectableCount = state.items.filter((item) => !item.running).length
-        const allSelected = selectableCount > 0 && state.selected.size === selectableCount
-
-        const batchBar = state.mode === 'batch'
-          ? h('div', { className: 'dsh-sdm-bar', role: 'status' },
-            h('div', { className: 'dsh-sdm-bar-title' }, t('batch.title', { name: state.workspaceTitle })),
-            h('div', { className: 'dsh-sdm-bar-meta' },
-              h('span', null, t('batch.count', { selected: state.selected.size, total: state.items.length })),
-              state.busy ? h('span', null, t('batch.busy')) : null),
-            state.items.length === 0 ? h('div', { className: 'dsh-sdm-bar-running' }, t('batch.empty')) : null,
-            state.items.some((item) => item.running)
-              ? h('div', { className: 'dsh-sdm-bar-running' }, t('batch.running', { count: state.items.filter((item) => item.running).length }))
-              : null,
-            state.error === null ? null : h('div', { className: 'dsh-sdm-bar-error', role: 'alert' }, state.error),
-            h('div', { className: 'dsh-sdm-bar-actions' },
-              h('button', {
-                type: 'button',
-                className: 'dsh-sdm-bar-btn',
-                disabled: state.busy || selectableCount === 0,
-                onClick: () => controller.selectAll(),
-              }, allSelected ? t('batch.deselectAll') : t('batch.selectAll')),
-              h('button', {
-                type: 'button',
-                className: 'dsh-sdm-bar-btn dsh-sdm-bar-btn-danger',
-                disabled: state.busy || state.selected.size === 0,
-                onClick: () => controller.openBatchConfirm(),
-              }, t('batch.deleteSelected')),
-              h('button', {
-                type: 'button',
-                className: 'dsh-sdm-bar-btn',
-                disabled: state.busy,
-                onClick: () => controller.stopBatch(),
-              }, t('batch.cancel'))))
-          : null
-
-        const confirmModal = modal === null
-          ? null
-          : h('div', { className: 'dsh-sdm-modal-root', role: 'presentation' },
+        const confirmModal = h('div', { className: 'dsh-sdm-modal-root', role: 'presentation' },
             h('div', {
               className: 'dsh-sdm-modal-mask',
               'aria-hidden': 'true',
@@ -1489,7 +1500,7 @@ window.__ModuleLoader__.load({
                 },
               }, t('confirm.delete')))))
 
-        return h(React.Fragment, null, batchBar, confirmModal)
+        return confirmModal
       }
 
       try {

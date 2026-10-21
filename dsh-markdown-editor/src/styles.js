@@ -6,8 +6,11 @@ const STYLE_SHEET = [
   '.dsh-mde-block{display:block;min-width:0;max-width:100%;white-space:normal;color:inherit}',
   '.dsh-mde-clip{display:block;position:relative;min-width:0;max-width:100%}',
   '.dsh-mde-clip[data-collapsed]{max-height:calc((22px + var(--dsh-content-font-delta,0px)) * 18);overflow:hidden}',
-  '.dsh-mde-fade{display:block;position:absolute;left:0;right:0;bottom:0;height:calc((22px + var(--dsh-content-font-delta,0px)) * 3);background:linear-gradient(to bottom,transparent,var(--dsw-specific-bubble,var(--dsw-alias-bg-base)));border-bottom-left-radius:var(--dsw-radius-xl);border-bottom-right-radius:var(--dsw-radius-xl);pointer-events:none}',
-  '.dsh-mde-toggle{display:inline-flex;align-items:center;gap:4px;margin:4px 0 0;padding:2px 6px;border:0;border-radius:var(--dsw-radius-sm);background:0 0;color:var(--dsw-alias-state-business-primary);cursor:pointer;font:inherit;font-size:var(--dsh-content-font-size-secondary,13px);line-height:calc(20px + var(--dsh-content-font-delta-secondary,0px))}',      '.dsh-mde-toggle:hover{background:var(--dsw-alias-interactive-bg-hover)}',
+  '.dsh-mde-fade{display:block;position:absolute;left:0;right:0;bottom:0;height:48px;background:linear-gradient(to bottom,transparent,var(--dsw-specific-bubble,var(--dsw-alias-bg-base)));border-bottom-left-radius:var(--dsw-radius-xl);border-bottom-right-radius:var(--dsw-radius-xl);pointer-events:none}',
+  '.dsh-mde-toggle{display:inline-flex;align-items:center;gap:6px;margin:6px 0 0;padding:3px 10px;border:1px solid var(--dsw-alias-border-l2,rgba(128,128,128,0.18));border-radius:14px;background:var(--dsw-alias-bg-layer-2,rgba(128,128,128,0.08));color:var(--dsw-alias-label-secondary);cursor:pointer;font:inherit;font-size:12px;line-height:18px;backdrop-filter:blur(8px);transition:all .15s ease}',
+  '.dsh-mde-toggle:hover{background:var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,0.15));color:var(--dsw-alias-label-primary);border-color:var(--dsw-alias-border-l1,rgba(128,128,128,0.3))}',
+  '.dsh-mde-chevron{transition:transform .18s ease;flex:none}',
+  '.dsh-mde-chevron.is-expanded{transform:rotate(180deg)}',
   '.dsh-mde-toggle:focus-visible{outline:1.5px solid var(--dsw-focus-ring-color,var(--dsw-alias-state-business-primary));outline-offset:2px}',
   '.dsh-mde-plain{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;color:inherit}',
   // Composer Custom Highlight paint: color-only, theme-token driven.

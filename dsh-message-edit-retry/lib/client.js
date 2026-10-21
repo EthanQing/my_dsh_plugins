@@ -111,7 +111,10 @@ window.__ModuleLoader__.load({
       '.dsh-mer-textBtn svg{width:calc(14px + var(--dsh-content-font-delta,0px));height:calc(14px + var(--dsh-content-font-delta,0px))}',
       '.dsh-mer-primary{color:var(--dsw-alias-label-primary);font-weight:500}',
       '.dsh-mer-alert{color:var(--dsw-alias-state-error-primary);font-size:var(--dsh-content-font-size-secondary,13px);line-height:calc(18px + var(--dsh-content-font-delta-secondary,0px));text-align:right;overflow-wrap:anywhere}',
-      '.dsh-mer-tail{display:flex;align-items:center;gap:8px;flex-wrap:wrap}',
+      '.dsh-mer-tail{display:inline-flex;align-items:center;gap:4px;margin-top:2px}',
+      '.dsh-mer-tail .dsh-mer-textBtn{height:24px;padding:2px 8px;border-radius:4px;font-size:12px;color:var(--dsw-alias-label-tertiary);border:1px solid transparent;transition:all .15s ease}',
+      '.dsh-mer-tail .dsh-mer-textBtn:hover:not([aria-disabled=true]){background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary);border-color:var(--dsw-alias-border-l2,rgba(128,128,128,0.15))}',
+      '.dsh-mer-tail .dsh-mer-textBtn svg{width:13px;height:13px}',
     ].join('')
 
     function installStyles() {
