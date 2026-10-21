@@ -1,6 +1,9 @@
 import { createDockState, retainedTabs } from './state.js'
 import { createDock } from './dock.js'
 import { createTerminalGuide } from './guide.js'
+import { createDockMount } from './mount.js'
+import { createShellPreferences } from './shell.js'
+import guideStyles from './guide.css'
 import styles from './style.css'
 import xtermStyles from '../vendor/xterm/css/xterm.css'
 
@@ -16,6 +19,8 @@ window.__ModuleLoader__.load({
   id: ID,
   factory: require => {
     const React = require('react')
+    const { createPortal } = require('react-dom')
+    const primitives = require('@deepseek-ai/dsh-client-ui-primitives')
     const { ClientTerminals } = require('@deepseek-ai/dsh-api-terminal-controller')
     return {
       inject: ['slots', 'sessions', 'remote', 'remote.terminal', 'connection', 'sidebarRight', 'theme', 'shortcuts'],
@@ -26,6 +31,8 @@ window.__ModuleLoader__.load({
         try { storage = window.localStorage } catch {}
         const store = createDockState({ storage, onStorageError: error => ctx.logger.warn('底部终端布局未能持久保存', error) })
         const session = observable(undefined)
+        const viewport = observable({ height: 0 })
+        const shellPreferences = createShellPreferences(terminals, storage)
         const activity = observable({ available: false, launching: false, message: '' })
         const lifetime = new AbortController()
         const patchActivity = patch => { if (!lifetime.signal.aborted) activity.set({ ...activity.getSnapshot(), ...patch }) }
@@ -35,29 +42,31 @@ window.__ModuleLoader__.load({
           const offSession = ctx.sessions.list.subscribe(syncSession)
           const offHolds = store.subscribe(syncHolds)
           syncSession(); syncHolds()
-          return () => { lifetime.abort(); offSession(); offHolds(); terminals.retainTabs([]); store.dispose(); session.dispose(); activity.dispose() }
+          return () => { lifetime.abort(); offSession(); offHolds(); terminals.retainTabs([]); store.dispose(); session.dispose(); viewport.dispose(); activity.dispose() }
         })
         ctx.effect(() => {
           const style = document.createElement('style')
           style.dataset.plugin = ID
-          style.textContent = `${xtermStyles}\n${styles}`
+          style.textContent = `${xtermStyles}\n${styles}\n${guideStyles}`
           document.head.append(style)
           return () => style.remove()
         })
         const api = {
-          store, terminals, session, activity,
+          store, session, activity, viewport,
+          setAvailable: available => patchActivity({ available }),
+          terminals: { ...shellPreferences, view: (...args) => terminals.view(...args), closeFailures: terminals.closeFailures, retryClose: id => terminals.retryClose(id) },
           theme: { getSnapshot: () => ctx.theme.getTheme(), subscribe: listener => ctx.on('theme/change', listener) },
           async newTerminal(sessionId = session.getSnapshot(), shellPath) {
             if (lifetime.signal.aborted || activity.getSnapshot().launching) return
-            if (!activity.getSnapshot().available) { ctx.logger.warn('shell.bottom 已被其他插件占用，底部终端未打开'); return }
+            if (!activity.getSnapshot().available) { ctx.logger.warn('请先打开主聊天会话，底部终端未挂载'); return }
             if (!sessionId) { patchActivity({ message: '请先选择会话' }); store.show(); return }
             patchActivity({ launching: true, message: '' }); store.show()
             try {
-              const choices = await terminals.launchShells(sessionId, lifetime.signal)
+              const choices = await shellPreferences.launchShells(sessionId, lifetime.signal)
               if (lifetime.signal.aborted) return
               const selected = shellPath || choices.selectedShell || choices.shells[0]?.path
               if (!selected || !choices.shells.some(shell => shell.path === selected)) throw new Error('所选 Shell 不可用，请从列表选择可用的 Shell')
-              terminals.selectShell(selected)
+              shellPreferences.selectShell(selected)
               store.add(sessionId, selected)
             } catch (error) { if (!lifetime.signal.aborted) patchActivity({ message: error.message || String(error) }) }
             finally { patchActivity({ launching: false }) }
@@ -76,30 +85,10 @@ window.__ModuleLoader__.load({
         }
         const LoadedTerminal = React.lazy(() => import('./terminal-view.js').then(module => ({ default: module.createTerminalView(React) })))
         const TerminalView = props => React.createElement(React.Suspense, { fallback: React.createElement('div', { className: 'dbt-message', role: 'status' }, '正在加载终端…') }, React.createElement(LoadedTerminal, props))
-        const Dock = createDock(React, api, TerminalView)
-        ctx.slots.inject('shell.bottom', () => {
-          let unregister, changing = false, warned = false
-          const sync = () => {
-            if (changing || lifetime.signal.aborted) return
-            changing = true
-            try {
-              const occupied = ctx.slots.entries('shell.bottom').some(entry => entry.options.id !== ID)
-              if (occupied) {
-                if (unregister) { const off = unregister; unregister = undefined; off() }
-                patchActivity({ available: false })
-                if (!warned) { warned = true; ctx.logger.warn('shell.bottom 是单一插槽，已有其他插件占用；底部终端不会覆盖现有内容') }
-              } else {
-                if (!unregister) unregister = ctx.slots.register({ name: 'shell.bottom', id: ID, priority: 1000 }, Dock)
-                warned = false
-                patchActivity({ available: true })
-              }
-            } finally { changing = false }
-          }
-          const unsubscribe = ctx.slots.subscribe('shell.bottom', sync)
-          sync()
-          return () => { unsubscribe(); unregister?.(); patchActivity({ available: false }) }
-        })
-        const Guide = createTerminalGuide(React, api)
+        const Dock = createDock(React, api, TerminalView, primitives)
+        const DockMount = createDockMount(React, createPortal, api, Dock)
+        ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({ name: 'conversation.input.dock', id: `${ID}-mount`, order: 1000 }, DockMount))
+        const Guide = createTerminalGuide(React, api, primitives)
         ctx.slots.inject('sidebar.right.tab.guide.entry', () => {
           const key = '@deepseek-ai/dsh-client-ui-sidebar-terminal'
           if (ctx.slots.entries('sidebar.right.tab.guide.entry').some(entry => entry.options.key === key && (entry.options.priority ?? 0) !== 0)) {
@@ -112,7 +101,7 @@ window.__ModuleLoader__.load({
         function Launcher() {
           const current = React.useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot)
           const status = React.useSyncExternalStore(activity.subscribe, activity.getSnapshot, activity.getSnapshot)
-          return React.createElement('button', { type: 'button', className: 'dbt-launcher', disabled: !current || !status.available, title: status.available ? '显示底部终端' : '底部位置已由其他插件占用', onClick: () => store.show() }, '终端')
+          return React.createElement('button', { type: 'button', className: 'dbt-launcher', disabled: !current || !status.available, title: status.available ? '显示底部终端' : '请先打开主聊天会话', onClick: () => store.show() }, '终端')
         }
         ctx.slots.inject('conversation.composer.dock', () => ctx.slots.register({ name: 'conversation.composer.dock', id: ID }, Launcher))
         ctx.effect(() => {

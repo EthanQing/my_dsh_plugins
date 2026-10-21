@@ -58,11 +58,11 @@ test('damaged state is sanitized without duplicated process content identities',
     bad: { tabs: null },
   } })
   assert.equal(state.visible, false)
-  assert.equal(state.height, 900)
+  assert.equal(state.height, 10000)
   assert.equal(state.sessions.a.activeId, '1')
   assert.deepEqual(retainedTabs(state).map(tab => tab.contentId), ['x', 'z'])
   assert.equal(state.sessions.b.tabs[0].shellPath, undefined)
-  assert.equal(restoreState({ version: 500 }).height, 280)
+  assert.equal(restoreState({ version: 500 }).height, 240)
 })
 
 test('unavailable or corrupted browser storage does not prevent an in-memory terminal', () => {

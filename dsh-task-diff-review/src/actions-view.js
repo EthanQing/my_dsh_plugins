@@ -17,6 +17,29 @@ export function pushPreviewIssue(preview, remote, state, statusError = '') {
   return ''
 }
 
+export function observeGitPopoverSpace(row, onHeight) {
+  const scroller = row.closest('[data-conversation-scroll]')
+  let frame
+  const measure = () => {
+    frame = undefined
+    const top = scroller ? scroller.getBoundingClientRect().top + scroller.clientTop : undefined
+    onHeight(top === undefined ? 460 : Math.max(0, Math.min(460, Math.floor(row.getBoundingClientRect().top - top - 8))))
+  }
+  const schedule = () => { if (frame === undefined) frame = requestAnimationFrame(measure) }
+  const observer = new ResizeObserver(schedule)
+  observer.observe(row)
+  if (scroller) observer.observe(scroller)
+  const composer = row.closest('[data-composer-seat]')
+  if (composer) observer.observe(composer)
+  scroller?.addEventListener('scroll', schedule, { passive: true })
+  measure()
+  return () => {
+    observer.disconnect()
+    scroller?.removeEventListener('scroll', schedule)
+    if (frame !== undefined) cancelAnimationFrame(frame)
+  }
+}
+
 export function createActionsPanel(React) {
   const { createElement: h, useState, useEffect, useRef, useCallback } = React
   const { IconBranch, IconChevron, IconClose, IconSparkles } = createIcons(React)
@@ -56,7 +79,7 @@ export function createActionsPanel(React) {
     const [modal, setModal] = useState()
     const [message, setMessage] = useState('')
     const [remote, setRemote] = useState('')
-    const [rightOffset, setRightOffset] = useState(0)
+    const [popoverHeight, setPopoverHeight] = useState(null)
 
     const generation = useRef(0)
     const mounted = useRef(true)
@@ -65,36 +88,10 @@ export function createActionsPanel(React) {
     const acting = useRef(false)
     const previewing = useRef(false)
 
-    // Dynamic right-sidebar offset calculation
     useEffect(() => {
-      let sidebar, frame
-      const updateOffset = () => {
-        frame = undefined
-        const next = document.querySelector('[data-sidebar-right-open]')
-        if (next !== sidebar) {
-          if (sidebar) ro.unobserve(sidebar)
-          sidebar = next
-          if (sidebar) ro.observe(sidebar)
-        }
-        const rect = sidebar?.getBoundingClientRect()
-        setRightOffset(rect && rect.width > 0 && rect.right >= window.innerWidth - 10 ? rect.width : 0)
-      }
-      const schedule = () => { if (frame === undefined) frame = requestAnimationFrame(updateOffset) }
-      const ro = new ResizeObserver(schedule)
-      const mo = new MutationObserver(records => {
-        if (records.some(record => record.type === 'attributes' || [...record.addedNodes, ...record.removedNodes].some(node =>
-          node.nodeType === 1 && (node.matches('[data-sidebar-right-open]') || node.querySelector('[data-sidebar-right-open]'))))) schedule()
-      })
-      mo.observe(document.body, { attributes: true, childList: true, subtree: true, attributeFilter: ['data-sidebar-right-open'] })
-      updateOffset()
-      window.addEventListener('resize', schedule)
-      return () => {
-        ro.disconnect()
-        mo.disconnect()
-        cancelAnimationFrame(frame)
-        window.removeEventListener('resize', schedule)
-      }
-    }, [])
+      if (!expanded || !popoverRef.current) { setPopoverHeight(null); return }
+      return observeGitPopoverSpace(popoverRef.current, setPopoverHeight)
+    }, [expanded, sessionId, !!state])
 
     // Close popover when clicking outside or pressing Escape
     useEffect(() => {
@@ -279,19 +276,10 @@ export function createActionsPanel(React) {
       changesText = '干净'
     }
 
-    return h('div', {
-      className: 'dtd-actions-fixed-wrap',
-      style: {
-        position: 'fixed',
-        bottom: '14px',
-        right: `calc(${rightOffset}px + 16px)`,
-        zIndex: 90,
-        pointerEvents: 'none',
-        transition: 'right 0.2s ease-out',
-      },
-    },
-      h('div', { ref: popoverRef, className: 'dtd-actions-container', style: { pointerEvents: 'auto', position: 'relative' } },
-        // Floating pill status button (形态 B：高 32px，圆角 16px，使用 SVG 图标)
+    return h('div', { className: 'dtd-actions-row' },
+      h('div', { ref: popoverRef, className: 'dtd-actions-container' },
+        expanded && popoverHeight !== null && popoverHeight < 88 && h('span', { className: 'dtd-actions-space-hint', role: 'status', title: '请先缩小终端面板以显示 Git 操作' }, '请先缩小终端面板以显示 Git 操作'),
+        // In-flow status pill, aligned to the input row's right edge.
         h('button', {
           type: 'button',
           className: `dtd-status-pill ${expanded ? 'dtd-status-pill-active' : ''}`,
@@ -314,7 +302,7 @@ export function createActionsPanel(React) {
           h(IconChevron, { size: 12, className: `dtd-pill-chevron ${expanded ? 'is-expanded' : ''}` })),
 
         // Upward Popover (向上生长的操作面板)
-        expanded && h('div', { className: 'dtd-git-popover', role: 'dialog', 'aria-label': 'Git 操作面板' },
+        expanded && popoverHeight >= 88 && h('div', { className: 'dtd-git-popover', style: { maxHeight: popoverHeight }, role: 'dialog', 'aria-label': 'Git 操作面板' },
           // Header (36px)
           h('div', { className: 'dtd-popover-header' },
             h('div', { className: 'dtd-popover-title' },

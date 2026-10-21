@@ -1,6 +1,7 @@
 import { shellLabel } from './shell.js'
+import { dockBounds } from './state.js'
 
-export function createDock(React, api, TerminalView) {
+export function createDock(React, api, TerminalView, primitives) {
   const { createElement: h, useEffect, useRef, useState, useSyncExternalStore } = React
   const useStore = store => useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
   function Tab({ tab, sessionId, selected }) {
@@ -24,6 +25,10 @@ export function createDock(React, api, TerminalView) {
     const sessionId = useStore(api.session)
     const theme = useStore(api.theme)
     const activity = useStore(api.activity)
+    const viewport = useStore(api.viewport)
+    const bounds = dockBounds(viewport.height, viewport.composerHeight)
+    const height = layout.maximized ? bounds.maximized : Math.min(bounds.max, Math.max(bounds.min, layout.height))
+    const resize = next => api.store.resize(Math.min(bounds.max, Math.max(bounds.min, next)))
     const failures = useStore(api.terminals.closeFailures)
     const [menu, setMenu] = useState(false)
     const [shells, setShells] = useState({ phase: 'idle' })
@@ -43,14 +48,6 @@ export function createDock(React, api, TerminalView) {
     useEffect(() => {
       setMenu(false)
     }, [sessionId, layout.visible, layout.collapsed])
-    useEffect(() => {
-      if (!menu) return
-      const outside = event => { if (!event.target.closest?.('.dbt-new-menu')) setMenu(false) }
-      const key = event => { if (event.key === 'Escape') setMenu(false) }
-      document.addEventListener('pointerdown', outside)
-      document.addEventListener('keydown', key)
-      return () => { document.removeEventListener('pointerdown', outside); document.removeEventListener('keydown', key) }
-    }, [menu])
     useEffect(() => () => {
       if (drag.current) { try { drag.current.element.releasePointerCapture(drag.current.id) } catch {} drag.current = null }
     }, [])
@@ -61,11 +58,11 @@ export function createDock(React, api, TerminalView) {
       try { event.currentTarget.releasePointerCapture(event.pointerId) } catch {}
       drag.current = null
     }
-    return h('section', { className: `dbt-dock${layout.collapsed ? ' is-collapsed' : ''}${layout.maximized ? ' is-maximized' : ''}`, ref: root, 'aria-label': '底部终端', style: layout.collapsed ? undefined : { height: layout.maximized ? 'calc(100dvh - var(--dsh-frame-top-clearance, 0px) - 140px)' : `min(${layout.height}px, 75dvh)` } },
-      !layout.collapsed && h('div', { className: 'dbt-resize', role: 'separator', 'aria-label': '调整终端高度', 'aria-orientation': 'horizontal', 'aria-valuemin': 140, 'aria-valuemax': 900, 'aria-valuenow': layout.height, tabIndex: 0,
-        onKeyDown: event => { if (event.key === 'ArrowUp' || event.key === 'ArrowDown') { event.preventDefault(); api.store.resize(layout.height + (event.key === 'ArrowUp' ? 20 : -20)) } },
+    return h('section', { className: `dbt-dock${layout.collapsed ? ' is-collapsed' : ''}${layout.maximized ? ' is-maximized' : ''}`, ref: root, 'aria-label': '底部终端', style: layout.collapsed ? undefined : { height: `${height}px` } },
+      !layout.collapsed && h('div', { className: 'dbt-resize', role: 'separator', 'aria-label': '调整终端高度', 'aria-orientation': 'horizontal', 'aria-valuemin': bounds.min, 'aria-valuemax': bounds.max, 'aria-valuenow': height, tabIndex: 0,
+        onKeyDown: event => { if (event.key === 'ArrowUp' || event.key === 'ArrowDown') { event.preventDefault(); resize(height + (event.key === 'ArrowUp' ? 20 : -20)) } },
         onPointerDown: event => { if (event.button !== 0) return; event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); drag.current = { id: event.pointerId, y: event.clientY, height: root.current.getBoundingClientRect().height, element: event.currentTarget } },
-        onPointerMove: event => { if (drag.current?.id === event.pointerId) api.store.resize(drag.current.height + drag.current.y - event.clientY) },
+        onPointerMove: event => { if (drag.current?.id === event.pointerId) resize(drag.current.height + drag.current.y - event.clientY) },
         onPointerUp: finishDrag, onPointerCancel: finishDrag, onLostPointerCapture: () => { drag.current = null },
       }),
       h('header', { className: 'dbt-toolbar' },
@@ -73,13 +70,14 @@ export function createDock(React, api, TerminalView) {
         h('div', { className: 'dbt-tabs', role: 'tablist', 'aria-label': '当前会话终端' }, tabs.map(tab => h(Tab, { key: tab.id, tab, sessionId, selected: tab.id === session.activeId }))),
         h('div', { className: 'dbt-new-menu' },
           h('button', { type: 'button', disabled: !sessionId || activity.launching, onClick: () => launch(), title: '新建底部终端' }, '+'),
-          h('button', { type: 'button', disabled: !sessionId || activity.launching, onClick: () => setMenu(!menu), 'aria-label': '选择 Shell 和新建位置', 'aria-expanded': menu }, '▾'),
-          menu && h('div', { className: 'dbt-menu', role: 'menu' },
-            shells.phase === 'loading' && h('span', { role: 'status' }, '正在读取 Shell…'),
-            shells.phase === 'error' && h('span', { role: 'alert' }, shells.error),
-            shells.phase === 'ready' && shells.shells.length === 0 && h('span', null, '没有可用的 Shell'),
-            shells.phase === 'ready' && shells.shells.map(shell => h('button', { type: 'button', role: 'menuitem', key: shell.path, title: shell.path, onClick: () => launch(shell.path) }, `${shell.path === shells.selectedShell ? '✓ ' : ''}${shellLabel(shell)}`)),
-            h('button', { type: 'button', role: 'menuitem', onClick: () => { setMenu(false); api.openRight() } }, '在右侧新建终端'))),
+          h(primitives.Menu, {
+            open: menu, portal: true, autoFocus: true, side: 'top', align: 'end', selection: 'check', className: 'dbt-shell-trigger', listClassName: 'dbt-shell-menu',
+            selectedId: shells.phase === 'ready' ? shells.selectedShell : undefined,
+            items: [...(shells.phase === 'ready' ? shells.shells.map(shell => ({ id: shell.path, label: shellLabel(shell), disabled: activity.launching })) : [{ id: 'status', label: shells.phase === 'error' ? shells.error : '正在读取 Shell…', disabled: true }]), { id: 'divider', type: 'separator' }, { id: 'action:right', label: '在右侧打开' }],
+            onClose: () => setMenu(false),
+            onSelect: id => { setMenu(false); if (id === 'action:right') api.openRight(); else launch(id) },
+            anchor: h('button', { type: 'button', disabled: !sessionId || activity.launching, onClick: () => setMenu(!menu), 'aria-label': '选择 Shell 和新建位置', 'aria-haspopup': 'menu', 'aria-expanded': menu }, h(primitives.IconChevronDownOutlineRegular, {})),
+          })),
         h('button', { type: 'button', onClick: () => api.store.collapse(), title: layout.collapsed ? '展开终端' : '折叠终端（保留进程）', 'aria-label': layout.collapsed ? '展开终端' : '折叠终端' }, layout.collapsed ? '▴' : '▾'),
         h('button', { type: 'button', onClick: () => api.store.maximize(), title: layout.maximized ? '还原高度' : '最大化终端', 'aria-label': layout.maximized ? '还原高度' : '最大化终端' }, layout.maximized ? '▣' : '□'),
         h('button', { type: 'button', onClick: () => api.store.hide(), title: '隐藏终端（保留进程）', 'aria-label': '隐藏终端' }, '×')),

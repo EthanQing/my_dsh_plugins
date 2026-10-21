@@ -8,7 +8,7 @@ const preview = { kind: 'push', ticket: 'ticket', remote: 'origin', branch: 'mai
 const state = { repository: true, head, branch: 'main', remotes: [destination], files: [], defaultRemote: 'origin' }
 
 function panel(modal = preview, status = state) {
-  const slots = [status, '', '', '', true, new Set(), false, modal, '', 'origin', 0]
+  const slots = [status, '', '', '', true, new Set(), false, modal, '', 'origin', 460]
   const refs = []
   let at = 0, refAt = 0
   const React = {

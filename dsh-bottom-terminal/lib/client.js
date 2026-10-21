@@ -9355,8 +9355,14 @@ ${h2.join(`
 
   // src/state.js
   var STORAGE_KEY = "dsh-bottom-terminal.layout.v1";
-  var DEFAULT_HEIGHT = 280;
-  var clampHeight = (height) => Math.min(900, Math.max(140, Number.isFinite(height) ? height : DEFAULT_HEIGHT));
+  var DEFAULT_HEIGHT = 240;
+  var clampHeight = (height) => Math.min(1e4, Math.max(120, Number.isFinite(height) ? height : DEFAULT_HEIGHT));
+  function dockBounds(availableHeight, composerHeight = 0) {
+    const available = Math.max(0, Number.isFinite(availableHeight) ? availableHeight : 0);
+    const composer = Math.max(0, Number.isFinite(composerHeight) ? composerHeight : 0);
+    const max = Math.min(available, Math.max(36, available - Math.max(180, composer)));
+    return { min: Math.min(120, max), max, maximized: Math.max(0, available - Math.max(48, composer)) };
+  }
   function restoreState(value) {
     const initial = { version: 1, visible: false, collapsed: false, maximized: false, height: DEFAULT_HEIGHT, sessions: {} };
     if (!value || value.version !== 1) return initial;
@@ -9445,12 +9451,38 @@ ${h2.join(`
   }
 
   // src/shell.js
+  var SHELL_PREFERENCE_KEY = "dsh-bottom-terminal.shell.v1";
+  var isNuShell = (shell) => /(?:^|[\\/])nu(?:\.exe)?$/i.test(shell.path);
   function shellLabel(shell) {
-    return /(?:^|[\\/])nu(?:\.exe)?$/i.test(shell.path) ? "NuShell（nu）" : shell.name;
+    return isNuShell(shell) ? "NuShell" : shell.name;
+  }
+  function createShellPreferences(terminals, storage) {
+    let preference;
+    try {
+      preference = storage?.getItem(SHELL_PREFERENCE_KEY) || void 0;
+    } catch {
+    }
+    return {
+      async launchShells(sessionId, signal) {
+        const choices = await terminals.launchShells(sessionId, signal);
+        const rank = (shell) => isNuShell(shell) ? 0 : /(?:^|[\\/])pwsh(?:\.exe)?$/i.test(shell.path) ? 1 : /git bash/i.test(shell.name) ? 2 : /(?:^|[\\/])powershell(?:\.exe)?$/i.test(shell.path) ? 3 : /(?:^|[\\/])cmd(?:\.exe)?$/i.test(shell.path) ? 4 : 5;
+        const shells = [...choices.shells].sort((a, b2) => rank(a) - rank(b2));
+        const saved = shells.find((shell) => shell.path === preference);
+        const selectedShell = saved?.path || shells.find(isNuShell)?.path || choices.selectedShell || shells[0]?.path;
+        return { ...choices, shells, selectedShell };
+      },
+      selectShell(path) {
+        preference = path;
+        try {
+          storage?.setItem(SHELL_PREFERENCE_KEY, path);
+        } catch {
+        }
+      }
+    };
   }
 
   // src/dock.js
-  function createDock(React, api, TerminalView) {
+  function createDock(React, api, TerminalView, primitives) {
     const { createElement: h2, useEffect, useRef, useState, useSyncExternalStore } = React;
     const useStore = (store) => useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
     function Tab({ tab, sessionId, selected }) {
@@ -9506,6 +9538,10 @@ ${h2.join(`
       const sessionId = useStore(api.session);
       const theme = useStore(api.theme);
       const activity = useStore(api.activity);
+      const viewport = useStore(api.viewport);
+      const bounds = dockBounds(viewport.height, viewport.composerHeight);
+      const height = layout.maximized ? bounds.maximized : Math.min(bounds.max, Math.max(bounds.min, layout.height));
+      const resize = (next) => api.store.resize(Math.min(bounds.max, Math.max(bounds.min, next)));
       const failures = useStore(api.terminals.closeFailures);
       const [menu, setMenu] = useState(false);
       const [shells, setShells] = useState({ phase: "idle" });
@@ -9527,21 +9563,6 @@ ${h2.join(`
       useEffect(() => {
         setMenu(false);
       }, [sessionId, layout.visible, layout.collapsed]);
-      useEffect(() => {
-        if (!menu) return;
-        const outside = (event) => {
-          if (!event.target.closest?.(".dbt-new-menu")) setMenu(false);
-        };
-        const key = (event) => {
-          if (event.key === "Escape") setMenu(false);
-        };
-        document.addEventListener("pointerdown", outside);
-        document.addEventListener("keydown", key);
-        return () => {
-          document.removeEventListener("pointerdown", outside);
-          document.removeEventListener("keydown", key);
-        };
-      }, [menu]);
       useEffect(() => () => {
         if (drag.current) {
           try {
@@ -9566,20 +9587,20 @@ ${h2.join(`
       };
       return h2(
         "section",
-        { className: `dbt-dock${layout.collapsed ? " is-collapsed" : ""}${layout.maximized ? " is-maximized" : ""}`, ref: root, "aria-label": "底部终端", style: layout.collapsed ? void 0 : { height: layout.maximized ? "calc(100dvh - var(--dsh-frame-top-clearance, 0px) - 140px)" : `min(${layout.height}px, 75dvh)` } },
+        { className: `dbt-dock${layout.collapsed ? " is-collapsed" : ""}${layout.maximized ? " is-maximized" : ""}`, ref: root, "aria-label": "底部终端", style: layout.collapsed ? void 0 : { height: `${height}px` } },
         !layout.collapsed && h2("div", {
           className: "dbt-resize",
           role: "separator",
           "aria-label": "调整终端高度",
           "aria-orientation": "horizontal",
-          "aria-valuemin": 140,
-          "aria-valuemax": 900,
-          "aria-valuenow": layout.height,
+          "aria-valuemin": bounds.min,
+          "aria-valuemax": bounds.max,
+          "aria-valuenow": height,
           tabIndex: 0,
           onKeyDown: (event) => {
             if (event.key === "ArrowUp" || event.key === "ArrowDown") {
               event.preventDefault();
-              api.store.resize(layout.height + (event.key === "ArrowUp" ? 20 : -20));
+              resize(height + (event.key === "ArrowUp" ? 20 : -20));
             }
           },
           onPointerDown: (event) => {
@@ -9589,7 +9610,7 @@ ${h2.join(`
             drag.current = { id: event.pointerId, y: event.clientY, height: root.current.getBoundingClientRect().height, element: event.currentTarget };
           },
           onPointerMove: (event) => {
-            if (drag.current?.id === event.pointerId) api.store.resize(drag.current.height + drag.current.y - event.clientY);
+            if (drag.current?.id === event.pointerId) resize(drag.current.height + drag.current.y - event.clientY);
           },
           onPointerUp: finishDrag,
           onPointerCancel: finishDrag,
@@ -9606,19 +9627,25 @@ ${h2.join(`
             "div",
             { className: "dbt-new-menu" },
             h2("button", { type: "button", disabled: !sessionId || activity.launching, onClick: () => launch(), title: "新建底部终端" }, "+"),
-            h2("button", { type: "button", disabled: !sessionId || activity.launching, onClick: () => setMenu(!menu), "aria-label": "选择 Shell 和新建位置", "aria-expanded": menu }, "▾"),
-            menu && h2(
-              "div",
-              { className: "dbt-menu", role: "menu" },
-              shells.phase === "loading" && h2("span", { role: "status" }, "正在读取 Shell…"),
-              shells.phase === "error" && h2("span", { role: "alert" }, shells.error),
-              shells.phase === "ready" && shells.shells.length === 0 && h2("span", null, "没有可用的 Shell"),
-              shells.phase === "ready" && shells.shells.map((shell) => h2("button", { type: "button", role: "menuitem", key: shell.path, title: shell.path, onClick: () => launch(shell.path) }, `${shell.path === shells.selectedShell ? "✓ " : ""}${shellLabel(shell)}`)),
-              h2("button", { type: "button", role: "menuitem", onClick: () => {
+            h2(primitives.Menu, {
+              open: menu,
+              portal: true,
+              autoFocus: true,
+              side: "top",
+              align: "end",
+              selection: "check",
+              className: "dbt-shell-trigger",
+              listClassName: "dbt-shell-menu",
+              selectedId: shells.phase === "ready" ? shells.selectedShell : void 0,
+              items: [...shells.phase === "ready" ? shells.shells.map((shell) => ({ id: shell.path, label: shellLabel(shell), disabled: activity.launching })) : [{ id: "status", label: shells.phase === "error" ? shells.error : "正在读取 Shell…", disabled: true }], { id: "divider", type: "separator" }, { id: "action:right", label: "在右侧打开" }],
+              onClose: () => setMenu(false),
+              onSelect: (id) => {
                 setMenu(false);
-                api.openRight();
-              } }, "在右侧新建终端")
-            )
+                if (id === "action:right") api.openRight();
+                else launch(id);
+              },
+              anchor: h2("button", { type: "button", disabled: !sessionId || activity.launching, onClick: () => setMenu(!menu), "aria-label": "选择 Shell 和新建位置", "aria-haspopup": "menu", "aria-expanded": menu }, h2(primitives.IconChevronDownOutlineRegular, {}))
+            })
           ),
           h2("button", { type: "button", onClick: () => api.store.collapse(), title: layout.collapsed ? "展开终端" : "折叠终端（保留进程）", "aria-label": layout.collapsed ? "展开终端" : "折叠终端" }, layout.collapsed ? "▴" : "▾"),
           h2("button", { type: "button", onClick: () => api.store.maximize(), title: layout.maximized ? "还原高度" : "最大化终端", "aria-label": layout.maximized ? "还原高度" : "最大化终端" }, layout.maximized ? "▣" : "□"),
@@ -9637,58 +9664,177 @@ ${h2.join(`
   }
 
   // src/guide.js
-  function createTerminalGuide(React, api) {
+  var RIGHT = "action:right";
+  var RETRY = "action:retry";
+  var shellId = (path) => `shell:${path}`;
+  function guideMenuItems(state, disabled = false) {
+    let items;
+    if (state.phase === "ready") {
+      items = state.choices.shells.map((shell) => ({ id: shellId(shell.path), label: shellLabel(shell), disabled }));
+      if (!items.length) items = [{ id: "status:empty", label: "没有可用的 Shell", disabled: true }];
+    } else if (state.phase === "failed") {
+      items = [{ id: "status:error", label: `读取 Shell 失败：${state.message}`, disabled: true }, { id: RETRY, label: "重试" }];
+    } else items = [{ id: "status:loading", label: "正在读取 Shell…", disabled: true }];
+    return [...items, { type: "separator", id: "separator:location" }, { id: RIGHT, label: "在右侧打开" }];
+  }
+  function createTerminalGuide(React, api, primitives) {
     const { createElement: h2, useEffect, useState, useSyncExternalStore } = React;
-    return function TerminalGuide({ sessionId, title = "新建终端", useTabInfo }) {
+    const { Button, Menu, PluginArtworkTerminal, IconChevronRightOutlineRegular } = primitives;
+    return function TerminalGuide({ sessionId, title = "新建终端", description, useTabInfo }) {
+      const subtitle = description === void 0 ? void 0 : "在底部打开终端";
       const { tab } = useTabInfo();
       const activity = useSyncExternalStore(api.activity.subscribe, api.activity.getSnapshot, api.activity.getSnapshot);
-      const [choices, setChoices] = useState({ phase: "loading", shells: [], selectedShell: "" });
+      const [open, setOpen] = useState(false);
+      const [attempt, setAttempt] = useState(0);
+      const [state, setState] = useState({ phase: "loading" });
       useEffect(() => {
+        setOpen(false);
+      }, [sessionId]);
+      useEffect(() => {
+        if (!open) return;
         const lifetime = new AbortController();
-        setChoices({ phase: "loading", shells: [], selectedShell: "" });
-        api.terminals.launchShells(sessionId, lifetime.signal).then((value) => {
-          if (!lifetime.signal.aborted) setChoices({ phase: "ready", ...value });
+        Promise.resolve().then(() => api.launchShells ? api.launchShells(sessionId, lifetime.signal) : api.terminals.launchShells(sessionId, lifetime.signal)).then((choices) => {
+          if (!lifetime.signal.aborted) setState({ phase: "ready", choices });
         }, (error) => {
-          if (!lifetime.signal.aborted) setChoices({ phase: "failed", shells: [], selectedShell: "", error: error.message });
+          if (!lifetime.signal.aborted) setState({ phase: "failed", message: error instanceof Error ? error.message : String(error) });
         });
         return () => lifetime.abort();
-      }, [sessionId]);
-      const openRight = () => tab.actions.openTab("terminal", { replaceTab: true, ...choices.selectedShell ? { params: { shellPath: choices.selectedShell } } : {} });
+      }, [open, attempt, sessionId]);
+      const unavailable = !sessionId || !activity.available || activity.launching;
+      const onSelect = (id) => {
+        if (id === RETRY) {
+          setState({ phase: "loading" });
+          setAttempt((value) => value + 1);
+          return;
+        }
+        if (id === RIGHT) {
+          setOpen(false);
+          tab.actions.openTab("terminal", { replaceTab: true });
+          return;
+        }
+        if (unavailable || state.phase !== "ready") return;
+        const shell = state.choices.shells.find((candidate) => shellId(candidate.path) === id);
+        if (!shell) return;
+        if (api.selectShell) api.selectShell(shell.path);
+        else api.terminals.selectShell(shell.path);
+        setOpen(false);
+        void api.newTerminal(sessionId, shell.path);
+      };
       return h2(
         "div",
-        { className: "dbt-guide", "data-sidebar-right-guide-entry": "terminal" },
+        { className: "dbt-terminal-guide", "data-sidebar-right-guide-entry": "terminal" },
+        h2(Button, {
+          variant: "ghost",
+          className: "dbt-terminal-guide-main",
+          disabled: unavailable,
+          "aria-label": description === void 0 ? title : `${title} ${subtitle}`,
+          title: !sessionId || !activity.available ? "请先打开主聊天会话，并确认底部终端位置可用" : "在底部新建终端",
+          onClick: () => {
+            if (!unavailable) void api.newTerminal(sessionId);
+          }
+        }),
+        h2("span", { className: "dbt-terminal-guide-icon", "aria-hidden": true }, h2(PluginArtworkTerminal, { size: description === void 0 ? 22 : 26 })),
         h2(
-          "button",
-          { type: "button", className: "dbt-guide-main", disabled: activity.launching, onClick: () => activity.available ? void api.newTerminal(sessionId, choices.selectedShell || void 0) : openRight() },
-          h2("span", { className: "dbt-guide-icon", "aria-hidden": true }, ">_"),
-          h2("span", null, h2("strong", null, title), h2("small", null, activity.available ? "在底部打开终端" : "底部位置已被占用，在右侧打开"))
+          "span",
+          { className: "dbt-terminal-guide-text" },
+          h2("span", { className: "dbt-terminal-guide-title", "aria-hidden": true }, title),
+          description !== void 0 && h2("span", { className: "dbt-terminal-guide-description", "aria-hidden": true }, subtitle)
         ),
-        h2(
-          "div",
-          { className: "dbt-guide-options" },
-          h2(
-            "select",
-            {
-              "aria-label": "新建终端的 Shell",
-              value: choices.selectedShell || "",
-              disabled: choices.phase !== "ready" || !choices.shells.length || activity.launching,
-              onChange: (event) => {
-                const selectedShell = event.target.value;
-                api.terminals.selectShell(selectedShell);
-                setChoices((previous) => ({ ...previous, selectedShell }));
-              }
-            },
-            choices.shells.length ? choices.shells.map((shell) => h2("option", { key: shell.path, value: shell.path, title: shell.path }, shellLabel(shell))) : h2("option", { value: "" }, choices.phase === "loading" ? "正在读取 Shell…" : "Shell 不可用")
-          ),
-          h2("button", { type: "button", onClick: openRight, disabled: activity.launching }, "在右侧打开")
-        ),
-        choices.error && h2("small", { role: "alert" }, choices.error)
+        h2(Menu, {
+          open,
+          portal: true,
+          autoFocus: true,
+          side: "right",
+          align: "start",
+          selection: "check",
+          className: "dbt-terminal-guide-menu",
+          listClassName: "dbt-terminal-guide-menu-list",
+          items: guideMenuItems(state, unavailable),
+          selectedId: state.phase === "ready" ? shellId(state.choices.selectedShell) : void 0,
+          onClose: () => setOpen(false),
+          onSelect,
+          anchor: h2(Button, {
+            variant: "ghost",
+            className: "dbt-terminal-guide-trigger",
+            "aria-label": "选择终端 Shell 或在右侧打开",
+            "aria-haspopup": "menu",
+            "aria-expanded": open,
+            onClick: () => {
+              setState({ phase: "loading" });
+              setOpen((value) => !value);
+            }
+          }, h2(IconChevronRightOutlineRegular, {}))
+        })
       );
     };
   }
 
+  // src/mount.js
+  function attachDockHost(anchor, onHeight) {
+    const content = anchor?.closest("[data-conversation-content]");
+    if (!content || content.closest("[data-sidebar-right-session], [data-rightbar-col]")) return;
+    const scroller = content.querySelector(":scope > [data-conversation-scroll]");
+    if (!scroller || content.querySelector(":scope > [data-dbt-host]")) return;
+    const host = content.ownerDocument.createElement("div");
+    host.className = "dbt-host";
+    host.dataset.dbtHost = "";
+    host.dataset.conversationRegion = "terminal";
+    const previous = content.getAttribute("data-dbt-main");
+    content.setAttribute("data-dbt-main", "");
+    content.appendChild(host);
+    const composer = anchor.closest("[data-composer-seat]");
+    let lastHeight = -1, lastComposerHeight = -1;
+    const measure = () => {
+      const height = Math.max(0, content.clientHeight);
+      const composerHeight = Math.ceil(composer?.getBoundingClientRect().height || 0);
+      if (height !== lastHeight || composerHeight !== lastComposerHeight) {
+        lastHeight = height;
+        lastComposerHeight = composerHeight;
+        onHeight(height, composerHeight);
+      }
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(content);
+    if (composer) observer.observe(composer);
+    measure();
+    return { host, dispose() {
+      observer.disconnect();
+      host.remove();
+      if (previous === null) content.removeAttribute("data-dbt-main");
+      else content.setAttribute("data-dbt-main", previous);
+    } };
+  }
+  function createDockMount(React, createPortal, api, Dock) {
+    return function DockMount({ sessionId }) {
+      const anchor = React.useRef(null);
+      const [host, setHost] = React.useState(null);
+      const active = React.useSyncExternalStore(api.session.subscribe, api.session.getSnapshot, api.session.getSnapshot);
+      React.useLayoutEffect(() => {
+        if (!sessionId || sessionId !== active) return;
+        const mount = attachDockHost(anchor.current, (height, composerHeight) => api.viewport.set({ height, composerHeight }));
+        if (!mount) return;
+        setHost(mount.host);
+        api.setAvailable(true);
+        return () => {
+          setHost(null);
+          api.setAvailable(false);
+          mount.dispose();
+        };
+      }, [sessionId, active]);
+      return React.createElement(
+        React.Fragment,
+        null,
+        React.createElement("span", { ref: anchor, hidden: true, "data-dbt-mount-anchor": "" }),
+        host && createPortal(React.createElement(Dock), host)
+      );
+    };
+  }
+
+  // src/guide.css
+  var guide_default = "/* Match the official TerminalGuide/Guide card metrics; native Menu owns its popup. */\n.dbt-terminal-guide{box-sizing:border-box;border:.5px solid var(--dsw-alias-border-l3);border-radius:var(--dsl-guide-entry-radius);background:var(--dsw-alias-bg-layer-1);align-items:center;gap:14px;width:100%;min-height:56px;padding:14px 20px;display:flex;position:relative;overflow:hidden}\n.dbt-terminal-guide-main{border-radius:0;width:100%;height:100%;position:absolute;inset:0}\n.dbt-terminal-guide-main:focus-visible{outline-offset:-2px}\n.dbt-terminal-guide-icon{width:26px;height:26px;color:var(--dsw-alias-label-secondary);pointer-events:none;flex:none;justify-content:center;align-items:center;display:flex;position:relative}\n.dbt-terminal-guide-text{pointer-events:none;flex-direction:column;flex:1;gap:3px;min-width:0;display:flex;position:relative}\n.dbt-terminal-guide-title{color:var(--dsw-alias-label-primary);white-space:nowrap;text-overflow:ellipsis;font-size:14px;line-height:1.4;overflow:hidden}\n.dbt-terminal-guide-description{color:var(--dsw-alias-label-tertiary);white-space:nowrap;text-overflow:ellipsis;font-size:11px;line-height:1.4;overflow:hidden}\n.dbt-terminal-guide-menu{pointer-events:auto;flex:none;display:flex;position:relative}\n.dbt-terminal-guide-trigger{border-radius:4px;flex:none;width:20px;height:20px;padding:0}\n.dbt-terminal-guide-trigger svg{width:14px;height:14px;color:var(--dsw-alias-label-tertiary)}\n.dbt-terminal-guide-menu-list{min-width:180px;max-width:calc(100vw - 24px);border-radius:8px;padding:4px;box-shadow:0 8px 24px -4px #00000024,0 2px 6px -1px #00000014}\n.dbt-terminal-guide-menu-list [role=menuitem]{box-sizing:border-box;min-height:30px;height:30px}\n";
+
   // src/style.css
-  var style_default = ".dbt-dock{box-sizing:border-box;position:relative;display:flex;flex-direction:column;width:100%;min-width:0;min-height:0;color:var(--dsw-alias-label-primary,#202124);background:var(--dsw-alias-bg-layer-1,#fff);border-top:1px solid var(--dsw-alias-border-l3,#d9dce2);font:12px/1.4 system-ui,sans-serif;isolation:isolate}\n.dbt-dock button,.dbt-launcher{font:inherit;color:inherit;background:transparent;border:1px solid transparent;border-radius:4px;cursor:pointer}\n.dbt-dock button:hover:not(:disabled),.dbt-launcher:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2,rgba(128,128,128,.14))}\n.dbt-dock button:focus-visible,.dbt-resize:focus-visible,.dbt-launcher:focus-visible{outline:2px solid #4f8cff;outline-offset:-2px}\n.dbt-dock button:disabled,.dbt-launcher:disabled{cursor:default;opacity:.5}\n.dbt-resize{position:absolute;top:-3px;left:0;right:0;height:6px;z-index:3;cursor:ns-resize;touch-action:none}\n.dbt-resize:hover,.dbt-resize:focus-visible{background:#4f8cff66}\n.dbt-toolbar{display:flex;align-items:center;flex:none;gap:4px;min-width:0;height:36px;padding:0 8px;border-bottom:1px solid var(--dsw-alias-border-l3,#d9dce2)}\n.dbt-toolbar>button,.dbt-new-menu>button{min-width:28px;height:28px;padding:2px 6px;font-size:16px}\n.dbt-label{font-weight:500;margin-right:8px;flex:none}\n.dbt-tabs{display:flex;align-items:stretch;flex:1;min-width:0;height:100%;overflow-x:auto;scrollbar-width:thin}\n.dbt-tab{display:flex;flex:none;align-items:center;max-width:230px;border-bottom:2px solid transparent;padding:0 2px}\n.dbt-tab.is-active{border-bottom-color:#4f8cff;background:var(--dsw-alias-bg-layer-1,rgba(128,128,128,.08))}\n.dbt-tab>[role=tab]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:36px;max-width:190px;padding:5px 8px}\n.dbt-rename{width:120px;min-width:40px;max-width:180px;padding:3px 5px;color:inherit;background:var(--dsw-alias-bg-layer-1,#fff);border:1px solid #4f8cff;border-radius:4px;font:inherit}\n.dbt-tab-close{flex:none;width:24px;height:24px;font-size:16px!important}\n.dbt-new-menu{position:relative;display:flex;flex:none}\n.dbt-menu{position:absolute;bottom:calc(100% + 6px);right:0;z-index:10;min-width:190px;max-width:min(340px,85vw);max-height:50dvh;overflow:auto;display:flex;flex-direction:column;padding:5px;border:1px solid var(--dsw-alias-border-l3,#d9dce2);border-radius:7px;background:var(--dsw-alias-bg-layer-1,#fff);box-shadow:0 5px 24px #0003}\n.dbt-menu>button,.dbt-menu>span{text-align:left;padding:7px 10px;white-space:normal;overflow-wrap:anywhere}\n.dbt-content{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;overflow:hidden}\n.dbt-message{flex:none;padding:5px 10px;overflow-wrap:anywhere;max-height:100px;overflow:auto;color:var(--dsw-alias-label-secondary,inherit)}\n.dbt-message button{text-decoration:underline}\n.dbt-empty{display:flex;flex:1;align-items:center;justify-content:center;color:var(--dsw-alias-label-secondary,#737780)}\n.dbt-empty button{border-color:var(--dsw-alias-border-l3,#d9dce2);padding:7px 12px}\n.dbt-terminal-pane{display:flex;flex:1;min-width:0;min-height:0;overflow:hidden}\n.dbt-terminal-pane[hidden]{display:none}\n.dbt-launcher{padding:4px 8px;color:var(--dsw-alias-label-secondary,inherit);white-space:nowrap}\n.dbt-dock.is-collapsed .dbt-toolbar{border-bottom:0}\n.dbt-terminal-status,.dbt-terminal-error{padding:4px 10px;max-height:96px;overflow:auto;overflow-wrap:anywhere}\n.dbt-terminal-status button{margin-left:8px;text-decoration:underline}\n.dbt-terminal-error{color:var(--dsw-alias-status-error,#d64545)}\n.dbt-guide{box-sizing:border-box;width:380px;max-width:100%;padding:12px 16px;border:1px solid var(--dsw-alias-border-l3,#d9dce2);border-radius:12px;background:var(--dsw-alias-bg-layer-1,#fff);color:var(--dsw-alias-label-primary,#202124)}\n.dbt-guide button,.dbt-guide select{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--dsw-alias-border-l3,#d9dce2);border-radius:5px;background:transparent;padding:5px 8px}\n.dbt-guide .dbt-guide-main{width:100%;display:flex;align-items:center;gap:14px;text-align:left;border:0;padding:0 0 10px}\n.dbt-guide-main strong,.dbt-guide-main small{display:block}.dbt-guide-main strong{font-size:14px;font-weight:500}.dbt-guide-main small{margin-top:2px;color:var(--dsw-alias-label-secondary,#737780);font-size:11px}\n.dbt-guide-icon{font:600 24px monospace}.dbt-guide-options{display:flex;justify-content:flex-end;gap:8px;font-size:12px}.dbt-guide-options select{min-width:0;max-width:60%;background:var(--dsw-alias-bg-layer-1,#fff)}\n.dbt-guide button:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2,rgba(128,128,128,.14))}.dbt-guide button:disabled,.dbt-guide select:disabled{opacity:.5;cursor:default}\n.dbt-guide small[role=alert]{display:block;margin-top:8px;overflow-wrap:anywhere}\nbody[data-ds-dark-theme] .dbt-dock,body[data-ds-dark-theme] .dbt-guide,body[data-ds-dark-theme] .dbt-menu,body[data-ds-dark-theme] .dbt-rename,body[data-ds-dark-theme] .dbt-guide-options select{background:var(--dsw-alias-bg-layer-1,#17191d);color:var(--dsw-alias-label-primary,#e6e8ed)}\n@media(max-width:600px){.dbt-label{display:none}.dbt-toolbar{padding:0 4px;gap:2px}.dbt-tab{max-width:160px}.dbt-tab>[role=tab]{max-width:120px}}\n";
+  var style_default = "/* Only the locally discovered main conversation content receives these rules. */\n[data-conversation-content][data-dbt-main]{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}\n[data-dbt-main]>[data-conversation-scroll]{flex:1 1 0%;min-height:0;overflow-y:auto}\n.dbt-host{flex:0 0 auto;width:100%;min-width:0;min-height:0}\n.dbt-host:empty{display:none}\n.dbt-dock{box-sizing:border-box;position:relative;display:flex;flex:0 0 auto;flex-direction:column;width:100%;min-width:0;min-height:0;overflow:hidden;padding-top:4px;color:var(--dsw-alias-label-primary,#202124);background:var(--dsw-alias-bg-base,#fff);border-top:1px solid var(--dsw-alias-border-l3,#d9dce2);font:12px/1.4 system-ui,sans-serif;container-type:inline-size;container-name:dbt-terminal}\n.dbt-dock button,.dbt-launcher{font:inherit;color:inherit;background:transparent;border:1px solid transparent;border-radius:4px;cursor:pointer}\n.dbt-dock button:hover:not(:disabled),.dbt-launcher:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,.08))}\n.dbt-dock button:focus-visible,.dbt-resize:focus-visible,.dbt-launcher:focus-visible{outline:2px solid var(--dsw-alias-state-business-primary,#4f8cff);outline-offset:-2px}\n.dbt-dock button:disabled,.dbt-launcher:disabled{cursor:default;opacity:.5}\n.dbt-resize{position:absolute;top:0;left:0;right:0;height:4px;cursor:row-resize;touch-action:none}\n.dbt-resize:hover,.dbt-resize:focus-visible{background:#4f8cff66}\n.dbt-toolbar{display:flex;align-items:center;flex:none;gap:4px;min-width:0;height:36px;padding:0 8px;border-bottom:1px solid var(--dsw-alias-border-l3,#d9dce2)}\n.dbt-toolbar>button,.dbt-new-menu button{min-width:28px;height:28px;padding:2px 6px;font-size:16px}\n.dbt-new-menu svg{width:14px;height:14px}\n.dbt-label{font-weight:500;margin-right:8px;flex:none}\n.dbt-tabs{display:flex;align-items:stretch;flex:1;min-width:0;height:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}\n.dbt-tab{display:flex;flex:none;align-items:center;max-width:230px;border-bottom:2px solid transparent;padding:0 2px}\n.dbt-tab.is-active{border-bottom-color:var(--dsw-alias-state-business-primary,#4f8cff);background:var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,.08))}\n.dbt-tab>[role=tab]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:36px;max-width:190px;padding:5px 8px}\n.dbt-rename{width:120px;min-width:40px;max-width:180px;padding:3px 5px;color:inherit;background:var(--dsw-alias-bg-base,#fff);border:1px solid #4f8cff;border-radius:4px;font:inherit}\n.dbt-tab-close{flex:none;width:24px;height:24px;font-size:16px!important}\n.dbt-new-menu{display:flex;flex:none}\n.dbt-shell-trigger{display:flex;flex:none}\n.dbt-shell-menu{min-width:180px;max-width:calc(100vw - 24px);border-radius:8px;padding:4px;box-shadow:0 8px 24px -4px #00000024,0 2px 6px -1px #00000014}\n.dbt-shell-menu [role=menuitem]{box-sizing:border-box;min-height:30px;height:30px}\n.dbt-content{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;overflow:hidden}\n.dbt-message{flex:none;padding:5px 10px;overflow-wrap:anywhere;max-height:100px;overflow:auto;color:var(--dsw-alias-label-secondary,inherit)}\n.dbt-message button{text-decoration:underline}\n.dbt-empty{display:flex;flex:1;align-items:center;justify-content:center;color:var(--dsw-alias-label-secondary,#737780)}\n.dbt-empty button{border-color:var(--dsw-alias-border-l3,#d9dce2);padding:7px 12px}\n.dbt-terminal-pane{display:flex;flex:1;min-width:0;min-height:0;overflow:hidden}\n.dbt-terminal-pane[hidden]{display:none}\n.dbt-launcher{padding:4px 8px;color:var(--dsw-alias-label-secondary,inherit);white-space:nowrap}\n.dbt-dock.is-collapsed{padding-top:0}\n.dbt-dock.is-collapsed .dbt-toolbar{border-bottom:0}\n.dbt-terminal-status,.dbt-terminal-error{padding:4px 10px;max-height:96px;overflow:auto;overflow-wrap:anywhere}\n.dbt-terminal-status button{margin-left:8px;text-decoration:underline}\n.dbt-terminal-error{color:var(--dsw-alias-status-error,#d64545)}\nbody[data-ds-dark-theme] .dbt-dock,body[data-ds-dark-theme] .dbt-rename{background:var(--dsw-alias-bg-base,#17191d);color:var(--dsw-alias-label-primary,#e6e8ed)}\n@container dbt-terminal (max-width:420px){.dbt-label{display:none}.dbt-toolbar{padding:0 4px;gap:2px}.dbt-tab{max-width:160px}.dbt-tab>[role=tab]{max-width:120px}}\n";
 
   // vendor/xterm/css/xterm.css
   var xterm_default = `/**
@@ -9998,6 +10144,8 @@ ${h2.join(`
     id: ID,
     factory: (require2) => {
       const React = require2("react");
+      const { createPortal } = require2("react-dom");
+      const primitives = require2("@deepseek-ai/dsh-client-ui-primitives");
       const { ClientTerminals } = require2("@deepseek-ai/dsh-api-terminal-controller");
       return {
         inject: ["slots", "sessions", "remote", "remote.terminal", "connection", "sidebarRight", "theme", "shortcuts"],
@@ -10011,6 +10159,8 @@ ${h2.join(`
           }
           const store = createDockState({ storage, onStorageError: (error) => ctx.logger.warn("底部终端布局未能持久保存", error) });
           const session = observable(void 0);
+          const viewport = observable({ height: 0 });
+          const shellPreferences = createShellPreferences(terminals, storage);
           const activity = observable({ available: false, launching: false, message: "" });
           const lifetime = new AbortController();
           const patchActivity = (patch) => {
@@ -10030,6 +10180,7 @@ ${h2.join(`
               terminals.retainTabs([]);
               store.dispose();
               session.dispose();
+              viewport.dispose();
               activity.dispose();
             };
           });
@@ -10037,20 +10188,23 @@ ${h2.join(`
             const style = document.createElement("style");
             style.dataset.plugin = ID;
             style.textContent = `${xterm_default}
-${style_default}`;
+${style_default}
+${guide_default}`;
             document.head.append(style);
             return () => style.remove();
           });
           const api = {
             store,
-            terminals,
             session,
             activity,
+            viewport,
+            setAvailable: (available) => patchActivity({ available }),
+            terminals: { ...shellPreferences, view: (...args) => terminals.view(...args), closeFailures: terminals.closeFailures, retryClose: (id) => terminals.retryClose(id) },
             theme: { getSnapshot: () => ctx.theme.getTheme(), subscribe: (listener) => ctx.on("theme/change", listener) },
             async newTerminal(sessionId = session.getSnapshot(), shellPath) {
               if (lifetime.signal.aborted || activity.getSnapshot().launching) return;
               if (!activity.getSnapshot().available) {
-                ctx.logger.warn("shell.bottom 已被其他插件占用，底部终端未打开");
+                ctx.logger.warn("请先打开主聊天会话，底部终端未挂载");
                 return;
               }
               if (!sessionId) {
@@ -10061,11 +10215,11 @@ ${style_default}`;
               patchActivity({ launching: true, message: "" });
               store.show();
               try {
-                const choices = await terminals.launchShells(sessionId, lifetime.signal);
+                const choices = await shellPreferences.launchShells(sessionId, lifetime.signal);
                 if (lifetime.signal.aborted) return;
                 const selected = shellPath || choices.selectedShell || choices.shells[0]?.path;
                 if (!selected || !choices.shells.some((shell) => shell.path === selected)) throw new Error("所选 Shell 不可用，请从列表选择可用的 Shell");
-                terminals.selectShell(selected);
+                shellPreferences.selectShell(selected);
                 store.add(sessionId, selected);
               } catch (error) {
                 if (!lifetime.signal.aborted) patchActivity({ message: error.message || String(error) });
@@ -10086,43 +10240,10 @@ ${style_default}`;
           };
           const LoadedTerminal = React.lazy(() => Promise.resolve().then(() => (init_terminal_view(), terminal_view_exports)).then((module) => ({ default: module.createTerminalView(React) })));
           const TerminalView = (props) => React.createElement(React.Suspense, { fallback: React.createElement("div", { className: "dbt-message", role: "status" }, "正在加载终端…") }, React.createElement(LoadedTerminal, props));
-          const Dock = createDock(React, api, TerminalView);
-          ctx.slots.inject("shell.bottom", () => {
-            let unregister, changing = false, warned = false;
-            const sync = () => {
-              if (changing || lifetime.signal.aborted) return;
-              changing = true;
-              try {
-                const occupied = ctx.slots.entries("shell.bottom").some((entry) => entry.options.id !== ID);
-                if (occupied) {
-                  if (unregister) {
-                    const off = unregister;
-                    unregister = void 0;
-                    off();
-                  }
-                  patchActivity({ available: false });
-                  if (!warned) {
-                    warned = true;
-                    ctx.logger.warn("shell.bottom 是单一插槽，已有其他插件占用；底部终端不会覆盖现有内容");
-                  }
-                } else {
-                  if (!unregister) unregister = ctx.slots.register({ name: "shell.bottom", id: ID, priority: 1e3 }, Dock);
-                  warned = false;
-                  patchActivity({ available: true });
-                }
-              } finally {
-                changing = false;
-              }
-            };
-            const unsubscribe = ctx.slots.subscribe("shell.bottom", sync);
-            sync();
-            return () => {
-              unsubscribe();
-              unregister?.();
-              patchActivity({ available: false });
-            };
-          });
-          const Guide = createTerminalGuide(React, api);
+          const Dock = createDock(React, api, TerminalView, primitives);
+          const DockMount = createDockMount(React, createPortal, api, Dock);
+          ctx.slots.inject("conversation.input.dock", () => ctx.slots.register({ name: "conversation.input.dock", id: `${ID}-mount`, order: 1e3 }, DockMount));
+          const Guide = createTerminalGuide(React, api, primitives);
           ctx.slots.inject("sidebar.right.tab.guide.entry", () => {
             const key = "@deepseek-ai/dsh-client-ui-sidebar-terminal";
             if (ctx.slots.entries("sidebar.right.tab.guide.entry").some((entry) => entry.options.key === key && (entry.options.priority ?? 0) !== 0)) {
@@ -10134,7 +10255,7 @@ ${style_default}`;
           function Launcher() {
             const current = React.useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
             const status = React.useSyncExternalStore(activity.subscribe, activity.getSnapshot, activity.getSnapshot);
-            return React.createElement("button", { type: "button", className: "dbt-launcher", disabled: !current || !status.available, title: status.available ? "显示底部终端" : "底部位置已由其他插件占用", onClick: () => store.show() }, "终端");
+            return React.createElement("button", { type: "button", className: "dbt-launcher", disabled: !current || !status.available, title: status.available ? "显示底部终端" : "请先打开主聊天会话", onClick: () => store.show() }, "终端");
           }
           ctx.slots.inject("conversation.composer.dock", () => ctx.slots.register({ name: "conversation.composer.dock", id: ID }, Launcher));
           ctx.effect(() => {

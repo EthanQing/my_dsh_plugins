@@ -647,6 +647,30 @@
     if (preview.count === 0) return "没有需要推送的提交。";
     return "";
   }
+  function observeGitPopoverSpace(row, onHeight) {
+    const scroller = row.closest("[data-conversation-scroll]");
+    let frame;
+    const measure = () => {
+      frame = void 0;
+      const top = scroller ? scroller.getBoundingClientRect().top + scroller.clientTop : void 0;
+      onHeight(top === void 0 ? 460 : Math.max(0, Math.min(460, Math.floor(row.getBoundingClientRect().top - top - 8))));
+    };
+    const schedule = () => {
+      if (frame === void 0) frame = requestAnimationFrame(measure);
+    };
+    const observer = new ResizeObserver(schedule);
+    observer.observe(row);
+    if (scroller) observer.observe(scroller);
+    const composer = row.closest("[data-composer-seat]");
+    if (composer) observer.observe(composer);
+    scroller?.addEventListener("scroll", schedule, { passive: true });
+    measure();
+    return () => {
+      observer.disconnect();
+      scroller?.removeEventListener("scroll", schedule);
+      if (frame !== void 0) cancelAnimationFrame(frame);
+    };
+  }
   function createActionsPanel(React) {
     const { createElement: h, useState, useEffect, useRef, useCallback } = React;
     const { IconBranch, IconChevron, IconClose, IconSparkles } = createIcons(React);
@@ -699,7 +723,7 @@
       const [modal, setModal] = useState();
       const [message, setMessage] = useState("");
       const [remote, setRemote] = useState("");
-      const [rightOffset, setRightOffset] = useState(0);
+      const [popoverHeight, setPopoverHeight] = useState(null);
       const generation = useRef(0);
       const mounted = useRef(true);
       const dialogMessage = useRef("");
@@ -707,35 +731,12 @@
       const acting = useRef(false);
       const previewing = useRef(false);
       useEffect(() => {
-        let sidebar, frame;
-        const updateOffset = () => {
-          frame = void 0;
-          const next = document.querySelector("[data-sidebar-right-open]");
-          if (next !== sidebar) {
-            if (sidebar) ro.unobserve(sidebar);
-            sidebar = next;
-            if (sidebar) ro.observe(sidebar);
-          }
-          const rect = sidebar?.getBoundingClientRect();
-          setRightOffset(rect && rect.width > 0 && rect.right >= window.innerWidth - 10 ? rect.width : 0);
-        };
-        const schedule = () => {
-          if (frame === void 0) frame = requestAnimationFrame(updateOffset);
-        };
-        const ro = new ResizeObserver(schedule);
-        const mo = new MutationObserver((records) => {
-          if (records.some((record) => record.type === "attributes" || [...record.addedNodes, ...record.removedNodes].some((node) => node.nodeType === 1 && (node.matches("[data-sidebar-right-open]") || node.querySelector("[data-sidebar-right-open]"))))) schedule();
-        });
-        mo.observe(document.body, { attributes: true, childList: true, subtree: true, attributeFilter: ["data-sidebar-right-open"] });
-        updateOffset();
-        window.addEventListener("resize", schedule);
-        return () => {
-          ro.disconnect();
-          mo.disconnect();
-          cancelAnimationFrame(frame);
-          window.removeEventListener("resize", schedule);
-        };
-      }, []);
+        if (!expanded || !popoverRef.current) {
+          setPopoverHeight(null);
+          return;
+        }
+        return observeGitPopoverSpace(popoverRef.current, setPopoverHeight);
+      }, [expanded, sessionId, !!state]);
       useEffect(() => {
         if (!expanded) return;
         const onMouseDown = (event) => {
@@ -929,21 +930,12 @@
       }
       return h(
         "div",
-        {
-          className: "dtd-actions-fixed-wrap",
-          style: {
-            position: "fixed",
-            bottom: "14px",
-            right: `calc(${rightOffset}px + 16px)`,
-            zIndex: 90,
-            pointerEvents: "none",
-            transition: "right 0.2s ease-out"
-          }
-        },
+        { className: "dtd-actions-row" },
         h(
           "div",
-          { ref: popoverRef, className: "dtd-actions-container", style: { pointerEvents: "auto", position: "relative" } },
-          // Floating pill status button (形态 B：高 32px，圆角 16px，使用 SVG 图标)
+          { ref: popoverRef, className: "dtd-actions-container" },
+          expanded && popoverHeight !== null && popoverHeight < 88 && h("span", { className: "dtd-actions-space-hint", role: "status", title: "请先缩小终端面板以显示 Git 操作" }, "请先缩小终端面板以显示 Git 操作"),
+          // In-flow status pill, aligned to the input row's right edge.
           h(
             "button",
             {
@@ -967,9 +959,9 @@
             h(IconChevron, { size: 12, className: `dtd-pill-chevron ${expanded ? "is-expanded" : ""}` })
           ),
           // Upward Popover (向上生长的操作面板)
-          expanded && h(
+          expanded && popoverHeight >= 88 && h(
             "div",
-            { className: "dtd-git-popover", role: "dialog", "aria-label": "Git 操作面板" },
+            { className: "dtd-git-popover", style: { maxHeight: popoverHeight }, role: "dialog", "aria-label": "Git 操作面板" },
             // Header (36px)
             h(
               "div",
@@ -1185,8 +1177,8 @@
   }
 
   // src/style.css
-  var style_default = `.dtd-root,.dtd-actions-fixed-wrap,.dtd-actions-dialog{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei UI",sans-serif;color:inherit;min-width:0;font-size:12.5px;--dtd-green:#16a34a;--dtd-green-bg:rgba(22,163,74,0.12);--dtd-red:#dc2626;--dtd-red-bg:rgba(220,38,38,0.12);--dtd-amber:#d97706;--dtd-amber-bg:rgba(217,119,6,0.12);--dtd-blue:#2563eb;--dtd-blue-bg:rgba(37,99,235,0.12);--dtd-surface-overlay:var(--dsw-alias-bg-layer-2,#ffffff);--dtd-surface-subtle:var(--dsw-alias-bg-layer-3,#f4f4f5);--dtd-border:rgba(128,128,128,0.18);--dtd-border-hover:rgba(128,128,128,0.32);--dtd-shadow:0 8px 24px -4px rgba(0,0,0,0.14),0 2px 6px -1px rgba(0,0,0,0.08)}
-body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-fixed-wrap,body[data-ds-dark-theme] .dtd-actions-dialog{--dtd-surface-overlay:var(--dsw-alias-bg-layer-2,#1e1e20);--dtd-surface-subtle:var(--dsw-alias-bg-layer-3,#27272a);--dtd-border:rgba(255,255,255,0.12);--dtd-border-hover:rgba(255,255,255,0.22);--dtd-shadow:0 12px 32px -4px rgba(0,0,0,0.45),0 4px 10px -2px rgba(0,0,0,0.3)}
+  var style_default = `.dtd-root,.dtd-actions-row,.dtd-actions-dialog{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei UI",sans-serif;color:inherit;min-width:0;font-size:12.5px;--dtd-green:#16a34a;--dtd-green-bg:rgba(22,163,74,0.12);--dtd-red:#dc2626;--dtd-red-bg:rgba(220,38,38,0.12);--dtd-amber:#d97706;--dtd-amber-bg:rgba(217,119,6,0.12);--dtd-blue:#2563eb;--dtd-blue-bg:rgba(37,99,235,0.12);--dtd-surface-overlay:var(--dsw-alias-bg-layer-2,#ffffff);--dtd-surface-subtle:var(--dsw-alias-bg-layer-3,#f4f4f5);--dtd-border:rgba(128,128,128,0.18);--dtd-border-hover:rgba(128,128,128,0.32);--dtd-shadow:0 8px 24px -4px rgba(0,0,0,0.14),0 2px 6px -1px rgba(0,0,0,0.08)}
+body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-row,body[data-ds-dark-theme] .dtd-actions-dialog{--dtd-surface-overlay:var(--dsw-alias-bg-layer-2,#1e1e20);--dtd-surface-subtle:var(--dsw-alias-bg-layer-3,#27272a);--dtd-border:rgba(255,255,255,0.12);--dtd-border-hover:rgba(255,255,255,0.22);--dtd-shadow:0 12px 32px -4px rgba(0,0,0,0.45),0 4px 10px -2px rgba(0,0,0,0.3)}
 
 .dtd-root button,.dtd-root select{font:inherit;color:inherit;border:1px solid transparent;border-radius:6px;background:transparent;cursor:pointer;padding:4px 8px;transition:all .15s ease}
 .dtd-root button:hover{background:var(--dtd-surface-subtle)}
@@ -1291,9 +1283,11 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-fixed-w
 .dtd-native>div{height:100%;min-height:150px}
 .dtd-message{padding:14px;font-size:12px;opacity:.7}
 
-/* 形态 B：Git Action Panel (右下角常驻状态胶囊 + 向上展开抽屉) */
-.dtd-actions-fixed-wrap{user-select:none}
-.dtd-status-pill{height:32px;box-sizing:border-box;padding:0 12px;border-radius:16px;background:var(--dtd-surface-overlay);border:1px solid var(--dtd-border);box-shadow:var(--dtd-shadow);display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;cursor:pointer;backdrop-filter:blur(14px);transition:all .18s ease}
+/* Git action row above the input bar; the popover uses the full row width. */
+.dtd-actions-row{position:relative;box-sizing:border-box;flex:none;width:min(var(--dsh-composer-card-max-width,100%),calc(100% - 2 * var(--dsh-composer-side-clearance,16px)));margin-inline:auto;min-height:32px;user-select:none;z-index:1}
+.dtd-actions-container{display:flex;justify-content:flex-end;align-items:center;gap:8px;width:100%;min-width:0}
+.dtd-actions-space-hint{flex:1;min-width:0;max-height:32px;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;font-size:11px;line-height:16px;overflow-wrap:anywhere;color:var(--dsw-alias-label-secondary,inherit)}
+.dtd-status-pill{max-width:100%;min-width:0;height:32px;box-sizing:border-box;padding:0 12px;border-radius:16px;background:var(--dtd-surface-overlay);border:1px solid var(--dtd-border);box-shadow:var(--dtd-shadow);display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;cursor:pointer;backdrop-filter:blur(14px);transition:all .18s ease}
 .dtd-status-pill:hover,.dtd-status-pill-active{border-color:#3b82f6;background:var(--dtd-surface-overlay)}
 .dtd-status-pill-active{box-shadow:0 0 0 2px rgba(59,130,246,0.2),var(--dtd-shadow)}
 .dtd-pill-branch{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
@@ -1303,20 +1297,21 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-fixed-w
 .dtd-pill-ahead{color:var(--dtd-blue);font-weight:600}
 
 /* Upward Popover */
-.dtd-git-popover{position:absolute;bottom:calc(100% + 8px);right:0;width:380px;max-height:480px;background:var(--dtd-surface-overlay);border:1px solid var(--dtd-border);border-radius:10px;box-shadow:var(--dtd-shadow);backdrop-filter:blur(16px);display:flex;flex-direction:column;overflow:hidden;z-index:300}
-.dtd-popover-header{height:36px;box-sizing:border-box;padding:0 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--dtd-border);background:var(--dtd-surface-subtle)}
-.dtd-popover-title{display:inline-flex;align-items:center;gap:6px;font-size:12.5px}
-.dtd-popover-branch-name{font-weight:600}
-.dtd-popover-header-actions{display:inline-flex;align-items:center;gap:6px}
-.dtd-popover-remote-select{height:24px;padding:0 4px;font-size:11px;border-radius:4px;background:var(--dtd-surface-overlay);border:1px solid var(--dtd-border)}
+.dtd-git-popover{position:absolute;bottom:calc(100% + 8px);right:0;box-sizing:border-box;width:min(380px,100%);max-height:460px;background:var(--dtd-surface-overlay);border:1px solid var(--dtd-border);border-radius:10px;box-shadow:var(--dtd-shadow);backdrop-filter:blur(16px);display:flex;flex-direction:column;overflow:auto;overflow-wrap:anywhere;z-index:1}
+.dtd-git-popover>*{flex-shrink:0}
+.dtd-popover-header{min-height:36px;box-sizing:border-box;padding:6px 12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--dtd-border);background:var(--dtd-surface-subtle)}
+.dtd-popover-title{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;min-width:0;max-width:100%}
+.dtd-popover-branch-name{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dtd-popover-header-actions{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0;max-width:100%}
+.dtd-popover-remote-select{height:24px;padding:0 4px;font-size:11px;border-radius:4px;background:var(--dtd-surface-overlay);border:1px solid var(--dtd-border);min-width:0;max-width:min(160px,100%)}
 .dtd-btn-compact{height:24px;padding:0 8px;font-size:11.5px;font-weight:500;border-radius:4px;border:1px solid var(--dtd-border);background:var(--dtd-surface-overlay);color:inherit;display:inline-flex;align-items:center;justify-content:center}
 .dtd-btn-compact:hover{border-color:#3b82f6;color:#3b82f6}
 .dtd-popover-close-btn{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;cursor:pointer;opacity:.6;padding:0}
 .dtd-popover-close-btn:hover{opacity:1;background:rgba(128,128,128,0.15)}
 
 /* File list section in popover */
-.dtd-popover-files-section{flex:1;min-height:0;display:flex;flex-direction:column;border-bottom:1px solid var(--dtd-border)}
-.dtd-files-subheader{height:28px;box-sizing:border-box;padding:0 10px;display:flex;align-items:center;justify-content:space-between;background:var(--dtd-surface-subtle);font-size:11.5px;border-bottom:1px solid var(--dtd-border)}
+.dtd-popover-files-section{flex:none;min-height:0;display:flex;flex-direction:column;border-bottom:1px solid var(--dtd-border)}
+.dtd-files-subheader{min-height:28px;box-sizing:border-box;padding:4px 10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;background:var(--dtd-surface-subtle);font-size:11.5px;border-bottom:1px solid var(--dtd-border)}
 .dtd-check-label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
 .dtd-header-checkbox{margin:0;width:13px;height:13px;accent-color:#3b82f6;cursor:pointer}
 .dtd-files-sub-actions{display:inline-flex;align-items:center;gap:6px}
@@ -1337,7 +1332,7 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-fixed-w
 .dtd-badge-D{background:var(--dtd-red-bg);color:var(--dtd-red)}
 .dtd-badge-R{background:var(--dtd-blue-bg);color:var(--dtd-blue)}
 .dtd-badge-U,.dtd-badge-\\?{background:rgba(128,128,128,0.15);color:var(--dsw-alias-label-secondary)}
-.dtd-file-name{font-weight:500;color:var(--dsw-alias-label-primary)}
+.dtd-file-name{font-weight:500;color:var(--dsw-alias-label-primary);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dtd-file-dir{opacity:.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;font-size:11px;margin-left:auto}
 .dtd-file-hover-actions{display:none;position:absolute;right:8px}
 .dtd-file-row:hover .dtd-file-hover-actions{display:inline-flex;gap:4px}
@@ -1476,7 +1471,7 @@ body[data-ds-dark-theme] .dtd-actions-dialog{background:#1e1e20;background:linea
           }));
           ctx.slots.inject("sidebar.right.tab.guide.entry", () => ctx.slots.register({ name: "sidebar.right.tab.guide.entry", key: "dsh-task-diff-review" }, ReviewGuide));
           ctx.slots.inject("conversation.input.dock", () => ctx.slots.register({ name: "conversation.input.dock", id: "dsh-task-diff-review", order: 10 }, views.Dock));
-          ctx.slots.inject("conversation.composer.dock", () => ctx.slots.register({ name: "conversation.composer.dock", id: "dsh-task-diff-review-actions" }, createActionsPanel(React)));
+          ctx.slots.inject("conversation.input.dock", () => ctx.slots.register({ name: "conversation.input.dock", id: "dsh-task-diff-review-actions", order: 100 }, createActionsPanel(React)));
           ctx.slots.inject("sidebar.right.pane.tab", () => ctx.slots.register({ name: "sidebar.right.pane.tab", key: "dsh-task-diff-review" }, views.Review));
         }
       };

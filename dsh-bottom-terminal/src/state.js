@@ -1,6 +1,12 @@
 export const STORAGE_KEY = 'dsh-bottom-terminal.layout.v1'
-export const DEFAULT_HEIGHT = 280
-export const clampHeight = height => Math.min(900, Math.max(140, Number.isFinite(height) ? height : DEFAULT_HEIGHT))
+export const DEFAULT_HEIGHT = 240
+export const clampHeight = height => Math.min(10000, Math.max(120, Number.isFinite(height) ? height : DEFAULT_HEIGHT))
+export function dockBounds(availableHeight, composerHeight = 0) {
+  const available = Math.max(0, Number.isFinite(availableHeight) ? availableHeight : 0)
+  const composer = Math.max(0, Number.isFinite(composerHeight) ? composerHeight : 0)
+  const max = Math.min(available, Math.max(36, available - Math.max(180, composer)))
+  return { min: Math.min(120, max), max, maximized: Math.max(0, available - Math.max(48, composer)) }
+}
 
 export function restoreState(value) {
   const initial = { version: 1, visible: false, collapsed: false, maximized: false, height: DEFAULT_HEIGHT, sessions: {} }

@@ -40,7 +40,7 @@ window.__ModuleLoader__.load({
         }))
         ctx.slots.inject('sidebar.right.tab.guide.entry', () => ctx.slots.register({ name: 'sidebar.right.tab.guide.entry', key: 'dsh-task-diff-review' }, ReviewGuide))
         ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({ name: 'conversation.input.dock', id: 'dsh-task-diff-review', order: 10 }, views.Dock))
-        ctx.slots.inject('conversation.composer.dock', () => ctx.slots.register({ name: 'conversation.composer.dock', id: 'dsh-task-diff-review-actions' }, createActionsPanel(React)))
+        ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({ name: 'conversation.input.dock', id: 'dsh-task-diff-review-actions', order: 100 }, createActionsPanel(React)))
         ctx.slots.inject('sidebar.right.pane.tab', () => ctx.slots.register({ name: 'sidebar.right.pane.tab', key: 'dsh-task-diff-review' }, views.Review))
       },
     }
