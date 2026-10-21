@@ -7,7 +7,8 @@
 .dbt-terminal-guide-title{color:var(--dsw-alias-label-primary);white-space:nowrap;text-overflow:ellipsis;font-size:14px;line-height:1.4;overflow:hidden}
 .dbt-terminal-guide-description{color:var(--dsw-alias-label-tertiary);white-space:nowrap;text-overflow:ellipsis;font-size:11px;line-height:1.4;overflow:hidden}
 .dbt-terminal-guide-menu{pointer-events:auto;flex:none;display:flex;position:relative}
-.dbt-terminal-guide-trigger{border-radius:4px;flex:none;width:20px;height:20px;padding:0}
-.dbt-terminal-guide-trigger svg{width:14px;height:14px;color:var(--dsw-alias-label-tertiary)}
+.dbt-terminal-guide-trigger{box-sizing:border-box;border:0;border-radius:4px;flex:none;width:22px;height:22px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;transition:background-color .12s ease}
+.dbt-terminal-guide-trigger:hover{background:var(--dsh-hover-bg,var(--dsw-alias-interactive-bg-hover,rgba(128,128,128,.1)))}
+.dbt-terminal-guide-trigger svg{width:12px;height:12px;color:var(--dsw-alias-label-tertiary)}
 .dbt-terminal-guide-menu-list{min-width:180px;max-width:calc(100vw - 24px);border-radius:8px;padding:4px;box-shadow:0 8px 24px -4px #00000024,0 2px 6px -1px #00000014}
 .dbt-terminal-guide-menu-list [role=menuitem]{box-sizing:border-box;min-height:30px;height:30px}

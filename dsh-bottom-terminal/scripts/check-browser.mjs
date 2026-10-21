@@ -2,12 +2,14 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { launchBrowser } from '../test/browser/cdp.mjs'
+import { extractOfficialIcons } from '../test/browser/extract-official-icons.mjs'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const { build } = await import(process.env.DSH_ESBUILD_MODULE || 'esbuild')
 const reactRoot = process.env.DSH_REACT_DIR, reactDOMRoot = process.env.DSH_REACT_DOM_DIR
 if (!reactRoot || !reactDOMRoot || !process.env.DSH_BROWSER_EXE) throw Error('Set DSH_REACT_DIR, DSH_REACT_DOM_DIR and DSH_BROWSER_EXE to existing dependencies')
 const out = path.join(root, '.test-output')
 await mkdir(out, { recursive: true })
+const officialIcons = await extractOfficialIcons(process.env.DSH_OFFICIAL_CLIENT_SOURCE || path.resolve(root, '../.scratch/dsh-web-formatted-terminal-reference.js'), path.join(out, 'official-icons.js'))
 await build({ absWorkingDir: root, entryPoints: ['test/browser/fixture.js'], outfile: path.join(out, 'fixture.js'), bundle: true, platform: 'browser', format: 'iife', target: 'chrome120', loader: { '.css': 'text' }, alias: { react: reactRoot, 'react-dom': reactDOMRoot }, define: { 'process.env.NODE_ENV': '"production"' } })
 await writeFile(path.join(out, 'fixture.html'), '<!doctype html><meta charset="utf-8"><title>Isolated bottom terminal fixture</title><div id="app"></div><script src="fixture.js"></script>')
 const browser = await launchBrowser(process.env.DSH_BROWSER_EXE, path.join(out, `edge-profile-${process.pid}`))
@@ -52,6 +54,20 @@ try {
     await writeFile(path.join(out, filename), Buffer.from(data, 'base64'))
     screenshots.push(filename)
   }
+  let iconError
+  try {
+    await evaluate('window.dbtTest.icons()')
+    const comparison = await evaluate('window.dbtTest.iconComparison()')
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 0, y: 0 })
+    const normal = await send('Page.captureScreenshot', { format: 'png', clip: comparison.clip })
+    await writeFile(path.join(out, 'browser-icons-comparison.png'), Buffer.from(normal.data, 'base64')); screenshots.push('browser-icons-comparison.png')
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...comparison.hover })
+    await evaluate(`window.dbtTest.verifyIconHover(${JSON.stringify(comparison.background)})`)
+    const hovered = await send('Page.captureScreenshot', { format: 'png', clip: comparison.clip })
+    await writeFile(path.join(out, 'browser-icons-hover.png'), Buffer.from(hovered.data, 'base64')); screenshots.push('browser-icons-hover.png')
+  } catch (error) { iconError = error.message }
+  report = { ...await evaluate('window.dbtTest.report()'), officialIcons }
+  if (iconError) report.results.push({ error: iconError })
   report.screenshots = screenshots
   report.browserExceptions = browser.events
   await writeFile(path.join(out, 'browser-dom.html'), await evaluate('document.documentElement.outerHTML'))

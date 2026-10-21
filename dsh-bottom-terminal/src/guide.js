@@ -76,7 +76,7 @@ export function createTerminalGuide(React, api, primitives) {
           variant: 'ghost', className: 'dbt-terminal-guide-trigger',
           'aria-label': '选择终端 Shell 或在右侧打开', 'aria-haspopup': 'menu', 'aria-expanded': open,
           onClick: () => { setState({ phase: 'loading' }); setOpen(value => !value) },
-        }, h(IconChevronRightOutlineRegular, {})),
+        }, h(IconChevronRightOutlineRegular, { size: 12 })),
       }))
   }
 }

@@ -1,17 +1,12 @@
-// TEST ONLY: the official primitives are runtime virtual modules. This shim verifies
-// action wiring and SVG/anchor structure, not native Menu placement or collision rules.
+// TEST ONLY: Menu/Button below verify action wiring, not native popup placement.
+// Public SVG components are generated unchanged from the verified official release.
 import React from 'react'
 import { createPortal } from 'react-dom'
 const h = React.createElement
 export function Button({ variant, children, className = '', ...props }) {
   return h('button', { type: 'button', ...props, className: `test-primitive-button ${className}`, 'data-test-primitive-shim': 'Button' }, children)
 }
-function Icon({ size = 14, ...props }) {
-  return h('svg', { ...props, width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'aria-hidden': true }, h('path', { d: 'M8 4l8 8-8 8', strokeWidth: 2 }))
-}
-export const PluginArtworkTerminal = ({ size = 26 }) => h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'aria-hidden': true }, h('rect', { x: 2, y: 4, width: 20, height: 16, rx: 3 }), h('path', { d: 'M6 9l3 3-3 3m6 0h5' }))
-export const IconChevronRightOutlineRegular = Icon
-export const IconChevronDownOutlineRegular = props => h(Icon, { ...props, style: { transform: 'rotate(90deg)' } })
+export { PluginArtworkTerminal, IconPlusOutlineRegular, IconChevronRightOutlineRegular, IconChevronDownOutlineRegular, IconChevronUpOutlineRegular, IconCloseOutlineRegular, IconFullscreenOutlineRegular, IconCopyOutlineRegular } from '../../.test-output/official-icons.js'
 export function Menu({ open, anchor, items, onSelect, onClose, selectedId, className, listClassName, side }) {
   const ref = React.useRef(null)
   const [position, setPosition] = React.useState({ left: 0, top: 0 })

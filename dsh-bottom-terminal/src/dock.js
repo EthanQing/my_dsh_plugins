@@ -1,9 +1,15 @@
 import { shellLabel } from './shell.js'
 import { dockBounds } from './state.js'
+import { createRestoreIcon } from './icons.js'
 
 export function createDock(React, api, TerminalView, primitives) {
   const { createElement: h, useEffect, useRef, useState, useSyncExternalStore } = React
   const useStore = store => useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
+  const RestoreIcon = createRestoreIcon(React)
+  const action = (Icon, props, size = 14) => h('button', {
+    type: 'button', 'aria-label': props.title, ...props,
+    className: `dbt-action-btn ${props.className || ''}`.trim(),
+  }, h(Icon, { size }))
   function Tab({ tab, sessionId, selected }) {
     const model = api.terminals.view(sessionId, tab.id, tab.contentId, undefined, tab.shellPath)
     const state = useStore(model.state)
@@ -18,7 +24,7 @@ export function createDock(React, api, TerminalView, primitives) {
         onBlur: event => { setEditing(false); const next = event.currentTarget.value.trim(); if (!cancelled.current && next && next !== title) void model.rename(next) },
         onKeyDown: event => { event.stopPropagation(); if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return; if (event.key === 'Escape') { cancelled.current = true; event.currentTarget.blur() } else if (event.key === 'Enter') event.currentTarget.blur() },
       }) : h('button', { type: 'button', role: 'tab', 'aria-selected': selected, onClick: () => api.store.select(sessionId, tab.id), onDoubleClick: edit, onKeyDown: event => { if (event.key === 'F2') { event.preventDefault(); edit() } }, title: `${title}（双击或 F2 重命名）` }, title),
-      h('button', { type: 'button', className: 'dbt-tab-close', title: `关闭 ${title}（结束进程）`, 'aria-label': `关闭 ${title}（结束进程）`, onClick: () => api.closeTab(sessionId, tab) }, '×'))
+      action(primitives.IconCloseOutlineRegular, { className: 'dbt-tab-close', title: `关闭 ${title}（结束进程）`, onClick: () => api.closeTab(sessionId, tab) }))
   }
   return function BottomTerminalDock() {
     const layout = useStore(api.store)
@@ -69,18 +75,18 @@ export function createDock(React, api, TerminalView, primitives) {
         h('strong', { className: 'dbt-label' }, '终端'),
         h('div', { className: 'dbt-tabs', role: 'tablist', 'aria-label': '当前会话终端' }, tabs.map(tab => h(Tab, { key: tab.id, tab, sessionId, selected: tab.id === session.activeId }))),
         h('div', { className: 'dbt-new-menu' },
-          h('button', { type: 'button', disabled: !sessionId || activity.launching, onClick: () => launch(), title: '新建底部终端' }, '+'),
+          action(primitives.IconPlusOutlineRegular, { disabled: !sessionId || activity.launching, onClick: () => launch(), title: '新建底部终端' }, 16),
           h(primitives.Menu, {
             open: menu, portal: true, autoFocus: true, side: 'top', align: 'end', selection: 'check', className: 'dbt-shell-trigger', listClassName: 'dbt-shell-menu',
             selectedId: shells.phase === 'ready' ? shells.selectedShell : undefined,
             items: [...(shells.phase === 'ready' ? shells.shells.map(shell => ({ id: shell.path, label: shellLabel(shell), disabled: activity.launching })) : [{ id: 'status', label: shells.phase === 'error' ? shells.error : '正在读取 Shell…', disabled: true }]), { id: 'divider', type: 'separator' }, { id: 'action:right', label: '在右侧打开' }],
             onClose: () => setMenu(false),
             onSelect: id => { setMenu(false); if (id === 'action:right') api.openRight(); else launch(id) },
-            anchor: h('button', { type: 'button', disabled: !sessionId || activity.launching, onClick: () => setMenu(!menu), 'aria-label': '选择 Shell 和新建位置', 'aria-haspopup': 'menu', 'aria-expanded': menu }, h(primitives.IconChevronDownOutlineRegular, {})),
+            anchor: action(primitives.IconChevronDownOutlineRegular, { disabled: !sessionId || activity.launching, onClick: () => setMenu(!menu), title: '选择 Shell 和新建位置', 'aria-haspopup': 'menu', 'aria-expanded': menu }),
           })),
-        h('button', { type: 'button', onClick: () => api.store.collapse(), title: layout.collapsed ? '展开终端' : '折叠终端（保留进程）', 'aria-label': layout.collapsed ? '展开终端' : '折叠终端' }, layout.collapsed ? '▴' : '▾'),
-        h('button', { type: 'button', onClick: () => api.store.maximize(), title: layout.maximized ? '还原高度' : '最大化终端', 'aria-label': layout.maximized ? '还原高度' : '最大化终端' }, layout.maximized ? '▣' : '□'),
-        h('button', { type: 'button', onClick: () => api.store.hide(), title: '隐藏终端（保留进程）', 'aria-label': '隐藏终端' }, '×')),
+        action(layout.collapsed ? primitives.IconChevronUpOutlineRegular : primitives.IconChevronDownOutlineRegular, { onClick: () => api.store.collapse(), title: layout.collapsed ? '展开终端' : '折叠终端（保留进程）', 'aria-label': layout.collapsed ? '展开终端' : '折叠终端', 'aria-expanded': !layout.collapsed }),
+        action(layout.maximized ? RestoreIcon : primitives.IconFullscreenOutlineRegular, { onClick: () => api.store.maximize(), title: layout.maximized ? '还原高度' : '最大化终端', 'aria-pressed': layout.maximized }),
+        action(primitives.IconCloseOutlineRegular, { onClick: () => api.store.hide(), title: '隐藏终端（保留进程）', 'aria-label': '隐藏终端' })),
       !layout.collapsed && h('div', { className: 'dbt-content' },
         activity.launching && h('div', { className: 'dbt-message', role: 'status' }, '正在启动终端…'),
         activity.message && h('div', { className: 'dbt-message', role: 'alert' }, activity.message),
