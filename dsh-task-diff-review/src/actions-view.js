@@ -1,5 +1,6 @@
 import { subscribeGitRefresh, refreshGitViews } from './refresh.js'
 import { createIcons } from './icons.js'
+import { createGitStatusPill } from './git-status-pill.js'
 
 export function pushPreviewIssue(preview, remote, state, statusError = '') {
   if (!preview?.ticket) return ''
@@ -47,7 +48,8 @@ export function observeGitPopoverSpace(row, onHeight) {
 
 export function createActionsPanel(React) {
   const { createElement: h, useState, useEffect, useRef, useCallback } = React
-  const { IconBranch, IconChevron, IconClose, IconSparkles } = createIcons(React)
+  const { IconBranch, IconClose, IconSparkles, IconUpload, IconPlus, IconMinus, FileStatusIcon } = createIcons(React)
+  const GitStatusPill = createGitStatusPill(React)
 
   const request = async (kind, sessionId, data) => {
     const response = await fetch(kind === 'status' ? `api/task-diff.git-status?${new URLSearchParams({ sessionId })}` : 'api/task-diff.git-action', {
@@ -255,7 +257,7 @@ export function createActionsPanel(React) {
       if (prep) setModal({ kind: 'commit', ...prep, message: message.trim() })
     }
 
-    if (!state) return null
+    if (!state) return h('div', { className: 'dtd-actions-row' }, h('div', { ref: popoverRef, className: 'dtd-actions-container' }, h(GitStatusPill, { error: statusError, disabled: true })))
 
     const renderFileInfo = path => {
       const idx = path.lastIndexOf('/')
@@ -271,40 +273,10 @@ export function createActionsPanel(React) {
       return act('push', { ticket: modal.ticket, remote, branch: modal.branch, head: modal.head, confirmed: true })
     }
 
-    // Formatted Pill Label (Task 3: 精简文案，零值隐藏)
-    const stagedCount = staged.length
-    const totalChanges = state.files ? state.files.length : 0
-    let changesText = `${totalChanges} 项更改`
-    if (stagedCount > 0) {
-      changesText = `已暂存 ${stagedCount}/${totalChanges}`
-    } else if (totalChanges === 0) {
-      changesText = '干净'
-    }
-
     return h('div', { className: 'dtd-actions-row' },
       h('div', { ref: popoverRef, className: 'dtd-actions-container' },
         expanded && popoverHeight !== null && popoverHeight < 88 && h('span', { className: 'dtd-actions-space-hint', role: 'status', title: '请先缩小终端面板以显示 Git 操作' }, '请先缩小终端面板以显示 Git 操作'),
-        // In-flow status pill, aligned to the input row's right edge.
-        h('button', {
-          type: 'button',
-          className: `dtd-status-pill ${expanded ? 'dtd-status-pill-active' : ''}`,
-          onClick: () => setExpanded(!expanded),
-          title: 'Git 状态 (点击打开操作面板)',
-          'aria-expanded': expanded,
-        },
-          h(IconBranch, { size: 14 }),
-          h('span', { className: 'dtd-pill-branch' }, state.repository ? (state.branch || 'Detached') : '非仓库'),
-          h('span', { className: 'dtd-pill-dot' }, '·'),
-          state.repository ? (
-            totalChanges > 0
-              ? h('span', { className: 'dtd-pill-changes' }, h('span', { className: 'dtd-dot-orange' }, '●'), ` ${changesText}`)
-              : h('span', { className: 'dtd-pill-clean' }, '✓ 干净')
-          ) : h('span', { className: 'dtd-muted' }, '未关联'),
-          // Only show ahead badge when ahead > 0 (zero-value hidden)
-          state.ahead !== null && state.ahead > 0 ? h(React.Fragment, null,
-            h('span', { className: 'dtd-pill-dot' }, '·'),
-            h('span', { className: 'dtd-pill-ahead' }, `↑${state.ahead}`)) : null,
-          h(IconChevron, { size: 12, className: `dtd-pill-chevron ${expanded ? 'is-expanded' : ''}` })),
+        h(GitStatusPill, { state, error: statusError || error, busy, expanded, onClick: () => setExpanded(!expanded) }),
 
         // Upward Popover (向上生长的操作面板)
         expanded && popoverHeight >= 88 && h('div', { className: 'dtd-git-popover', style: { maxHeight: popoverHeight }, role: 'dialog', 'aria-label': 'Git 操作面板' },
@@ -327,7 +299,7 @@ export function createActionsPanel(React) {
                 disabled: !enabled || !state.head || !state.branch,
                 onClick: openPush,
                 title: '推送至远端',
-              }, `↑ 推送${state.ahead && state.ahead > 0 ? ` (${state.ahead})` : ''}`),
+              }, h(IconUpload, { size: 12 }), `推送${state.ahead && state.ahead > 0 ? ` (${state.ahead})` : ''}`),
               h('button', {
                 type: 'button',
                 className: 'dtd-popover-close-btn',
@@ -370,8 +342,9 @@ export function createActionsPanel(React) {
                   ? h('div', { className: 'dtd-empty-files' }, '工作区干净，无改动文件')
                   : state.files.map(file => {
                     const { dir, file: fileName } = renderFileInfo(file.path)
-                    const statusChar = file.untracked ? 'U' : (file.xy.trim() || 'M')[0]
-                    const statusClass = `dtd-badge-${statusChar}`
+                    const statusChar = file.conflict ? '!' : file.untracked ? 'U' : (file.xy.trim() || 'M')[0]
+                    const statusLabel = ({ '!': '未解决冲突', U: '未跟踪', A: '新增', D: '删除', M: '修改', R: '重命名', C: '复制', T: '类型变化' })[statusChar] || '其他文件状态'
+                    const statusClass = file.conflict ? 'dtd-badge-conflict' : `dtd-badge-${statusChar}`
                     return h('div', { key: file.path, className: `dtd-file-row ${selected.has(file.path) ? 'dtd-file-row-selected' : ''}` },
                       h('input', {
                         type: 'checkbox',
@@ -380,7 +353,7 @@ export function createActionsPanel(React) {
                         disabled: busy,
                         onChange: () => select(file.path),
                       }),
-                      h('span', { className: `dtd-file-badge ${statusClass}` }, statusChar),
+                      h('span', { className: `dtd-file-badge ${statusClass}`, role: 'img', title: statusLabel, 'aria-label': statusLabel }, h(FileStatusIcon, { status: statusChar })),
                       h('span', { className: 'dtd-file-name', title: file.path }, fileName),
                       dir && h('span', { className: 'dtd-file-dir', title: dir }, dir),
                       h('div', { className: 'dtd-file-hover-actions' },
@@ -390,14 +363,14 @@ export function createActionsPanel(React) {
                           title: '暂存此文件',
                           disabled: busy,
                           onClick: e => { e.stopPropagation(); void act('stage', { all: false, paths: [file.path], version: state.version }) },
-                        }, '+'),
+                        }, h(IconPlus, { size: 12 })),
                         file.staged && h('button', {
                           type: 'button',
                           className: 'dtd-quick-unstage-btn',
                           title: '取消暂存此文件',
                           disabled: busy,
                           onClick: e => { e.stopPropagation(); void act('unstage', { all: false, paths: [file.path], version: state.version }) },
-                        }, '−'))
+                        }, h(IconMinus, { size: 12 })))
                     )
                   }))),
 

@@ -15,7 +15,7 @@
     const h = React.createElement;
     const IconBranch = ({ size = 14 }) => h(
       "svg",
-      { width: size, height: size, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round", className: "dtd-svg-icon" },
+      { "aria-hidden": true, focusable: false, width: size, height: size, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round", className: "dtd-svg-icon" },
       h("circle", { cx: 4, cy: 4, r: 2 }),
       h("circle", { cx: 4, cy: 12, r: 2 }),
       h("circle", { cx: 12, cy: 7, r: 2 }),
@@ -23,41 +23,54 @@
     );
     const IconChevron = ({ size = 12, className = "" }) => h(
       "svg",
-      { width: size, height: size, viewBox: "0 0 12 12", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", strokeLinejoin: "round", className: `dtd-svg-chevron ${className}` },
+      { "aria-hidden": true, focusable: false, width: size, height: size, viewBox: "0 0 12 12", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", strokeLinejoin: "round", className: `dtd-svg-chevron ${className}` },
       h("path", { d: "M3 4.5L6 7.5L9 4.5" })
     );
     const IconChevronRight = ({ size = 12, className = "" }) => h(
       "svg",
-      { width: size, height: size, viewBox: "0 0 12 12", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", strokeLinejoin: "round", className: `dtd-svg-chevron-right ${className}` },
+      { "aria-hidden": true, focusable: false, width: size, height: size, viewBox: "0 0 12 12", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", strokeLinejoin: "round", className: `dtd-svg-chevron-right ${className}` },
       h("path", { d: "M4.5 3L7.5 6L4.5 9" })
     );
     const IconClose = ({ size = 12 }) => h(
       "svg",
-      { width: size, height: size, viewBox: "0 0 12 12", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", className: "dtd-svg-icon" },
+      { "aria-hidden": true, focusable: false, width: size, height: size, viewBox: "0 0 12 12", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", className: "dtd-svg-icon" },
       h("path", { d: "M2.5 2.5l7 7M9.5 2.5l-7 7" })
     );
     const IconCheck = ({ size = 12 }) => h(
       "svg",
-      { width: size, height: size, viewBox: "0 0 12 12", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", className: "dtd-svg-icon" },
+      { "aria-hidden": true, focusable: false, width: size, height: size, viewBox: "0 0 12 12", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", className: "dtd-svg-icon" },
       h("path", { d: "M2.5 6.5l2.5 2.5 4.5-5" })
     );
     const IconRefresh = ({ size = 13 }) => h(
       "svg",
-      { width: size, height: size, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round", className: "dtd-svg-icon" },
+      { "aria-hidden": true, focusable: false, width: size, height: size, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round", className: "dtd-svg-icon" },
       h("path", { d: "M2.5 8a5.5 5.5 0 0 1 9.3-3.9L13.5 6M13.5 2v4h-4M13.5 8a5.5 5.5 0 0 1-9.3 3.9L2.5 10M2.5 14v-4h4" })
     );
     const IconInfo = ({ size = 13 }) => h(
       "svg",
-      { width: size, height: size, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round", className: "dtd-svg-icon" },
+      { "aria-hidden": true, focusable: false, width: size, height: size, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round", className: "dtd-svg-icon" },
       h("circle", { cx: 8, cy: 8, r: 6.5 }),
       h("path", { d: "M8 7v4.5M8 4.75v.5" })
     );
     const IconSparkles = ({ size = 13 }) => h(
       "svg",
-      { width: size, height: size, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round", className: "dtd-svg-icon" },
+      { "aria-hidden": true, focusable: false, width: size, height: size, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round", className: "dtd-svg-icon" },
       h("path", { d: "M8 1.5l1.5 3.8 3.8 1.5-3.8 1.5L8 12.1 6.5 8.3 2.7 6.8l3.8-1.5L8 1.5z" })
     );
-    return { IconBranch, IconChevron, IconChevronRight, IconClose, IconCheck, IconRefresh, IconInfo, IconSparkles };
+    const glyph = (paths, extra = {}) => ({ size = 14 }) => h("svg", { "aria-hidden": true, focusable: false, width: size, height: size, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round", className: "dtd-svg-icon", ...extra }, ...paths.map((d) => h("path", { key: d, d })));
+    const IconPlus = glyph(["M8 3v10M3 8h10"]);
+    const IconMinus = glyph(["M3 8h10"]);
+    const IconEdit = glyph(["M3 10l7-7 3 3-7 7H3v-3z", "M8.5 4.5l3 3"]);
+    const IconStaged = glyph(["M2 10v3h12v-3", "M4.5 6.5L7 9l4.5-5"]);
+    const IconUpload = glyph(["M8 12V2.5M4.5 6L8 2.5 11.5 6", "M2.5 11v2.5h11V11"]);
+    const IconWarning = glyph(["M8 1.5L15 14H1L8 1.5z", "M8 6v3.5M8 11.5v.1"]);
+    const IconUnavailable = glyph(["M2 5V3h4l2 2h6v8H2V5", "M2 14L14 2"]);
+    const IconCopy = glyph(["M5 5h8v8H5V5z", "M3 10H2V2h8v1"]);
+    const IconCommit = glyph(["M1.5 8H5M11 8h3.5", "M11 8a3 3 0 1 1-6 0a3 3 0 1 1 6 0"]);
+    const IconRename = glyph(["M2 4h9M8 1l3 3-3 3", "M14 12H5M8 9l-3 3 3 3"]);
+    const IconLoading = glyph(["M13.5 8A5.5 5.5 0 1 1 8 2.5"], { className: "dtd-svg-icon dtd-svg-loading" });
+    const FileStatusIcon = ({ status, size = 12 }) => h({ A: IconPlus, D: IconMinus, M: IconEdit, T: IconEdit, R: IconRename, C: IconCopy, U: IconInfo }[status] || IconWarning, { size });
+    return { IconBranch, IconChevron, IconChevronRight, IconClose, IconCheck, IconRefresh, IconInfo, IconSparkles, IconPlus, IconMinus, IconEdit, IconStaged, IconUpload, IconWarning, IconUnavailable, IconCopy, IconCommit, IconRename, IconLoading, FileStatusIcon };
   }
 
   // src/views.js
@@ -80,7 +93,7 @@
   }
   function createViews(React, ctx, open) {
     const { createElement: h, useState, useEffect, useCallback, useMemo, useRef } = React;
-    const { IconBranch, IconChevron, IconChevronRight, IconCheck, IconRefresh, IconInfo } = createIcons(React);
+    const { IconBranch, IconChevron, IconChevronRight, IconCheck, IconRefresh, IconInfo, IconWarning, FileStatusIcon } = createIcons(React);
     class NativeBoundary extends React.Component {
       constructor(props) {
         super(props);
@@ -183,9 +196,9 @@
         h(
           "button",
           { type: "button", className: `dtd-file ${selected === index ? "dtd-selected" : ""}`, title: file.path, onClick: () => select(index) },
-          h("span", { className: `dtd-status dtd-status-${file.status}`, "aria-label": { M: "修改", A: "新增", D: "删除", R: "重命名" }[file.status] || file.status }, { M: "M", A: "A", D: "D", R: "R" }[file.status] || file.status),
+          h("span", { className: `dtd-status dtd-status-${file.status}`, role: "img", title: { M: "修改", A: "新增", D: "删除", R: "重命名" }[file.status] || file.status, "aria-label": { M: "修改", A: "新增", D: "删除", R: "重命名" }[file.status] || file.status }, h(FileStatusIcon, { status: file.status })),
           h("span", { className: "dtd-path" }, file.untracked ? file.display.replace(/^\[未跟踪\] /, "") : file.display),
-          file.untracked && h("span", { className: "dtd-untracked" }, "未跟踪"),
+          file.untracked && h("span", { className: "dtd-untracked", role: "img", title: "未跟踪", "aria-label": "未跟踪" }, h(IconInfo, { size: 12 })),
           fileCount(file)
         )
       )));
@@ -558,7 +571,7 @@
                 h("ul", { className: "dtd-info-list" }, value.warnings.map((w, i) => h("li", { key: i }, w)))
               )
             ),
-            // Refresh Button (↻ SVG)
+            // Refresh Button (SVG)
             h("button", {
               type: "button",
               className: "dtd-icon-btn",
@@ -574,7 +587,7 @@
         uncapturedWarning && h(
           "div",
           { className: "dtd-slim-warning-bar" },
-          h("span", null, `⚠️ ${uncapturedWarning}`),
+          h("span", null, h(IconWarning, { size: 13 }), uncapturedWarning),
           h("button", { type: "button", className: "dtd-btn-link", onClick: () => setInfoOpen(true) }, "查看说明")
         ),
         // Commit Detail Bar (compact 1-2 lines for commits mode)
@@ -626,6 +639,43 @@
     return { Dock, Review };
   }
 
+  // src/git-status-pill.js
+  function createGitStatusPill(React) {
+    const h = React.createElement;
+    const { IconBranch, IconChevron, IconCheck, IconEdit, IconStaged, IconUpload, IconWarning, IconUnavailable, IconCommit, IconLoading } = createIcons(React);
+    return function GitStatusPill({ state, error = "", busy = false, expanded = false, onClick, disabled = false }) {
+      const files = state?.files || [];
+      const staged = files.filter((file) => file.staged).length;
+      const unstaged = files.filter((file) => file.unstaged || file.untracked).length;
+      const badges = [];
+      const badge = (kind, Icon, label2, count) => {
+        badges.push({ kind, label: label2, Icon, element: h("span", { key: kind, className: `dtd-pill-indicator dtd-pill-${kind}`, role: "img", title: label2, "aria-label": label2 }, h(Icon, { size: 13 }), count === void 0 ? null : h("span", { "aria-hidden": true }, count)) });
+      };
+      if (error) badge("error", IconWarning, `Git 状态读取或操作失败：${error}`);
+      else if (!state || busy || state.busy) badge("loading", IconLoading, !state ? "正在读取 Git 状态" : "Git 操作进行中");
+      else if (!state.repository) badge("unavailable", IconUnavailable, state.message || "当前目录未关联 Git 仓库");
+      else if (files.some((file) => file.conflict)) badge("conflict", IconWarning, `未解决冲突 ${files.filter((file) => file.conflict).length} 个文件`, files.filter((file) => file.conflict).length);
+      else if (!files.length) badge("clean", IconCheck, "工作区干净");
+      else {
+        if (staged) badge("staged", IconStaged, `已暂存 ${staged} 个文件`, staged);
+        if (unstaged) badge("changes", IconEdit, `未暂存 ${unstaged} 个文件`, unstaged);
+        if (!staged && !unstaged) badge("changes", IconEdit, `未提交 ${files.length} 个文件`, files.length);
+      }
+      if (state?.repository && !state.branch) badge("detached", IconCommit, "游离 HEAD");
+      if (state?.repository && state.ahead > 0) badge("ahead", IconUpload, `待推送 ${state.ahead} 个提交`, state.ahead);
+      const compact = badges[0].kind === "clean" && badges.length > 1 ? badges[badges.length - 1] : badges[0];
+      const label = [state?.branch, ...badges.map((item) => item.label), "点击打开 Git 操作面板"].filter(Boolean).join("；");
+      return h(
+        "button",
+        { type: "button", className: `dtd-status-pill ${expanded ? "dtd-status-pill-active" : ""}`, title: label, "aria-label": label, "aria-expanded": expanded, disabled, onClick },
+        h("span", { className: "dtd-pill-leading", "aria-hidden": true }, h(IconBranch, { size: 14 }), h("span", { className: `dtd-pill-compact-state dtd-pill-${compact.kind}` }, h(compact.Icon, { size: 14 }))),
+        state?.branch && h("span", { className: "dtd-pill-branch" }, state.branch),
+        ...badges.map((item) => item.element),
+        h(IconChevron, { size: 12, className: `dtd-pill-chevron ${expanded ? "is-expanded" : ""}` })
+      );
+    };
+  }
+
   // src/actions-view.js
   function pushPreviewIssue(preview, remote, state, statusError = "") {
     if (!preview?.ticket) return "";
@@ -673,7 +723,8 @@
   }
   function createActionsPanel(React) {
     const { createElement: h, useState, useEffect, useRef, useCallback } = React;
-    const { IconBranch, IconChevron, IconClose, IconSparkles } = createIcons(React);
+    const { IconBranch, IconClose, IconSparkles, IconUpload, IconPlus, IconMinus, FileStatusIcon } = createIcons(React);
+    const GitStatusPill = createGitStatusPill(React);
     const request = async (kind, sessionId, data) => {
       const response = await fetch(kind === "status" ? `api/task-diff.git-status?${new URLSearchParams({ sessionId })}` : "api/task-diff.git-action", {
         method: kind === "status" ? "GET" : "POST",
@@ -907,7 +958,7 @@
         const prep = await act("prepareCommit");
         if (prep) setModal({ kind: "commit", ...prep, message: message.trim() });
       };
-      if (!state) return null;
+      if (!state) return h("div", { className: "dtd-actions-row" }, h("div", { ref: popoverRef, className: "dtd-actions-container" }, h(GitStatusPill, { error: statusError, disabled: true })));
       const renderFileInfo = (path) => {
         const idx = path.lastIndexOf("/");
         if (idx === -1) return { dir: "", file: path };
@@ -920,14 +971,6 @@
         if (pushChecking || previewing.current || pushIssue || !modal?.ticket) return;
         return act("push", { ticket: modal.ticket, remote, branch: modal.branch, head: modal.head, confirmed: true });
       };
-      const stagedCount = staged.length;
-      const totalChanges = state.files ? state.files.length : 0;
-      let changesText = `${totalChanges} 项更改`;
-      if (stagedCount > 0) {
-        changesText = `已暂存 ${stagedCount}/${totalChanges}`;
-      } else if (totalChanges === 0) {
-        changesText = "干净";
-      }
       return h(
         "div",
         { className: "dtd-actions-row" },
@@ -935,29 +978,7 @@
           "div",
           { ref: popoverRef, className: "dtd-actions-container" },
           expanded && popoverHeight !== null && popoverHeight < 88 && h("span", { className: "dtd-actions-space-hint", role: "status", title: "请先缩小终端面板以显示 Git 操作" }, "请先缩小终端面板以显示 Git 操作"),
-          // In-flow status pill, aligned to the input row's right edge.
-          h(
-            "button",
-            {
-              type: "button",
-              className: `dtd-status-pill ${expanded ? "dtd-status-pill-active" : ""}`,
-              onClick: () => setExpanded(!expanded),
-              title: "Git 状态 (点击打开操作面板)",
-              "aria-expanded": expanded
-            },
-            h(IconBranch, { size: 14 }),
-            h("span", { className: "dtd-pill-branch" }, state.repository ? state.branch || "Detached" : "非仓库"),
-            h("span", { className: "dtd-pill-dot" }, "·"),
-            state.repository ? totalChanges > 0 ? h("span", { className: "dtd-pill-changes" }, h("span", { className: "dtd-dot-orange" }, "●"), ` ${changesText}`) : h("span", { className: "dtd-pill-clean" }, "✓ 干净") : h("span", { className: "dtd-muted" }, "未关联"),
-            // Only show ahead badge when ahead > 0 (zero-value hidden)
-            state.ahead !== null && state.ahead > 0 ? h(
-              React.Fragment,
-              null,
-              h("span", { className: "dtd-pill-dot" }, "·"),
-              h("span", { className: "dtd-pill-ahead" }, `↑${state.ahead}`)
-            ) : null,
-            h(IconChevron, { size: 12, className: `dtd-pill-chevron ${expanded ? "is-expanded" : ""}` })
-          ),
+          h(GitStatusPill, { state, error: statusError || error, busy, expanded, onClick: () => setExpanded(!expanded) }),
           // Upward Popover (向上生长的操作面板)
           expanded && popoverHeight >= 88 && h(
             "div",
@@ -988,7 +1009,7 @@
                   disabled: !enabled || !state.head || !state.branch,
                   onClick: openPush,
                   title: "推送至远端"
-                }, `↑ 推送${state.ahead && state.ahead > 0 ? ` (${state.ahead})` : ""}`),
+                }, h(IconUpload, { size: 12 }), `推送${state.ahead && state.ahead > 0 ? ` (${state.ahead})` : ""}`),
                 h("button", {
                   type: "button",
                   className: "dtd-popover-close-btn",
@@ -1043,8 +1064,9 @@
                   { className: "dtd-files-scroll-list" },
                   state.files.length === 0 ? h("div", { className: "dtd-empty-files" }, "工作区干净，无改动文件") : state.files.map((file) => {
                     const { dir, file: fileName } = renderFileInfo(file.path);
-                    const statusChar = file.untracked ? "U" : (file.xy.trim() || "M")[0];
-                    const statusClass = `dtd-badge-${statusChar}`;
+                    const statusChar = file.conflict ? "!" : file.untracked ? "U" : (file.xy.trim() || "M")[0];
+                    const statusLabel = { "!": "未解决冲突", U: "未跟踪", A: "新增", D: "删除", M: "修改", R: "重命名", C: "复制", T: "类型变化" }[statusChar] || "其他文件状态";
+                    const statusClass = file.conflict ? "dtd-badge-conflict" : `dtd-badge-${statusChar}`;
                     return h(
                       "div",
                       { key: file.path, className: `dtd-file-row ${selected.has(file.path) ? "dtd-file-row-selected" : ""}` },
@@ -1055,7 +1077,7 @@
                         disabled: busy,
                         onChange: () => select(file.path)
                       }),
-                      h("span", { className: `dtd-file-badge ${statusClass}` }, statusChar),
+                      h("span", { className: `dtd-file-badge ${statusClass}`, role: "img", title: statusLabel, "aria-label": statusLabel }, h(FileStatusIcon, { status: statusChar })),
                       h("span", { className: "dtd-file-name", title: file.path }, fileName),
                       dir && h("span", { className: "dtd-file-dir", title: dir }, dir),
                       h(
@@ -1070,7 +1092,7 @@
                             e.stopPropagation();
                             void act("stage", { all: false, paths: [file.path], version: state.version });
                           }
-                        }, "+"),
+                        }, h(IconPlus, { size: 12 })),
                         file.staged && h("button", {
                           type: "button",
                           className: "dtd-quick-unstage-btn",
@@ -1080,7 +1102,7 @@
                             e.stopPropagation();
                             void act("unstage", { all: false, paths: [file.path], version: state.version });
                           }
-                        }, "−")
+                        }, h(IconMinus, { size: 12 }))
                       )
                     );
                   })
@@ -1412,8 +1434,18 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-row,bod
 .dtd-status-pill:hover,.dtd-status-pill-active{border-color:#3b82f6;background:var(--dtd-surface-overlay)}
 .dtd-status-pill-active{box-shadow:0 0 0 2px rgba(59,130,246,0.2),var(--dtd-shadow)}
 .dtd-pill-branch{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
-.dtd-pill-dot{opacity:.4}
-.dtd-dot-orange{color:var(--dtd-amber);margin-right:2px}
+.dtd-status-pill{white-space:nowrap;flex-wrap:nowrap}
+.dtd-pill-leading,.dtd-pill-indicator{display:inline-flex;align-items:center;gap:3px;flex:none}
+.dtd-pill-compact-state{display:none}
+[data-tools-compact] .dtd-pill-leading>.dtd-svg-icon{display:none}
+[data-tools-compact] .dtd-pill-compact-state{display:inline-flex}
+.dtd-pill-changes{color:var(--dtd-amber)}
+.dtd-pill-staged{color:var(--dtd-green)}
+.dtd-badge-conflict,.dtd-pill-error,.dtd-pill-conflict{color:var(--dtd-red)}
+.dtd-pill-unavailable,.dtd-pill-detached,.dtd-pill-loading{color:var(--dsw-alias-label-secondary,inherit)}
+.dtd-svg-loading{animation:dtd-svg-spin 1s linear infinite}
+@keyframes dtd-svg-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.dtd-svg-loading{animation:none}}
 .dtd-pill-clean{color:var(--dtd-green)}
 .dtd-pill-ahead{color:var(--dtd-blue);font-weight:600}
 
@@ -1425,7 +1457,7 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-row,bod
 .dtd-popover-branch-name{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dtd-popover-header-actions{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0;max-width:100%}
 .dtd-popover-remote-select{height:24px;padding:0 4px;font-size:11px;border-radius:4px;background:var(--dtd-surface-overlay);border:1px solid var(--dtd-border);min-width:0;max-width:min(160px,100%)}
-.dtd-btn-compact{height:24px;padding:0 8px;font-size:11.5px;font-weight:500;border-radius:4px;border:1px solid var(--dtd-border);background:var(--dtd-surface-overlay);color:inherit;display:inline-flex;align-items:center;justify-content:center}
+.dtd-btn-compact{gap:4px;height:24px;padding:0 8px;font-size:11.5px;font-weight:500;border-radius:4px;border:1px solid var(--dtd-border);background:var(--dtd-surface-overlay);color:inherit;display:inline-flex;align-items:center;justify-content:center}
 .dtd-btn-compact:hover{border-color:#3b82f6;color:#3b82f6}
 .dtd-popover-close-btn{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;cursor:pointer;opacity:.6;padding:0}
 .dtd-popover-close-btn:hover{opacity:1;background:rgba(128,128,128,0.15)}

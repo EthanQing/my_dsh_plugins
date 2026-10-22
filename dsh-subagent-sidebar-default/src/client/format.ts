@@ -173,5 +173,41 @@ export const asideButton=(options:{tr:Tr,row:SubagentRow,addressOf?:((row:Subage
   let address=null
   try{address=addressOf(options.row)}catch(error){console.warn('subagent-sidebar-default: sidebar address lookup failed',error);address=null}
   if(address===undefined)return null
-  return jsx('button',{type:'button',className:options.compact?'dsh-ssd-side-btn dsh-ssd-side-btn-compact':'dsh-ssd-side-btn',disabled:!address,title:address?tr('openInSidebar'):tr('openInSidebarUnavailable'),'aria-label':address?tr('openInSidebar.named',{name:options.row.name}):tr('openInSidebarUnavailable'),onClick:event=>{event.stopPropagation();if(!address)return;if(typeof options.open==='function'&&options.open(address)===true){if(typeof options.onOpened==='function')options.onOpened();return}window.alert(tr('openInSidebarFailed'))},children:'◫'})
+  return jsx('button',{type:'button',className:options.compact?'dsh-ssd-side-btn dsh-ssd-side-btn-compact':'dsh-ssd-side-btn',disabled:!address,title:address?tr('openInSidebar'):tr('openInSidebarUnavailable'),'aria-label':address?tr('openInSidebar.named',{name:options.row.name}):tr('openInSidebarUnavailable'),onClick:event=>{event.stopPropagation();if(!address)return;if(typeof options.open==='function'&&options.open(address)===true){if(typeof options.onOpened==='function')options.onOpened();return}window.alert(tr('openInSidebarFailed'))},children:sidebarIcon('sidebar')})
+}
+
+// Shared inline artwork for the manager and its live previews. Close reuses
+// the manager's existing path; all variants remain SVG, including pending states.
+export const sidebarIcon=(name:string)=>{
+  const paths:Record<string,string>={
+    input:'M8 13V3M4 7l4-4 4 4',output:'M8 3v10M4 9l4 4 4-4',
+    close:'M3.3 3.3l9.4 9.4M12.7 3.3l-9.4 9.4',
+    plus:'M8 3v10M3 8h10',
+    up:'M4 10l4-4 4 4',down:'M4 6l4 4 4-4',
+    play:'M5 3l8 5-8 5Z',pause:'M5 3v10M11 3v10',
+    success:'M3 8l3 3 7-7',error:'M3 3l10 10M13 3L3 13',
+    spinner:'M13 8a5 5 0 1 1-5-5',
+    sidebar:'M2 3h12v10H2ZM10 3v10',
+    agent:'M3 5h10v8H3ZM6 8h.01M10 8h.01M6 11h4M8 2v3M1 7v4M15 7v4',
+    settings:'M2 4h12M2 8h12M2 12h12M5 2v4M11 6v4M6 10v4',
+    trash:'M3 4h10M6 4V2h4v2M4 4l1 10h6l1-10M7 7v4M9 7v4',
+    eye:'M1 8s2.5-4 7-4 7 4 7 4-2.5 4-7 4-7-4-7-4ZM6 8a2 2 0 1 0 4 0 2 2 0 1 0-4 0',
+    hidden:'M2 2l12 12M1 8s2.5-4 7-4 7 4 7 4M2 9s2 3 6 3c1 0 2-.2 3-.7',
+    download:'M8 2v8M5 7l3 3 3-3M2 11v3h12v-3',
+    bolt:'M9 1L3 9h4l-1 6 7-8H9Z',
+    thought:'M3 3h10v8H7l-4 3ZM5 6h6M5 8h4',
+    command:'M3 4l4 4-4 4M9 12h4',
+  }
+  return jsx('svg',{width:14,height:14,viewBox:'0 0 16 16',fill:'none',stroke:'currentColor',strokeWidth:1.5,strokeLinecap:'round',strokeLinejoin:'round','aria-hidden':true,focusable:'false',className:`dsh-ssd-svg${name==='spinner'?' dsh-ssd-spin':''}`,children:jsx('path',{d:paths[name]||paths.agent})})
+}
+export const sidebarLabel=(tr:Tr,key:string)=>{
+  const icons:Record<string,string>={continue:'play',continuePending:'spinner',pause:'pause',pauseAll:'pause',pausing:'spinner',deleteTrash:'trash',hideShort:'hidden',unhideShort:'eye',newCategory:'plus',oneShotBadge:'bolt',loadLatest:'download',loading:'spinner',collapseFilters:'settings',expandFilters:'settings'}
+  return jsxs('span',{className:'dsh-ssd-icon-label',children:[sidebarIcon(icons[key]),tr(key),key==='collapseFilters'?sidebarIcon('up'):key==='expandFilters'?sidebarIcon('down'):null]})
+}
+
+// The tooltip keeps readable input/output labels; visible direction marks are SVG.
+export const statsView=(tr:Tr,row:SubagentRow|undefined)=>{
+  const u=usageStats(tr,row),values={input:fmt(tr,u.billed),uncached:fmt(tr,u.uncached),output:fmt(tr,u.output)}
+  const suffix=statsLine(tr,row).slice(tr('stats.usage',values).length)
+  return jsxs(React.Fragment,{children:[sidebarIcon('input'),' ',tr('stats.input',values),' / ',sidebarIcon('output'),' ',values.output,suffix]})
 }

@@ -49,3 +49,5 @@ github:EthanQing/my_dsh_plugins#main
 只想安装单个插件时，可以在 [Releases](https://github.com/EthanQing/my_dsh_plugins/releases) 有安装包后下载对应的 `.tgz`，再通过 DSH 插件管理页面安装。
 
 各插件的详细说明都在上表链接里。安装、更新和重启由使用者自行操作。
+
+图标统一使用 SVG，包括状态、加载和图标按钮，不使用字符或 emoji 代替。完整范围见 [SVG 图标审计](docs/svg-icon-audit.md)；源码仓库可运行 `npm run check:icons` 复查。

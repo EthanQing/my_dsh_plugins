@@ -125,8 +125,18 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-row,bod
 .dtd-status-pill:hover,.dtd-status-pill-active{border-color:#3b82f6;background:var(--dtd-surface-overlay)}
 .dtd-status-pill-active{box-shadow:0 0 0 2px rgba(59,130,246,0.2),var(--dtd-shadow)}
 .dtd-pill-branch{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
-.dtd-pill-dot{opacity:.4}
-.dtd-dot-orange{color:var(--dtd-amber);margin-right:2px}
+.dtd-status-pill{white-space:nowrap;flex-wrap:nowrap}
+.dtd-pill-leading,.dtd-pill-indicator{display:inline-flex;align-items:center;gap:3px;flex:none}
+.dtd-pill-compact-state{display:none}
+[data-tools-compact] .dtd-pill-leading>.dtd-svg-icon{display:none}
+[data-tools-compact] .dtd-pill-compact-state{display:inline-flex}
+.dtd-pill-changes{color:var(--dtd-amber)}
+.dtd-pill-staged{color:var(--dtd-green)}
+.dtd-badge-conflict,.dtd-pill-error,.dtd-pill-conflict{color:var(--dtd-red)}
+.dtd-pill-unavailable,.dtd-pill-detached,.dtd-pill-loading{color:var(--dsw-alias-label-secondary,inherit)}
+.dtd-svg-loading{animation:dtd-svg-spin 1s linear infinite}
+@keyframes dtd-svg-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.dtd-svg-loading{animation:none}}
 .dtd-pill-clean{color:var(--dtd-green)}
 .dtd-pill-ahead{color:var(--dtd-blue);font-weight:600}
 
@@ -138,7 +148,7 @@ body[data-ds-dark-theme] .dtd-root,body[data-ds-dark-theme] .dtd-actions-row,bod
 .dtd-popover-branch-name{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dtd-popover-header-actions{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0;max-width:100%}
 .dtd-popover-remote-select{height:24px;padding:0 4px;font-size:11px;border-radius:4px;background:var(--dtd-surface-overlay);border:1px solid var(--dtd-border);min-width:0;max-width:min(160px,100%)}
-.dtd-btn-compact{height:24px;padding:0 8px;font-size:11.5px;font-weight:500;border-radius:4px;border:1px solid var(--dtd-border);background:var(--dtd-surface-overlay);color:inherit;display:inline-flex;align-items:center;justify-content:center}
+.dtd-btn-compact{gap:4px;height:24px;padding:0 8px;font-size:11.5px;font-weight:500;border-radius:4px;border:1px solid var(--dtd-border);background:var(--dtd-surface-overlay);color:inherit;display:inline-flex;align-items:center;justify-content:center}
 .dtd-btn-compact:hover{border-color:#3b82f6;color:#3b82f6}
 .dtd-popover-close-btn{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;cursor:pointer;opacity:.6;padding:0}
 .dtd-popover-close-btn:hover{opacity:1;background:rgba(128,128,128,0.15)}

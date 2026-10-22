@@ -1,6 +1,6 @@
 {
   "name": "dsh-task-diff-review",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "private": true,
   "type": "module",
   "description": "Native task and Git Diff review with explicit staging, AI-assisted commit messages, commit and ordinary push actions.",

@@ -1,6 +1,6 @@
 {
   "name": "dsh-subagent-sidebar-default",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Subagent manager with native right-sidebar tabs by default; an independent MIT fork of dsh-subagent-workspace-ui.",

@@ -1,6 +1,6 @@
 # dsh-subagent-sidebar-default
 
-子代理侧边栏管理器 **0.1.0**，面向已核对的 Windows Desktop **DSH 0.2.1-rc.2 / Node 24+**。
+子代理侧边栏管理器 **0.1.1**，面向已核对的 Windows Desktop **DSH 0.2.1-rc.2 / Node 24+**。
 
 这是你仓库内独立维护的完整插件，基于 miuzel 的 `dsh-subagent-workspace-ui 1.10.0`（MIT）制作 Fork，**无需安装原第三方插件**。上游出处、固定提交和修改范围见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。开发目录使用当前工作区，未使用提示词中的旧机器路径。
 
@@ -15,7 +15,7 @@
 
 ## 保留功能与差异
 
-保留上游管理器的搜索、范围选择、分类分组、筛选排序、批量选择、活跃浮窗、实时输出、暂停/继续、隐藏与恢复，以及子代理提示词预览。管理器界面未重新设计。
+保留上游管理器的搜索、范围选择、分类分组、筛选排序、批量选择、活跃浮窗、实时输出、暂停/继续、隐藏与恢复，以及子代理提示词预览。管理器界面未重新设计。入口、动作按钮、状态、Token 方向和实时事件标记统一为 SVG；中英文文案不再夹带 emoji 或字符图标。实时输出中的用户内容保持原样。
 
 本插件使用独立插件/浏览器 ID、语言命名空间、CSS 类、偏好键和删除端点。第一次读取偏好时可以继承原插件留在浏览器中的配置；后续仅写自己的配置，不修改原插件。
 
@@ -36,7 +36,7 @@
 也可以手动安装独立预构建包：
 
 ```powershell
-& 'D:/Programs/DSH/resources/runtime/cli/bin/dsh.cmd' plugin --profile desktop add './dsh-subagent-sidebar-default-0.1.0.tgz'
+& 'D:/Programs/DSH/resources/runtime/cli/bin/dsh.cmd' plugin --profile desktop add './dsh-subagent-sidebar-default-0.1.1.tgz'
 ```
 
 使用实际包路径；合集与独立包二选一，避免同一插件重复注册。

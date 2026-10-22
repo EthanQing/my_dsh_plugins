@@ -21,7 +21,7 @@ function timeAgo(dateStr) {
 
 export function createViews(React, ctx, open) {
   const { createElement: h, useState, useEffect, useCallback, useMemo, useRef } = React
-  const { IconBranch, IconChevron, IconChevronRight, IconCheck, IconRefresh, IconInfo } = createIcons(React)
+  const { IconBranch, IconChevron, IconChevronRight, IconCheck, IconRefresh, IconInfo, IconWarning, FileStatusIcon } = createIcons(React)
 
   class NativeBoundary extends React.Component {
     constructor(props) { super(props); this.state = { failed: false } }
@@ -83,8 +83,8 @@ export function createViews(React, ctx, open) {
   function FileList({ value, select, selected }) {
     return h('ul', { className: 'dtd-files', 'aria-label': '改动文件' }, value.files.map((file, index) => h('li', { key: `${file.repository}:${file.relative}` },
       h('button', { type: 'button', className: `dtd-file ${selected === index ? 'dtd-selected' : ''}`, title: file.path, onClick: () => select(index) },
-        h('span', { className: `dtd-status dtd-status-${file.status}`, 'aria-label': ({ M: '修改', A: '新增', D: '删除', R: '重命名' })[file.status] || file.status }, ({ M: 'M', A: 'A', D: 'D', R: 'R' })[file.status] || file.status),
-        h('span', { className: 'dtd-path' }, file.untracked ? file.display.replace(/^\[未跟踪\] /, '') : file.display), file.untracked && h('span', { className: 'dtd-untracked' }, '未跟踪'), fileCount(file)))))
+        h('span', { className: `dtd-status dtd-status-${file.status}`, role: 'img', title: ({ M: '修改', A: '新增', D: '删除', R: '重命名' })[file.status] || file.status, 'aria-label': ({ M: '修改', A: '新增', D: '删除', R: '重命名' })[file.status] || file.status }, h(FileStatusIcon, { status: file.status })),
+        h('span', { className: 'dtd-path' }, file.untracked ? file.display.replace(/^\[未跟踪\] /, '') : file.display), file.untracked && h('span', { className: 'dtd-untracked', role: 'img', title: '未跟踪', 'aria-label': '未跟踪' }, h(IconInfo, { size: 12 })), fileCount(file)))))
   }
 
   // Match the native TodoPanel card while keeping live summaries and review navigation.
@@ -375,7 +375,7 @@ export function createViews(React, ctx, open) {
               h('div', { className: 'dtd-info-popover-title' }, '覆盖范围与归属说明'),
               h('ul', { className: 'dtd-info-list' }, value.warnings.map((w, i) => h('li', { key: i }, w))))),
 
-          // Refresh Button (↻ SVG)
+          // Refresh Button (SVG)
           h('button', {
             type: 'button',
             className: 'dtd-icon-btn',
@@ -385,7 +385,7 @@ export function createViews(React, ctx, open) {
 
       // Conditional slim warning alert for uncaptured/large files (26px)
       uncapturedWarning && h('div', { className: 'dtd-slim-warning-bar' },
-        h('span', null, `⚠️ ${uncapturedWarning}`),
+        h('span', null, h(IconWarning, { size: 13 }), uncapturedWarning),
         h('button', { type: 'button', className: 'dtd-btn-link', onClick: () => setInfoOpen(true) }, '查看说明')),
 
       // Commit Detail Bar (compact 1-2 lines for commits mode)

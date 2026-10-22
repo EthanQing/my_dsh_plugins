@@ -13,7 +13,13 @@ function renderPanel(popoverHeight = 460) {
   let index = 0
   const React = { Fragment: 'fragment', createElement: (type, props, ...children) => ({ type, props: props || {}, children }), useState: initial => [index < states.length ? states[index++] : initial, () => {}], useEffect() {}, useRef: initial => ({ current: initial }), useCallback: fn => fn }
   const wrapped = createActionsPanel(React)({ sessionId: 'layout-fixture' })
-  return wrapped.type(wrapped.props)
+  const expand = node => {
+    if (!node || typeof node !== 'object') return node
+    if (Array.isArray(node)) return node.map(expand)
+    if (typeof node.type === 'function') return expand(node.type({ ...node.props, children: node.children }))
+    return { ...node, children: node.children.map(expand) }
+  }
+  return expand(wrapped.type(wrapped.props))
 }
 const escape = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 function html(node) {

@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugins",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "private": true,
   "type": "module",
   "description": "DSH plugins and the Aegis engineering workflow. Enable the components you need.",
@@ -20,6 +20,7 @@
     "cordis.patch.yml",
     "plugins.json",
     "examples/",
+    "docs/svg-icon-audit.md",
     "scripts/",
     "dsh-markdown-editor/package.json",
     "dsh-markdown-editor/lib/",
@@ -99,6 +100,7 @@
   ],
   "scripts": {
     "check": "node scripts/check-package.mjs",
+    "check:icons": "node scripts/check-ui-icons.mjs",
     "pack:plugins": "node scripts/pack-plugins.mjs"
   },
   "dsh": {
