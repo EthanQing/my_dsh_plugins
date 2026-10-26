@@ -9,7 +9,7 @@
   "files": ["lib/", "locale/", "icon.svg", "cordis.patch.yml", "README.md", "docs/", "LICENSE", "THIRD_PARTY_NOTICES.md", "vendor/xterm/LICENSE", "vendor/addon-fit/LICENSE"],
   "scripts": { "build": "node scripts/build.mjs", "check": "node scripts/build.mjs --check", "test": "node --test test/*.test.mjs" },
   "dsh": { "bundle": { "patch": "./cordis.patch.yml" }, "client": { "platform": "web", "immediately": true, "inject": ["@deepseek-ai/dsh-client-ui-layout", "@deepseek-ai/dsh-client-ui-conversation", "@deepseek-ai/dsh-client-ui-session", "@deepseek-ai/dsh-client-ui-sidebar-terminal", "@deepseek-ai/dsh-client-ui-sidebar-right", "@deepseek-ai/dsh-api-terminal-controller", "@deepseek-ai/dsh-client-shortcuts", "@deepseek-ai/dsh-client-ui-theme", "@deepseek-ai/dsh-client-locale"] } },
-  "engines": { "node": ">=24", "dsh": "0.2.1-rc.2" },
+  "engines": { "node": ">=24", "dsh": "0.2.1-rc.2 || 0.2.1-rc.3" },
   "license": "MIT",
   "devDependencies": { "esbuild": "0.25.12" }
 }

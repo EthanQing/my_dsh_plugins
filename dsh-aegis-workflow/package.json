@@ -10,7 +10,7 @@
     "directory": "dsh-aegis-workflow"
   },
   "engines": {
-    "dsh": "0.2.1-rc.2",
+    "dsh": "0.2.1-rc.2 || 0.2.1-rc.3",
     "node": ">=24"
   },
   "files": [

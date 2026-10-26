@@ -1,6 +1,6 @@
 # DSH Plugins · DSH 插件合集
 
-这里放的是我为 DSH 桌面版整理和开发的插件，可以按需开启。目前适配 **DSH 0.2.1-rc.2**。
+这里放的是我为 DSH 桌面版整理和开发的插件，可以按需开启。合集 **0.6.6** 声明兼容 **DSH 0.2.1-rc.2 和 0.2.1-rc.3**，不放行未经核对的后续版本。
 
 ## 有哪些插件
 
@@ -28,6 +28,8 @@ github:EthanQing/my_dsh_plugins#main
 
 安装后，在合集的“包含的组件”里打开需要的插件即可。**初次安装默认全部关闭**，不用一次全部开启。更新并重启 DSH 后可加载新版本。
 
+从 `dsh-plugins@0.6.5` 更新时，在插件管理器中更新现有合集，确认版本为 **0.6.6**，再自行重启 DSH；无需修改 Profile 或使用版本豁免。如果 GitHub 尚未包含此次修复，更新仍会取得旧包，须等修复提交到上述仓库后再更新，也可自行安装本地打包的 `dist/dsh-plugins-0.6.6.tgz`。9 个组件仍默认禁用，更新前已手动启用的项目以你保留的配置为准。
+
 如果使用命令行，先退出 DSH，再在 PowerShell 中执行：
 
 ```powershell
@@ -49,5 +51,11 @@ github:EthanQing/my_dsh_plugins#main
 只想安装单个插件时，可以在 [Releases](https://github.com/EthanQing/my_dsh_plugins/releases) 有安装包后下载对应的 `.tgz`，再通过 DSH 插件管理页面安装。
 
 各插件的详细说明都在上表链接里。安装、更新和重启由使用者自行操作。
+
+## rc.3 兼容性核对
+
+对照官方 [rc.3 发布说明](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3) 及 [rc.2 → rc.3 源码差异](https://github.com/deepseek-ai/deepseek-harness/compare/dsh-v0.2.1-rc.2...dsh-v0.2.1-rc.3)（`687f282` → `1f81c04`）：新增导航“更多”菜单和可选参数未删除现有 Slots；Session 客户端变更涉及空白会话/草稿复用；DeepSeek API Key 路由调整模型列表来源，未改变插件使用的 `llm.prepareCall`、标题生成接口。终端、子代理、Git Review 所用服务继续沿用原接口，因此此次只修改包兼容声明、官方 peer 约束和校验，不改业务代码或 UI。
+
+验证范围为官方源码、本机 rc.3 发布包的离线 API 核对、现有测试、构建与打包检查；未安装/启用插件，也未在运行中的 Desktop 中做 GUI、真实模型、PTY 或 Git 写操作验证。各子插件文档中的 rc.2 记录为原始验证基线，原有功能限制仍适用。
 
 图标统一使用 SVG，包括状态、加载和图标按钮，不使用字符或 emoji 代替。完整范围见 [SVG 图标审计](docs/svg-icon-audit.md)；源码仓库可运行 `npm run check:icons` 复查。

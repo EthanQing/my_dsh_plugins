@@ -22,8 +22,14 @@ async function checkSyntax(directory) {
 export async function checkPackage() {
   const manifest = await readJson('package.json')
   const plugins = await readJson('plugins.json')
+  const supportedDsh = manifest.engines.dsh
+  const versions = supportedDsh.split(' || ')
+  assert.equal(new Set(versions).size, versions.length)
+  for (const version of versions) {
+    assert.match(version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/)
+  }
   assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
-  assert.equal(manifest.engines.dsh, '0.2.1-rc.2')
+  assert.equal(plugins.length, 9, 'component catalog must remain complete')
   assert.equal(new Set(plugins.map(p => p.name)).size, plugins.length)
   for (const entry of await readdir(root, { withFileTypes: true })) {
     if (!entry.isDirectory() || !entry.name.startsWith('dsh-')) continue
@@ -47,6 +53,19 @@ export async function checkPackage() {
     assert.equal(plugin.directory, plugin.name)
     const pkg = await readJson(`${plugin.directory}/package.json`)
     assert.equal(pkg.name, plugin.name)
+    assert.equal(pkg.engines?.dsh, supportedDsh, `${plugin.name}: DSH compatibility must match the verified collection versions`)
+    for (const [peer, range] of Object.entries(pkg.peerDependencies ?? {})) {
+      if (peer.startsWith('@deepseek-ai/dsh-') || peer === '@deepseek-ai/dsh') {
+        assert.equal(range, supportedDsh, `${plugin.name}: ${peer} must support exactly the verified DSH versions`)
+      }
+    }
+    try {
+      const lock = await readJson(`${plugin.directory}/package-lock.json`)
+      assert.equal(lock.version, pkg.version, `${plugin.name}: stale lockfile version`)
+      assert.deepEqual(lock.packages[''].engines, pkg.engines, `${plugin.name}: stale lockfile engines`)
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error
+    }
     for (const script of ['prepare', 'preinstall', 'install', 'postinstall', 'prepack']) {
       assert.equal(pkg.scripts?.[script], undefined, `${plugin.name}: ${script} must not run while installing the collection`)
     }
